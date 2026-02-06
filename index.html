@@ -2,33 +2,56 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Mappa Sportiva Mondiale</title>
+    <title>Mappa Mondiale Club</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; font-family: sans-serif; }
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         #map { height: 100vh; width: 100%; }
-        /* Il box delle statistiche e filtri */
         #ui-panel {
-            position: absolute; bottom: 20px; left: 20px; z-index: 1000;
-            background: white; padding: 15px; border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3); border: 2px solid #333;
+            position: absolute; top: 15px; left: 15px; z-index: 1000;
+            background: white; padding: 15px; border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 240px;
         }
-        .logo-marker { border-radius: 50%; background: white; border: 2px solid #333; }
-        .storico-img { width: 45px; height: 45px; margin: 5px; border: 1px solid #ddd; border-radius: 5px; }
-        select { padding: 5px; margin-top: 10px; width: 100%; }
+        /* Container del logo con bordo colorato */
+        .logo-container {
+            border-radius: 50%; padding: 3px;
+            display: flex; justify-content: center; align-items: center;
+            transition: all 0.3s ease;
+        }
+        .logo-img-inner {
+            width: 100%; height: 100%; border-radius: 50%;
+            background: white; object-fit: contain;
+        }
+        /* Effetto per squadre scomparse */
+        .club-scomparso { filter: grayscale(100%); opacity: 0.8; }
+        .club-scomparso:hover { filter: grayscale(0%); opacity: 1; transform: scale(1.2); z-index: 1000 !important; }
+        
+        .stat-item { font-size: 13px; margin: 8px 0; color: #333; }
+        select { width: 100%; margin-top: 5px; padding: 6px; border-radius: 5px; border: 1px solid #ccc; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 10px 0; }
     </style>
 </head>
 <body>
 
 <div id="ui-panel">
-    <strong>STATISTICHE</strong>
-    <div id="count-box">Caricamento...</div>
+    <div id="count-box" class="stat-item">Squadre totali: <b>0</b></div>
     <hr>
-    <strong>FILTRA PER PAESE</strong>
-    <select id="filter-nazione">
-        <option value="Tutti">Mostra Tutti</option>
-        <option value="Italia">Italia</option>
-        <option value="Inghilterra">Inghilterra</option>
+    <label class="stat-item">Nazione:</label>
+    <select id="filter-nazione"><option value="Tutti">Tutte le nazioni</option></select>
+    
+    <label class="stat-item">Stato Club:</label>
+    <select id="filter-stato">
+        <option value="Tutti">Tutti (Attivi e Scomparsi)</option>
+        <option value="attivo">Solo Club Attivi</option>
+        <option value="scomparso">Solo Club Scomparsi</option>
+    </select>
+
+    <label class="stat-item">Epoca Fondazione:</label>
+    <select id="filter-epoca">
+        <option value="Tutti">Tutte le epoche</option>
+        <option value="Antiche">Prima del 1900</option>
+        <option value="Novecento">1900 - 1999</option>
+        <option value="Duemila">Dal 2000 in poi</option>
     </select>
 </div>
 
@@ -38,77 +61,94 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
 
 <script>
-    // 1. Setup Mappa
-    var map = L.map('map').setView([45, 10], 4);
+    var map = L.map('map').setView([45, 10], 5);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-    // 2. Setup Spiderfier (Per Inter/Milan che condividono lo stadio)
+    
     var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 25 });
-    var popup = L.popup();
+    var allMarkers = [];
 
-    // 3. Carichiamo i dati dal file JSON
     fetch('squadre.json')
         .then(res => res.json())
-        .then(squadre => {
-            let markers = [];
+        .then(data => {
+            // Popolamento automatico menu nazioni
+            const nazioni = [...new Set(data.map(s => s.nazione))].sort();
+            nazioni.forEach(n => {
+                let opt = document.createElement('option');
+                opt.value = opt.innerText = n;
+                document.getElementById('filter-nazione').appendChild(opt);
+            });
 
-            squadre.forEach(s => {
-                // Icona personalizzata con il logo attuale
-                var icona = L.icon({ iconUrl: s.logoAttuale, iconSize: [40, 40], className: 'logo-marker' });
-                
-                // Creiamo il marker
-                var marker = L.marker(s.coords, { icon: icona });
-                
-                // Salviamo i dati della nazione nel marker per poterlo filtrare
-                marker.nazione = s.nazione;
+            data.forEach(s => {
+                // Generazione bordo basato sui colori sociali
+                let borderStyle = s.colori.length > 1 
+                    ? `linear-gradient(45deg, ${s.colori.join(',')})` 
+                    : (s.colori[0] || "#333");
 
-                // Contenuto del fumetto (Popup)
+                // Classe CSS speciale se il club è scomparso
+                let classeScomparso = s.stato === "scomparso" ? "club-scomparso" : "";
+
+                var customIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div class="logo-container ${classeScomparso}" style="background: ${borderStyle}; width:42px; height:42px;">
+                             <img src="${s.logoAttuale}" class="logo-img-inner" title="${s.nome}">
+                           </div>`,
+                    iconSize: [42, 42],
+                    iconAnchor: [21, 21]
+                });
+
+                var marker = L.marker(s.coords, { icon: customIcon });
+                marker.dati = s; // Salvataggio dati per filtri
+                
+                // Creazione popup
                 let storiciHtml = s.loghiStorici.map(l => `
-                    <div style="display:inline-block; text-align:center;">
-                        <img src="${l.url}" class="storico-img"><br><small>${l.inizio}-${l.fine}</small>
-                    </div>
-                `).join('');
+                    <div style="display:inline-block; margin:5px; text-align:center;">
+                        <img src="${l.url}" style="width:40px; height:40px; border:1px solid #ddd; border-radius:4px;"><br>
+                        <small>${l.inizio}-${l.fine}</small>
+                    </div>`).join('');
 
                 marker.descrizione = `
-                    <div style="text-align:center">
-                        <h2>${s.nome}</h2>
-                        <p>Fondato nel: <b>${s.fondazione}</b></p>
-                        <div style="background:#eee; padding:5px; border-radius:5px;">
-                            <b>Loghi Storici:</b><br>${storiciHtml || 'Nessuno inserito'}
-                        </div>
+                    <div style="text-align:center; min-width:150px;">
+                        <h2 style="margin:5px 0;">${s.nome}</h2>
+                        <p style="margin:5px 0;">Nazione: <b>${s.nazione}</b><br>Fondato nel: <b>${s.fondazione}</b></p>
+                        ${s.stato === 'scomparso' ? '<b style="color:red;">CLUB NON PIÙ ESISTENTE</b>' : ''}
+                        <hr>
+                        <div style="background:#f9f9f9; padding:5px;">${storiciHtml || 'Nessun logo storico'}</div>
                     </div>`;
 
-                // Aggiungiamo alla mappa e allo spiderfier
                 marker.addTo(map);
                 oms.addMarker(marker);
-                markers.push(marker);
+                allMarkers.push(marker);
             });
 
-            // Gestione click (Spiderfier richiede questo modo per aprire i popup)
-            oms.addListener('click', function(marker) {
-                popup.setContent(marker.descrizione);
-                popup.setLatLng(marker.getLatLng());
-                map.openPopup(popup);
-            });
+            function applicaFiltri() {
+                const naz = document.getElementById('filter-nazione').value;
+                const stat = document.getElementById('filter-stato').value;
+                const epoc = document.getElementById('filter-epoca').value;
+                let visibili = 0;
 
-            // Funzione Filtro Nazione
-            document.getElementById('filter-nazione').addEventListener('change', function(e) {
-                let nazione = e.target.value;
-                let count = 0;
-                markers.forEach(m => {
-                    if (nazione === "Tutti" || m.nazione === nazione) {
-                        map.addLayer(m);
-                        count++;
-                    } else {
-                        map.removeLayer(m);
-                    }
+                allMarkers.forEach(m => {
+                    let mostra = true;
+                    if (naz !== "Tutti" && m.dati.nazione !== naz) mostra = false;
+                    if (stat !== "Tutti" && m.dati.stato !== stat) mostra = false;
+                    
+                    if (epoc === "Antiche" && m.dati.fondazione >= 1900) mostra = false;
+                    if (epoc === "Novecento" && (m.dati.fondazione < 1900 || m.dati.fondazione >= 2000)) mostra = false;
+                    if (epoc === "Duemila" && m.dati.fondazione < 2000) mostra = false;
+
+                    if (mostra) { map.addLayer(m); visibili++; }
+                    else { map.removeLayer(m); }
                 });
-                document.getElementById('count-box').innerHTML = `Squadre visibili: <b>${count}</b>`;
-            });
+                document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibili}</b>`;
+            }
 
-            // Conteggio iniziale
-            document.getElementById('count-box').innerHTML = `Squadre visibili: <b>${squadre.length}</b>`;
+            document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
+            document.getElementById('count-box').innerHTML = `Squadre totali: <b>${data.length}</b>`;
         });
+
+    var popup = L.popup();
+    oms.addListener('click', m => {
+        popup.setContent(m.descrizione).setLatLng(m.getLatLng()).openOn(map);
+    });
 </script>
 </body>
 </html>
