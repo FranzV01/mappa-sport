@@ -30,12 +30,14 @@
         select { width: 100%; margin-top: 5px; padding: 6px; border-radius: 5px; border: 1px solid #ccc; }
         hr { border: 0; border-top: 1px solid #eee; margin: 10px 0; }
         .flag-icon { width: 20px; vertical-align: middle; margin-right: 5px; border: 1px solid #eee; }
+        .storico-item { display: inline-block; margin: 5px; text-align: center; font-size: 11px; }
+        .storico-img { width: 40px; height: 40px; border: 1px solid #ddd; border-radius: 4px; display: block; margin: 0 auto; }
     </style>
 </head>
 <body>
 
 <div id="ui-panel">
-    <div id="count-box" class="stat-item">Squadre visibili: <b>Caricamento...</b></div>
+    <div id="count-box" class="stat-item">Caricamento squadre...</div>
     <hr>
     <label class="stat-item">Nazione:</label>
     <select id="filter-nazione"><option value="Tutti">Tutte le nazioni</option></select>
@@ -70,23 +72,20 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
 <script>
-    // --- CONFIGURAZIONE ---
     const urlFoglio = 'IL_TUO_LINK_CSV_QUI'; 
-    // ----------------------
 
     var map = L.map('map').setView([45, 10], 5);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 25 });
     var allMarkers = [];
 
-    // Funzione per caricare dati da Google Sheets
     Papa.parse(urlFoglio, {
         download: true,
         header: true,
         complete: function(results) {
             const data = results.data;
             
-            // Popola Nazioni
+            // Popola Nazioni nel filtro
             const nazioni = [...new Set(data.map(s => s.nazione))].filter(n => n).sort();
             nazioni.forEach(n => {
                 let opt = document.createElement('option');
@@ -95,13 +94,10 @@
             });
 
             data.forEach(s => {
-                if(!s.lat || !s.lng) return; // Salta righe vuote
+                if(!s.lat || !s.lng) return;
 
                 let coloriArray = s.colori ? s.colori.split(',') : ['#333'];
-                let borderStyle = coloriArray.length > 1 
-                    ? `linear-gradient(45deg, ${coloriArray.join(',')})` 
-                    : coloriArray[0];
-
+                let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
                 let classeScomparso = s.stato === "scomparso" ? "club-scomparso" : "";
 
                 var customIcon = L.divIcon({
@@ -117,12 +113,27 @@
                 
                 let flagHtml = s.codiceNazione ? `<img src="https://flagcdn.com/w40/${s.codiceNazione.toLowerCase()}.png" class="flag-icon">` : '';
 
+                // LOGICA LOGHI STORICI
+                let storiciHtml = "";
+                for(let i=1; i<=3; i++) {
+                    let url = s[`logo_storia_${i}_url`];
+                    let ini = s[`logo_storia_${i}_inizio`];
+                    let fin = s[`logo_storia_${i}_fine`];
+                    if(url && url.trim() !== "") {
+                        storiciHtml += `<div class="storico-item">
+                            <img src="${url}" class="storico-img">
+                            <span>${ini}-${fin}</span>
+                        </div>`;
+                    }
+                }
+
                 marker.descrizione = `
-                    <div style="text-align:center; min-width:150px;">
+                    <div style="text-align:center; min-width:180px;">
                         <h2 style="margin:5px 0;">${s.nome}</h2>
                         <p>${flagHtml} <b>${s.nazione}</b><br>Fondato nel: <b>${s.fondazione}</b></p>
                         <p>Sport: ${s.sport}</p>
                         ${s.stato === 'scomparso' ? '<b style="color:red;">SCOMPARSO</b>' : ''}
+                        ${storiciHtml !== "" ? '<hr><div style="background:#f9f9f9; padding:5px;">' + storiciHtml + '</div>' : ''}
                     </div>`;
 
                 marker.addTo(map);
