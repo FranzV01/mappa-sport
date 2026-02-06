@@ -5,63 +5,58 @@
     <title>Mappa Mondiale Club</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; }
+        body { margin: 0; font-family: sans-serif; }
         #map { height: 100vh; width: 100%; }
         #ui-panel {
             position: absolute; top: 15px; left: 15px; z-index: 1000;
             background: white; padding: 15px; border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 240px;
         }
-        
-        /* Container del logo */
+        /* Container Logo */
         .logo-container {
             border-radius: 50%; padding: 3px;
             display: flex; justify-content: center; align-items: center;
-            transition: transform 0.2s ease-in-out, filter 0.3s ease;
+            transition: transform 0.2s ease; /* Effetto ingrandimento */
             cursor: pointer;
         }
-        
-        /* Effetto ingrandimento per TUTTE le squadre al passaggio del mouse */
+        /* Ingrandimento per TUTTI al passaggio del mouse */
         .logo-container:hover {
             transform: scale(1.3);
-            z-index: 9999 !important;
-            filter: grayscale(0%) !important; /* Torna a colori se era grigio */
+            z-index: 999 !important;
+            filter: grayscale(0%) !important;
         }
-
         .logo-img-inner {
             width: 100%; height: 100%; border-radius: 50%;
             background: white; object-fit: contain;
         }
-
-        /* Grigio solo per i club scomparsi quando NON ci sei sopra col mouse */
+        /* Bianco e nero solo per scomparsi se non ci sei sopra col mouse */
         .club-scomparso { filter: grayscale(100%); opacity: 0.8; }
         
         .stat-item { font-size: 13px; margin: 8px 0; }
         select { width: 100%; margin-top: 5px; padding: 6px; border-radius: 5px; border: 1px solid #ccc; }
-        .flag { width: 20px; vertical-align: middle; margin-right: 5px; border: 1px solid #eee; }
+        .flag-img { width: 20px; vertical-align: middle; margin-right: 5px; border: 1px solid #ddd; }
+        .storico-img { width: 40px; height: 40px; margin: 5px; border: 1px solid #eee; border-radius: 4px; }
     </style>
 </head>
 <body>
 
 <div id="ui-panel">
-    <div id="count-box" class="stat-item">Squadre totali: <b>0</b></div>
+    <div id="count-box" class="stat-item">Squadre visibili: <b>0</b></div>
     <hr>
     <label class="stat-item">Nazione:</label>
-    <select id="filter-nazione"><option value="Tutti">Tutte le nazioni</option></select>
-    
+    <select id="filter-nazione"><option value="Tutti">Tutte</option></select>
     <label class="stat-item">Stato Club:</label>
     <select id="filter-stato">
         <option value="Tutti">Tutti</option>
-        <option value="attivo">Solo Attivi</option>
-        <option value="scomparso">Solo Scomparsi</option>
+        <option value="attivo">Attivi</option>
+        <option value="scomparso">Scomparsi</option>
     </select>
-
     <label class="stat-item">Epoca Fondazione:</label>
     <select id="filter-epoca">
-        <option value="Tutti">Tutte le epoche</option>
+        <option value="Tutti">Tutte</option>
         <option value="Antiche">Prima del 1900</option>
-        <option value="Novecento">1900 - 1999</option>
-        <option value="Duemila">Dal 2000 in poi</option>
+        <option value="Novecento">1900-1999</option>
+        <option value="Duemila">Dal 2000</option>
     </select>
 </div>
 
@@ -87,33 +82,30 @@
             });
 
             data.forEach(s => {
-                let borderStyle = s.colori.length > 1 
-                    ? `linear-gradient(45deg, ${s.colori.join(',')})` 
-                    : (s.colori[0] || "#333");
-
+                let borderStyle = s.colori.length > 1 ? `linear-gradient(45deg, ${s.colori.join(',')})` : (s.colori[0] || "#333");
                 let classeStato = s.stato === "scomparso" ? "club-scomparso" : "";
 
                 var customIcon = L.divIcon({
-                    className: 'custom-div-icon',
+                    className: 'custom-icon',
                     html: `<div class="logo-container ${classeStato}" style="background: ${borderStyle}; width:42px; height:42px;">
                              <img src="${s.logoAttuale}" class="logo-img-inner">
                            </div>`,
-                    iconSize: [42, 42],
-                    iconAnchor: [21, 21]
+                    iconSize: [42, 42], iconAnchor: [21, 21]
                 });
 
                 var marker = L.marker(s.coords, { icon: customIcon });
                 marker.dati = s;
-                
-                // Link alla bandierina (utilizza il codice nazione nel JSON)
+
+                // Bandiera e Loghi Storici
                 let flagUrl = `https://flagcdn.com/w40/${s.codiceNazione.toLowerCase()}.png`;
+                let storiciHtml = s.loghiStorici.map(l => `<img src="${l.url}" class="storico-img" title="${l.inizio}-${l.fine}">`).join('');
 
                 marker.descrizione = `
-                    <div style="text-align:center; min-width:180px;">
+                    <div style="text-align:center; min-width:160px;">
                         <h2 style="margin:5px 0;">${s.nome}</h2>
-                        <p><img src="${flagUrl}" class="flag"> <b>${s.nazione}</b></p>
-                        <p>Fondato nel: <b>${s.fondazione}</b></p>
-                        ${s.stato === 'scomparso' ? '<b style="color:red;">CLUB SCOMPARSO</b>' : ''}
+                        <p><img src="${flagUrl}" class="flag-img"> ${s.nazione} - ${s.fondazione}</p>
+                        ${s.stato === 'scomparso' ? '<b style="color:red;">SCOMPARSO</b>' : ''}
+                        <hr>${storiciHtml || 'No storici'}
                     </div>`;
 
                 marker.addTo(map);
@@ -121,28 +113,24 @@
                 allMarkers.push(marker);
             });
 
-            function applicaFiltri() {
+            function filtra() {
                 const naz = document.getElementById('filter-nazione').value;
-                const stat = document.getElementById('filter-stato').value;
-                const epoc = document.getElementById('filter-epoca').value;
-                let visibili = 0;
-
+                const sta = document.getElementById('filter-stato').value;
+                const epo = document.getElementById('filter-epoca').value;
+                let vis = 0;
                 allMarkers.forEach(m => {
-                    let mostra = true;
-                    if (naz !== "Tutti" && m.dati.nazione !== naz) mostra = false;
-                    if (stat !== "Tutti" && m.dati.stato !== stat) mostra = false;
-                    if (epoc === "Antiche" && m.dati.fondazione >= 1900) mostra = false;
-                    if (epoc === "Novecento" && (m.dati.fondazione < 1900 || m.dati.fondazione >= 2000)) mostra = false;
-                    if (epoc === "Duemila" && m.dati.fondazione < 2000) mostra = false;
-
-                    if (mostra) { map.addLayer(m); visibili++; }
-                    else { map.removeLayer(m); }
+                    let ok = true;
+                    if (naz !== "Tutti" && m.dati.nazione !== naz) ok = false;
+                    if (sta !== "Tutti" && m.dati.stato !== sta) ok = false;
+                    if (epo === "Antiche" && m.dati.fondazione >= 1900) ok = false;
+                    if (epo === "Novecento" && (m.dati.fondazione < 1900 || m.dati.fondazione >= 2000)) ok = false;
+                    if (epo === "Duemila" && m.dati.fondazione < 2000) ok = false;
+                    if (ok) { map.addLayer(m); vis++; } else { map.removeLayer(m); }
                 });
-                document.getElementById('count-box').innerHTML = `Squadre visibili: <b>${visibili}</b>`;
+                document.getElementById('count-box').innerHTML = `Squadre visibili: <b>${vis}</b>`;
             }
-
-            document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
-            document.getElementById('count-box').innerHTML = `Squadre totali: <b>${data.length}</b>`;
+            document.querySelectorAll('select').forEach(s => s.onchange = filtra);
+            filtra();
         });
 
     var popup = L.popup();
