@@ -8,9 +8,11 @@
     "stato": "attivo",
     "colori": ["#000000", "#0000FF"],
     "coords": [45.478, 9.124],
-    "logoAttuale": "https://i.imgur.com/link_inter.png",
+    "logoAttuale": "https://i.imgur.com/y8EDyRO.png",
     "loghiStorici": []
-  },
+{ "url": "https://i.imgur.com/xSQwLJl.png", "inizio": 1930, "fine": 1950 }
+    ]
+},
   {
     "nome": "Chievo Verona",
     "sport": "Calcio",
@@ -20,7 +22,8 @@
     "stato": "scomparso",
     "colori": ["#FFFF00", "#0000FF"],
     "coords": [45.435, 10.993],
-    "logoAttuale": "https://i.imgur.com/link_chievo.png",
+    "logoAttuale": "https://i.imgur.com/G9y2cWF.png",
     "loghiStorici": []
   }
 ]
+
