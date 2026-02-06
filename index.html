@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Mappa Mondiale Club - Kit Edition</title>
+    <title>Mappa Mondiale Club - Google Sheets</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { margin: 0; font-family: 'Segoe UI', sans-serif; }
@@ -29,40 +29,39 @@
         .stat-item { font-size: 13px; margin: 8px 0; color: #333; }
         select { width: 100%; margin-top: 5px; padding: 6px; border-radius: 5px; border: 1px solid #ccc; }
         hr { border: 0; border-top: 1px solid #eee; margin: 10px 0; }
-        .flag-icon { width: 20px; vertical-align: middle; margin-right: 5px; }
-        
-        /* Stili per Kit e Loghi */
-        .section-title { font-size: 12px; font-weight: bold; color: #666; text-transform: uppercase; margin-top: 10px; display: block; }
-        .scroll-container { display: flex; overflow-x: auto; gap: 10px; padding: 5px 0; }
-        .item-box { flex: 0 0 50px; text-align: center; font-size: 10px; }
-        .item-img { width: 45px; height: 45px; object-fit: contain; border: 1px solid #eee; border-radius: 4px; background: white; }
+        .flag-icon { width: 20px; vertical-align: middle; margin-right: 5px; border: 1px solid #eee; }
+        .storico-item { display: inline-block; margin: 5px; text-align: center; font-size: 11px; }
+        .storico-img { width: 40px; height: 40px; border: 1px solid #ddd; border-radius: 4px; display: block; margin: 0 auto; }
     </style>
 </head>
 <body>
 
 <div id="ui-panel">
-    <div id="count-box" class="stat-item">Caricamento...</div>
+    <div id="count-box" class="stat-item">Caricamento squadre...</div>
     <hr>
     <label class="stat-item">Nazione:</label>
-    <select id="filter-nazione"><option value="Tutti">Tutte</option></select>
+    <select id="filter-nazione"><option value="Tutti">Tutte le nazioni</option></select>
+    
     <label class="stat-item">Sport:</label>
     <select id="filter-sport">
-        <option value="Tutti">Tutti</option>
-        <option value="Calcio">Calcio</option>
-        <option value="Basket">Basket</option>
+        <option value="Tutti">Tutti gli sport</option>
+        <option value="Calcio">Calcio ⚽</option>
+        <option value="Basket">Basket 🏀</option>
     </select>
+
     <label class="stat-item">Stato Club:</label>
     <select id="filter-stato">
         <option value="Tutti">Tutti</option>
-        <option value="attivo">Attivi</option>
-        <option value="scomparso">Scomparsi</option>
+        <option value="attivo">Solo Attivi</option>
+        <option value="scomparso">Solo Scomparsi</option>
     </select>
+
     <label class="stat-item">Epoca Fondazione:</label>
     <select id="filter-epoca">
-        <option value="Tutti">Tutte</option>
-        <option value="Antiche">Prima 1900</option>
-        <option value="Novecento">1900-1999</option>
-        <option value="Duemila">Dal 2000</option>
+        <option value="Tutti">Tutte le epoche</option>
+        <option value="Antiche">Prima del 1900</option>
+        <option value="Novecento">1900 - 1999</option>
+        <option value="Duemila">Dal 2000 in poi</option>
     </select>
 </div>
 
@@ -77,7 +76,7 @@
 
     var map = L.map('map').setView([45, 10], 5);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true });
+    var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 25 });
     var allMarkers = [];
 
     Papa.parse(urlFoglio, {
@@ -85,6 +84,8 @@
         header: true,
         complete: function(results) {
             const data = results.data;
+            
+            // Popola Nazioni nel filtro
             const nazioni = [...new Set(data.map(s => s.nazione))].filter(n => n).sort();
             nazioni.forEach(n => {
                 let opt = document.createElement('option');
@@ -94,12 +95,14 @@
 
             data.forEach(s => {
                 if(!s.lat || !s.lng) return;
+
                 let coloriArray = s.colori ? s.colori.split(',') : ['#333'];
                 let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
-                
+                let classeScomparso = s.stato === "scomparso" ? "club-scomparso" : "";
+
                 var customIcon = L.divIcon({
                     className: 'custom-div-icon',
-                    html: `<div class="logo-container ${s.stato === 'scomparso' ? 'club-scomparso' : ''}" style="background: ${borderStyle}; width:42px; height:42px;">
+                    html: `<div class="logo-container ${classeScomparso}" style="background: ${borderStyle}; width:42px; height:42px;">
                              <img src="${s.logoAttuale}" class="logo-img-inner">
                            </div>`,
                     iconSize: [42, 42], iconAnchor: [21, 21]
@@ -107,32 +110,30 @@
 
                 var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: customIcon });
                 marker.dati = s;
+                
+                let flagHtml = s.codiceNazione ? `<img src="https://flagcdn.com/w40/${s.codiceNazione.toLowerCase()}.png" class="flag-icon">` : '';
 
-                // LOGICA LOGHI E KIT
-                let loghiHtml = "";
+                // LOGICA LOGHI STORICI
+                let storiciHtml = "";
                 for(let i=1; i<=3; i++) {
-                    if(s[`logo_storia_${i}_url`]) {
-                        loghiHtml += `<div class="item-box"><img src="${s['logo_storia_'+i+'_url']}" class="item-img"><span>${s['logo_storia_'+i+'_inizio']}</span></div>`;
-                    }
-                }
-
-                let kitHtml = "";
-                if(s.kitAttuale_url) kitHtml += `<div class="item-box"><img src="${s.kitAttuale_url}" class="item-img"><span>Attuale</span></div>`;
-                for(let i=1; i<=2; i++) {
-                    if(s[`kitStorico${i}_url`]) {
-                        kitHtml += `<div class="item-box"><img src="${s['kitStorico'+i+'_url']}" class="item-img"><span>${s['kitStorico'+i+'_anni']}</span></div>`;
+                    let url = s[`logo_storia_${i}_url`];
+                    let ini = s[`logo_storia_${i}_inizio`];
+                    let fin = s[`logo_storia_${i}_fine`];
+                    if(url && url.trim() !== "") {
+                        storiciHtml += `<div class="storico-item">
+                            <img src="${url}" class="storico-img">
+                            <span>${ini}-${fin}</span>
+                        </div>`;
                     }
                 }
 
                 marker.descrizione = `
-                    <div style="text-align:center; min-width:220px;">
+                    <div style="text-align:center; min-width:180px;">
                         <h2 style="margin:5px 0;">${s.nome}</h2>
-                        <p><img src="https://flagcdn.com/w40/${s.codiceNazione.toLowerCase()}.png" class="flag-icon"> <b>${s.nazione}</b> - ${s.fondazione}</p>
-                        
-                        ${loghiHtml ? '<span class="section-title">Evoluzione Logo</span><div class="scroll-container">'+loghiHtml+'</div>' : ''}
-                        ${kitHtml ? '<span class="section-title">Kit Maglie</span><div class="scroll-container">'+kitHtml+'</div>' : ''}
-                        
-                        ${s.stato === 'scomparso' ? '<p style="color:red; font-weight:bold; margin-top:10px;">CLUB SCOMPARSO</p>' : ''}
+                        <p>${flagHtml} <b>${s.nazione}</b><br>Fondato nel: <b>${s.fondazione}</b></p>
+                        <p>Sport: ${s.sport}</p>
+                        ${s.stato === 'scomparso' ? '<b style="color:red;">SCOMPARSO</b>' : ''}
+                        ${storiciHtml !== "" ? '<hr><div style="background:#f9f9f9; padding:5px;">' + storiciHtml + '</div>' : ''}
                     </div>`;
 
                 marker.addTo(map);
@@ -146,19 +147,21 @@
                 const epoc = document.getElementById('filter-epoca').value;
                 const spor = document.getElementById('filter-sport').value;
                 let vis = 0;
+
                 allMarkers.forEach(m => {
                     let ok = true;
                     if (naz !== "Tutti" && m.dati.nazione !== naz) ok = false;
                     if (stat !== "Tutti" && m.dati.stato !== stat) ok = false;
                     if (spor !== "Tutti" && m.dati.sport !== spor) ok = false;
-                    let f = parseInt(m.dati.fondazione);
-                    if (epoc === "Antiche" && f >= 1900) ok = false;
-                    if (epoc === "Novecento" && (f < 1900 || f >= 2000)) ok = false;
-                    if (epoc === "Duemila" && f < 2000) ok = false;
+                    if (epoc === "Antiche" && parseInt(m.dati.fondazione) >= 1900) ok = false;
+                    if (epoc === "Novecento" && (parseInt(m.dati.fondazione) < 1900 || parseInt(m.dati.fondazione) >= 2000)) ok = false;
+                    if (epoc === "Duemila" && parseInt(m.dati.fondazione) < 2000) ok = false;
+
                     if (ok) { map.addLayer(m); vis++; } else { map.removeLayer(m); }
                 });
-                document.getElementById('count-box').innerHTML = `Squadre: <b>${vis}</b>`;
+                document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${vis}</b>`;
             }
+
             document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
             applicaFiltri();
         }
