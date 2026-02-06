@@ -5,30 +5,40 @@
     <title>Mappa Mondiale Club</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; }
         #map { height: 100vh; width: 100%; }
         #ui-panel {
             position: absolute; top: 15px; left: 15px; z-index: 1000;
             background: white; padding: 15px; border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 240px;
         }
-        /* Container del logo con bordo colorato */
+        
+        /* Container del logo */
         .logo-container {
             border-radius: 50%; padding: 3px;
             display: flex; justify-content: center; align-items: center;
-            transition: all 0.3s ease;
+            transition: transform 0.2s ease-in-out, filter 0.3s ease;
+            cursor: pointer;
         }
+        
+        /* Effetto ingrandimento per TUTTE le squadre al passaggio del mouse */
+        .logo-container:hover {
+            transform: scale(1.3);
+            z-index: 9999 !important;
+            filter: grayscale(0%) !important; /* Torna a colori se era grigio */
+        }
+
         .logo-img-inner {
             width: 100%; height: 100%; border-radius: 50%;
             background: white; object-fit: contain;
         }
-        /* Effetto per squadre scomparse */
+
+        /* Grigio solo per i club scomparsi quando NON ci sei sopra col mouse */
         .club-scomparso { filter: grayscale(100%); opacity: 0.8; }
-        .club-scomparso:hover { filter: grayscale(0%); opacity: 1; transform: scale(1.2); z-index: 1000 !important; }
         
-        .stat-item { font-size: 13px; margin: 8px 0; color: #333; }
+        .stat-item { font-size: 13px; margin: 8px 0; }
         select { width: 100%; margin-top: 5px; padding: 6px; border-radius: 5px; border: 1px solid #ccc; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 10px 0; }
+        .flag { width: 20px; vertical-align: middle; margin-right: 5px; border: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -41,9 +51,9 @@
     
     <label class="stat-item">Stato Club:</label>
     <select id="filter-stato">
-        <option value="Tutti">Tutti (Attivi e Scomparsi)</option>
-        <option value="attivo">Solo Club Attivi</option>
-        <option value="scomparso">Solo Club Scomparsi</option>
+        <option value="Tutti">Tutti</option>
+        <option value="attivo">Solo Attivi</option>
+        <option value="scomparso">Solo Scomparsi</option>
     </select>
 
     <label class="stat-item">Epoca Fondazione:</label>
@@ -63,14 +73,12 @@
 <script>
     var map = L.map('map').setView([45, 10], 5);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    
-    var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 25 });
+    var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true });
     var allMarkers = [];
 
     fetch('squadre.json')
         .then(res => res.json())
         .then(data => {
-            // Popolamento automatico menu nazioni
             const nazioni = [...new Set(data.map(s => s.nazione))].sort();
             nazioni.forEach(n => {
                 let opt = document.createElement('option');
@@ -79,40 +87,33 @@
             });
 
             data.forEach(s => {
-                // Generazione bordo basato sui colori sociali
                 let borderStyle = s.colori.length > 1 
                     ? `linear-gradient(45deg, ${s.colori.join(',')})` 
                     : (s.colori[0] || "#333");
 
-                // Classe CSS speciale se il club è scomparso
-                let classeScomparso = s.stato === "scomparso" ? "club-scomparso" : "";
+                let classeStato = s.stato === "scomparso" ? "club-scomparso" : "";
 
                 var customIcon = L.divIcon({
                     className: 'custom-div-icon',
-                    html: `<div class="logo-container ${classeScomparso}" style="background: ${borderStyle}; width:42px; height:42px;">
-                             <img src="${s.logoAttuale}" class="logo-img-inner" title="${s.nome}">
+                    html: `<div class="logo-container ${classeStato}" style="background: ${borderStyle}; width:42px; height:42px;">
+                             <img src="${s.logoAttuale}" class="logo-img-inner">
                            </div>`,
                     iconSize: [42, 42],
                     iconAnchor: [21, 21]
                 });
 
                 var marker = L.marker(s.coords, { icon: customIcon });
-                marker.dati = s; // Salvataggio dati per filtri
+                marker.dati = s;
                 
-                // Creazione popup
-                let storiciHtml = s.loghiStorici.map(l => `
-                    <div style="display:inline-block; margin:5px; text-align:center;">
-                        <img src="${l.url}" style="width:40px; height:40px; border:1px solid #ddd; border-radius:4px;"><br>
-                        <small>${l.inizio}-${l.fine}</small>
-                    </div>`).join('');
+                // Link alla bandierina (utilizza il codice nazione nel JSON)
+                let flagUrl = `https://flagcdn.com/w40/${s.codiceNazione.toLowerCase()}.png`;
 
                 marker.descrizione = `
-                    <div style="text-align:center; min-width:150px;">
+                    <div style="text-align:center; min-width:180px;">
                         <h2 style="margin:5px 0;">${s.nome}</h2>
-                        <p style="margin:5px 0;">Nazione: <b>${s.nazione}</b><br>Fondato nel: <b>${s.fondazione}</b></p>
-                        ${s.stato === 'scomparso' ? '<b style="color:red;">CLUB NON PIÙ ESISTENTE</b>' : ''}
-                        <hr>
-                        <div style="background:#f9f9f9; padding:5px;">${storiciHtml || 'Nessun logo storico'}</div>
+                        <p><img src="${flagUrl}" class="flag"> <b>${s.nazione}</b></p>
+                        <p>Fondato nel: <b>${s.fondazione}</b></p>
+                        ${s.stato === 'scomparso' ? '<b style="color:red;">CLUB SCOMPARSO</b>' : ''}
                     </div>`;
 
                 marker.addTo(map);
@@ -130,7 +131,6 @@
                     let mostra = true;
                     if (naz !== "Tutti" && m.dati.nazione !== naz) mostra = false;
                     if (stat !== "Tutti" && m.dati.stato !== stat) mostra = false;
-                    
                     if (epoc === "Antiche" && m.dati.fondazione >= 1900) mostra = false;
                     if (epoc === "Novecento" && (m.dati.fondazione < 1900 || m.dati.fondazione >= 2000)) mostra = false;
                     if (epoc === "Duemila" && m.dati.fondazione < 2000) mostra = false;
@@ -138,7 +138,7 @@
                     if (mostra) { map.addLayer(m); visibili++; }
                     else { map.removeLayer(m); }
                 });
-                document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibili}</b>`;
+                document.getElementById('count-box').innerHTML = `Squadre visibili: <b>${visibili}</b>`;
             }
 
             document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
