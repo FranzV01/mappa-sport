@@ -16,6 +16,16 @@
             border: 1px solid rgba(255,255,255,0.3);
         }
         
+        /* Barra di Ricerca */
+        #search-container { margin-bottom: 15px; position: relative; }
+        #search-input {
+            width: 100%; padding: 10px 12px; border-radius: 8px;
+            border: 1px solid #ddd; background: white;
+            font-family: inherit; font-size: 14px; box-sizing: border-box;
+            outline: none; transition: border-color 0.2s;
+        }
+        #search-input:focus { border-color: #007bff; box-shadow: 0 0 0 2px rgba(0,123,255,0.1); }
+        
         .logo-container {
             border-radius: 50%; padding: 3px;
             display: flex; justify-content: center; align-items: center;
@@ -27,32 +37,25 @@
         
         .club-scomparso { filter: grayscale(100%); opacity: 1; }
         
-        /* Stile Popup Migliorato */
+        /* Stile Popup */
         .custom-popup .leaflet-popup-content-wrapper { border-radius: 12px; padding: 5px; }
         .popup-card { text-align: center; font-family: 'Segoe UI', sans-serif; width: 220px; }
         .popup-header { border-bottom: 2px solid #eee; margin-bottom: 10px; padding-bottom: 8px; }
         .popup-title { margin: 5px 0; color: #222; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; }
         .popup-info { font-size: 13px; color: #555; line-height: 1.5; }
         
-        /* Box Uniformi (Centenario e Storici) */
-        .centenario-box, .storici-container { 
-            margin: 10px 0; padding: 8px; border-radius: 8px; 
-        }
+        /* Box Uniformi */
+        .centenario-box, .storici-container { margin: 10px 0; padding: 8px; border-radius: 8px; }
         .centenario-box { background: #fff9c4; border: 1px solid #fbc02d; }
         .storici-container { background: #f8f9fa; border: 1px solid #ddd; }
         
         .box-label { font-size: 9px; font-weight: bold; display: block; margin-bottom: 5px; text-transform: uppercase; color: #666; }
         .centenario-label { color: #856404; }
-
         .centenario-img, .storico-img { width: 45px; height: 45px; object-fit: contain; background: white; border: 1px solid #eee; border-radius: 4px; }
         
-        /* Loghi Storici Griglia */
-        .storico-grid { 
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; 
-        }
+        .storico-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
         .storico-item { flex: 0 0 45px; text-align: center; font-size: 9px; color: #777; }
         
-        /* Pulsante Espandi */
         .btn-espandi { 
             background: none; border: none; color: #007bff; font-size: 10px; 
             cursor: pointer; text-decoration: underline; margin-top: 5px; display: block; width: 100%;
@@ -61,7 +64,7 @@
 
         /* UI Elements */
         .stat-item { font-size: 13px; font-weight: bold; margin: 8px 0; color: #444; }
-        select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: #fdfdfd; cursor: pointer; }
+        select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: #fdfdfd; cursor: pointer; font-family: inherit; }
         hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
         .flag-icon { width: 22px; border-radius: 3px; vertical-align: middle; margin-right: 6px; }
     </style>
@@ -69,6 +72,10 @@
 <body>
 
 <div id="ui-panel">
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="Cerca squadra...">
+    </div>
+
     <div id="count-box" class="stat-item">Calcolo squadre...</div>
     <hr>
     <label class="stat-item">Nazione:</label>
@@ -120,7 +127,6 @@
     var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 30 });
     var allMarkers = [];
 
-    // Funzione per gestire l'espansione dei loghi
     window.toggleLoghi = function(btn) {
         const container = btn.previousElementSibling;
         if (container.style.display === "flex") {
@@ -165,16 +171,14 @@
                 
                 let flagHtml = s.codiceNazione ? `<img src="https://flagcdn.com/w40/${s.codiceNazione.toLowerCase()}.png" class="flag-icon">` : '';
 
-                // Logo Centenario
                 let centenarioHtml = s.logoCentenario ? `
                     <div class="centenario-box">
                         <span class="box-label centenario-label">Logo Centenario</span>
                         <img src="${s.logoCentenario}" class="centenario-img">
                     </div>` : '';
 
-                // Loghi Storici dinamici
                 let loghiItems = [];
-                for(let i=1; i<=10; i++) { // Supporta fino a 10 loghi
+                for(let i=1; i<=10; i++) {
                     let url = s[`logo_storia_${i}_url`];
                     let date = s[`logo_storia_${i}_date`];
                     if(url && url.trim() !== "") {
@@ -191,7 +195,7 @@
                             <span class="box-label">Loghi Storici</span>
                             <div class="storico-grid">${visibili}</div>
                             ${extra ? `<div class="storico-grid hidden-logos" style="margin-top:8px;">${extra}</div>
-                                       <button class="btn-espandi" onclick="toggleLoghi(this)">espandi ▼</button>` : ''}
+                                       <button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}
                         </div>`;
                 }
 
@@ -214,6 +218,7 @@
             });
 
             function applicaFiltri() {
+                const searchVal = document.getElementById('search-input').value.toLowerCase();
                 const naz = document.getElementById('filter-nazione').value;
                 const stat = document.getElementById('filter-stato').value;
                 const epoc = document.getElementById('filter-epoca').value;
@@ -222,18 +227,25 @@
 
                 allMarkers.forEach(m => {
                     let ok = true;
+                    // Filtro Ricerca Testuale
+                    if (searchVal && !m.dati.nome.toLowerCase().includes(searchVal)) ok = false;
+                    // Filtri Dropdown
                     if (naz !== "Tutti" && m.dati.nazione !== naz) ok = false;
                     if (stat !== "Tutti" && m.dati.stato !== stat) ok = false;
                     if (spor !== "Tutti" && m.dati.sport !== spor) ok = false;
-                    if (epoc === "Antiche" && parseInt(m.dati.fondazione) >= 1900) ok = false;
-                    if (epoc === "Novecento" && (parseInt(m.dati.fondazione) < 1900 || parseInt(m.dati.fondazione) >= 2000)) ok = false;
-                    if (epoc === "Duemila" && parseInt(m.dati.fondazione) < 2000) ok = false;
+                    
+                    const anno = parseInt(m.dati.fondazione);
+                    if (epoc === "Antiche" && anno >= 1900) ok = false;
+                    if (epoc === "Novecento" && (anno < 1900 || anno >= 2000)) ok = false;
+                    if (epoc === "Duemila" && anno < 2000) ok = false;
 
                     if (ok) { map.addLayer(m); vis++; } else { map.removeLayer(m); }
                 });
                 document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${vis}</b>`;
             }
 
+            // Eventi per filtri e ricerca
+            document.getElementById('search-input').oninput = applicaFiltri;
             document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
             applicaFiltri();
         }
