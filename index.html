@@ -2,42 +2,58 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Mappa Mondiale Club - Google Sheets</title>
+    <title>Mappa Mondiale Club - Progetto Avanzato</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; }
-        #map { height: 100vh; width: 100%; }
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        #map { height: 100vh; width: 100%; background: #aad3df; }
+        
+        /* Pannello UI Migliorato */
         #ui-panel {
             position: absolute; top: 15px; left: 15px; z-index: 1000;
-            background: white; padding: 15px; border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 240px;
+            background: rgba(255, 255, 255, 0.95); padding: 18px; border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15); width: 260px;
+            border: 1px solid rgba(255,255,255,0.3);
         }
+        
+        /* Icone Logo sulla Mappa */
         .logo-container {
             border-radius: 50%; padding: 3px;
             display: flex; justify-content: center; align-items: center;
-            transition: transform 0.2s ease; cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.3);
         }
-        .logo-container:hover { 
-            transform: scale(1.3); z-index: 1000 !important; 
-            filter: grayscale(0%); opacity: 1;
-        }
-        .logo-img-inner {
-            width: 100%; height: 100%; border-radius: 50%;
-            background: white; object-fit: contain;
-        }
-        .club-scomparso { filter: grayscale(100%); opacity: 0.8; }
-        .stat-item { font-size: 13px; margin: 8px 0; color: #333; }
-        select { width: 100%; margin-top: 5px; padding: 6px; border-radius: 5px; border: 1px solid #ccc; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 10px 0; }
-        .flag-icon { width: 20px; vertical-align: middle; margin-right: 5px; border: 1px solid #eee; }
-        .storico-item { display: inline-block; margin: 5px; text-align: center; font-size: 11px; }
-        .storico-img { width: 40px; height: 40px; border: 1px solid #ddd; border-radius: 4px; display: block; margin: 0 auto; }
+        .logo-container:hover { transform: scale(1.4); z-index: 1000 !important; filter: grayscale(0%) !important; opacity: 1 !important; }
+        .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
+        
+        /* Scomparsi: Solo BN, no trasparenza */
+        .club-scomparso { filter: grayscale(100%); opacity: 1; }
+        
+        /* Stile Popup Migliorato */
+        .custom-popup .leaflet-popup-content-wrapper { border-radius: 12px; padding: 5px; }
+        .popup-card { text-align: center; font-family: 'Segoe UI', sans-serif; }
+        .popup-header { border-bottom: 2px solid #eee; margin-bottom: 10px; padding-bottom: 8px; }
+        .popup-title { margin: 5px 0; color: #222; font-size: 1.4em; text-transform: uppercase; letter-spacing: 1px; }
+        .popup-info { font-size: 13px; color: #555; line-height: 1.5; }
+        .centenario-box { margin: 10px 0; padding: 8px; background: #fff9c4; border: 1px solid #fbc02d; border-radius: 8px; }
+        .centenario-img { width: 60px; height: 60px; object-fit: contain; }
+        
+        /* Loghi Storici */
+        .storico-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-top: 10px; }
+        .storico-item { text-align: center; font-size: 10px; color: #666; }
+        .storico-img { width: 45px; height: 45px; object-fit: contain; border-radius: 4px; background: white; border: 1px solid #ddd; margin-bottom: 4px; }
+        
+        /* UI Elements */
+        .stat-item { font-size: 13px; font-weight: bold; margin: 8px 0; color: #444; }
+        select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: #fdfdfd; cursor: pointer; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
+        .flag-icon { width: 22px; border-radius: 3px; vertical-align: middle; margin-right: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
 
 <div id="ui-panel">
-    <div id="count-box" class="stat-item">Caricamento squadre...</div>
+    <div id="count-box" class="stat-item">Calcolo squadre...</div>
     <hr>
     <label class="stat-item">Nazione:</label>
     <select id="filter-nazione"><option value="Tutti">Tutte le nazioni</option></select>
@@ -46,7 +62,14 @@
     <select id="filter-sport">
         <option value="Tutti">Tutti gli sport</option>
         <option value="Calcio">Calcio ⚽</option>
-        <option value="Basket">Basket 🏀</option>
+        <option value="Pallacanestro">Pallacanestro 🏀</option>
+        <option value="Pallavolo">Pallavolo 🏐</option>
+        <option value="Rugby">Rugby 🏉</option>
+        <option value="Pallamano">Pallamano 🤾</option>
+        <option value="Pallanuoto">Pallanuoto 🤽</option>
+        <option value="Hockey su ghiaccio">Hockey su ghiaccio 🏒</option>
+        <option value="Football americano">Football americano 🏈</option>
+        <option value="Baseball">Baseball ⚾</option>
     </select>
 
     <label class="stat-item">Stato Club:</label>
@@ -74,9 +97,12 @@
 <script>
     const urlFoglio = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB3hRuuuzUhGho2Wr_c0KBa8BYYMyASu6n0DrQ8q_o3GU3aw4_oC2vEvhuVbtmqR3Z3y0C5Zgh8Dji/pub?output=csv'; 
 
-    var map = L.map('map').setView([45, 10], 5);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 25 });
+    var map = L.map('map', { zoomControl: false }).setView([45, 10], 5);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
+    
+    var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 30 });
     var allMarkers = [];
 
     Papa.parse(urlFoglio, {
@@ -85,7 +111,6 @@
         complete: function(results) {
             const data = results.data;
             
-            // Popola Nazioni nel filtro
             const nazioni = [...new Set(data.map(s => s.nazione))].filter(n => n).sort();
             nazioni.forEach(n => {
                 let opt = document.createElement('option');
@@ -102,10 +127,10 @@
 
                 var customIcon = L.divIcon({
                     className: 'custom-div-icon',
-                    html: `<div class="logo-container ${classeScomparso}" style="background: ${borderStyle}; width:42px; height:42px;">
+                    html: `<div class="logo-container ${classeScomparso}" style="background: ${borderStyle}; width:44px; height:44px;">
                              <img src="${s.logoAttuale}" class="logo-img-inner">
                            </div>`,
-                    iconSize: [42, 42], iconAnchor: [21, 21]
+                    iconSize: [44, 44], iconAnchor: [22, 22]
                 });
 
                 var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: customIcon });
@@ -113,27 +138,39 @@
                 
                 let flagHtml = s.codiceNazione ? `<img src="https://flagcdn.com/w40/${s.codiceNazione.toLowerCase()}.png" class="flag-icon">` : '';
 
-                // LOGICA LOGHI STORICI
+                // Logo Centenario
+                let centenarioHtml = s.logoCentenario ? `
+                    <div class="centenario-box">
+                        <small style="color:#856404; font-weight:bold; display:block; margin-bottom:5px;">LOGO CENTENARIO</small>
+                        <img src="${s.logoCentenario}" class="centenario-img">
+                    </div>` : '';
+
+                // Loghi Storici Semplificati
                 let storiciHtml = "";
                 for(let i=1; i<=3; i++) {
                     let url = s[`logo_storia_${i}_url`];
-                    let ini = s[`logo_storia_${i}_inizio`];
-                    let fin = s[`logo_storia_${i}_fine`];
+                    let date = s[`logo_storia_${i}_date`];
                     if(url && url.trim() !== "") {
                         storiciHtml += `<div class="storico-item">
                             <img src="${url}" class="storico-img">
-                            <span>${ini}-${fin}</span>
+                            <b>${date || ''}</b>
                         </div>`;
                     }
                 }
 
                 marker.descrizione = `
-                    <div style="text-align:center; min-width:180px;">
-                        <h2 style="margin:5px 0;">${s.nome}</h2>
-                        <p>${flagHtml} <b>${s.nazione}</b><br>Fondato nel: <b>${s.fondazione}</b></p>
-                        <p>Sport: ${s.sport}</p>
-                        ${s.stato === 'scomparso' ? '<b style="color:red;">SCOMPARSO</b>' : ''}
-                        ${storiciHtml !== "" ? '<hr><div style="background:#f9f9f9; padding:5px;">' + storiciHtml + '</div>' : ''}
+                    <div class="popup-card">
+                        <div class="popup-header">
+                            <h2 class="popup-title">${s.nome}</h2>
+                        </div>
+                        <div class="popup-info">
+                            ${flagHtml} <b>${s.nazione}</b><br>
+                            Fondazione: <b>${s.fondazione}</b><br>
+                            Sport: <b>${s.sport}</b><br>
+                            ${s.stato === 'scomparso' ? '<p style="color:#d32f2f; font-weight:900; margin:5px 0;">CLUB NON PIÙ ATTIVO</p>' : ''}
+                        </div>
+                        ${centenarioHtml}
+                        ${storiciHtml !== "" ? '<div class="storico-grid">' + storiciHtml + '</div>' : ''}
                     </div>`;
 
                 marker.addTo(map);
@@ -167,11 +204,10 @@
         }
     });
 
-    var popup = L.popup();
+    var popup = L.popup({ className: 'custom-popup' });
     oms.addListener('click', m => {
         popup.setContent(m.descrizione).setLatLng(m.getLatLng()).openOn(map);
     });
 </script>
 </body>
 </html>
-
