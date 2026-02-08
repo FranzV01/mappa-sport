@@ -37,7 +37,6 @@
             cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.3);
             width: 44px; height: 44px;
         }
-        /* L'effetto ingrandimento richiesto */
         .logo-container:hover { 
             transform: scale(1.4); 
             z-index: 9999 !important; 
@@ -60,7 +59,6 @@
         .centenario-box { background: #fff9c4; border: 1px solid #fbc02d; }
         .storici-container { background: #f8f9fa; border: 1px solid #ddd; }
         .box-label { font-size: 9px; font-weight: bold; display: block; margin-bottom: 5px; text-transform: uppercase; color: #666; }
-        .centenario-label { color: #856404; }
         .centenario-img, .storico-img { width: 45px; height: 45px; object-fit: contain; background: white; border: 1px solid #eee; border-radius: 4px; }
         .storico-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
         .storico-item { flex: 0 0 45px; text-align: center; font-size: 9px; color: #777; }
@@ -71,7 +69,7 @@
         .stat-item { font-size: 13px; font-weight: bold; margin: 8px 0; color: #444; }
         select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: #fdfdfd; cursor: pointer; font-family: inherit; }
         hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
-        .flag-icon { width: 22px; border-radius: 3px; vertical-align: middle; margin-right: 6px; }
+        .flag-icon { width: 22px; border-radius: 3px; vertical-align: middle; margin-right: 6px; border: 1px solid #eee; }
 
         /* Tasto Geolocalizzazione */
         .locate-btn {
@@ -136,7 +134,6 @@
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
     
-    // Cluster con poligono rimosso (showCoverageOnHover: false)
     var markers = L.markerClusterGroup({ 
         disableClusteringAtZoom: 17, 
         spiderfyOnMaxZoom: false,
@@ -146,8 +143,8 @@
     var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 30 });
     var allMarkers = [];
 
-    // Funzione Accent-folding
     const normalizeText = (str) => {
+        if (!str) return "";
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     };
 
@@ -193,6 +190,9 @@
                 marker.dati = s;
                 marker.nomeNormalizzato = normalizeText(s.nome);
 
+                // Ricostruzione HTML Bandiera e Popup
+                let flagHtml = s.codiceNazione ? `<img src="https://flagcdn.com/w40/${s.codiceNazione.toLowerCase()}.png" class="flag-icon">` : '';
+                
                 let loghiItems = [];
                 for(let i=1; i<=10; i++) {
                     let url = s[`logo_storia_${i}_url`];
@@ -206,12 +206,21 @@
                     <div class="popup-card">
                         <div class="popup-header"><h2 class="popup-title">${s.nome}</h2></div>
                         <div class="popup-info">
-                            <b>${s.nazione}</b><br>
+                            ${flagHtml} <b>${s.nazione}</b><br>
                             Fondazione: <b>${s.fondazione}</b><br>
                             Sport: <b>${s.sport}</b>
+                            ${s.stato === 'scomparso' ? '<p style="color:#d32f2f; font-weight:900; margin:5px 0;">CLUB NON PIÙ ATTIVO</p>' : ''}
                         </div>
-                        ${s.logoCentenario ? `<div class="centenario-box"><img src="${s.logoCentenario}" class="centenario-img"></div>` : ''}
-                        ${loghiItems.length > 0 ? `<div class="storici-container"><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div></div>` : ''}
+                        ${s.logoCentenario ? `<div class="centenario-box"><span class="box-label" style="color:#856404">Logo Centenario</span><img src="${s.logoCentenario}" class="centenario-img"></div>` : ''}
+                        ${loghiItems.length > 0 ? `
+                            <div class="storici-container">
+                                <span class="box-label">Loghi Storici</span>
+                                <div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
+                                ${loghiItems.length > 3 ? `
+                                    <div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div>
+                                    <button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>
+                                ` : ''}
+                            </div>` : ''}
                     </div>`;
 
                 oms.addMarker(marker);
@@ -261,11 +270,11 @@
         }
     });
 
-    // Controllo Geolocalizzazione manuale
     var LocateControl = L.Control.extend({
         options: { position: 'bottomright' },
         onAdd: function (map) {
             var div = L.DomUtil.create('div', 'locate-btn');
+            div.title = "Trovami";
             div.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>';
             div.onclick = function(e){
                 e.stopPropagation();
