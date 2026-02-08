@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>Mappa Mondiale Club - Progetto Avanzato</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    
     <style>
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         #map { height: 100vh; width: 100%; background: #aad3df; }
@@ -16,7 +19,6 @@
             border: 1px solid rgba(255,255,255,0.3);
         }
         
-        /* Barra di Ricerca */
         #search-container { margin-bottom: 15px; position: relative; }
         #search-input {
             width: 100%; padding: 10px 12px; border-radius: 8px;
@@ -26,15 +28,14 @@
         }
         #search-input:focus { border-color: #007bff; box-shadow: 0 0 0 2px rgba(0,123,255,0.1); }
         
+        /* Icone Logo */
         .logo-container {
             border-radius: 50%; padding: 3px;
             display: flex; justify-content: center; align-items: center;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.3);
         }
-        .logo-container:hover { transform: scale(1.4); z-index: 1000 !important; filter: grayscale(0%) !important; opacity: 1 !important; }
         .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
-        
         .club-scomparso { filter: grayscale(100%); opacity: 1; }
         
         /* Stile Popup */
@@ -48,18 +49,12 @@
         .centenario-box, .storici-container { margin: 10px 0; padding: 8px; border-radius: 8px; }
         .centenario-box { background: #fff9c4; border: 1px solid #fbc02d; }
         .storici-container { background: #f8f9fa; border: 1px solid #ddd; }
-        
         .box-label { font-size: 9px; font-weight: bold; display: block; margin-bottom: 5px; text-transform: uppercase; color: #666; }
         .centenario-label { color: #856404; }
         .centenario-img, .storico-img { width: 45px; height: 45px; object-fit: contain; background: white; border: 1px solid #eee; border-radius: 4px; }
-        
         .storico-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
         .storico-item { flex: 0 0 45px; text-align: center; font-size: 9px; color: #777; }
-        
-        .btn-espandi { 
-            background: none; border: none; color: #007bff; font-size: 10px; 
-            cursor: pointer; text-decoration: underline; margin-top: 5px; display: block; width: 100%;
-        }
+        .btn-espandi { background: none; border: none; color: #007bff; font-size: 10px; cursor: pointer; text-decoration: underline; margin-top: 5px; display: block; width: 100%; }
         .hidden-logos { display: none; }
 
         /* UI Elements */
@@ -67,20 +62,27 @@
         select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: #fdfdfd; cursor: pointer; font-family: inherit; }
         hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
         .flag-icon { width: 22px; border-radius: 3px; vertical-align: middle; margin-right: 6px; }
+
+        /* Bottone Localizzazione Custom */
+        .locate-button {
+            background: white; width: 34px; height: 34px; display: flex;
+            justify-content: center; align-items: center; border-radius: 4px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.4); cursor: pointer;
+        }
+        .locate-button:hover { background: #f4f4f4; }
+        .locate-button svg { width: 20px; height: 20px; fill: #444; }
     </style>
 </head>
 <body>
 
 <div id="ui-panel">
     <div id="search-container">
-        <input type="text" id="search-input" placeholder="Cerca squadra...">
+        <input type="text" id="search-input" placeholder="Cerca squadra (es: Atletico)...">
     </div>
-
-    <div id="count-box" class="stat-item">Calcolo squadre...</div>
+    <div id="count-box" class="stat-item">Caricamento squadre...</div>
     <hr>
     <label class="stat-item">Nazione:</label>
     <select id="filter-nazione"><option value="Tutti">Tutte le nazioni</option></select>
-    
     <label class="stat-item">Sport:</label>
     <select id="filter-sport">
         <option value="Tutti">Tutti gli sport</option>
@@ -90,18 +92,16 @@
         <option value="Rugby">Rugby 🏉</option>
         <option value="Pallamano">Pallamano 🤾</option>
         <option value="Pallanuoto">Pallanuoto 🤽</option>
-        <option value="Hockey su ghiaccio">Hockey su ghiaccio 🏒</option>
+        <option value="Hockey su ghiaccio">Hockey su ghiaccio  operativo 🏒</option>
         <option value="Football americano">Football americano 🏈</option>
         <option value="Baseball">Baseball ⚾</option>
     </select>
-
     <label class="stat-item">Stato Club:</label>
     <select id="filter-stato">
         <option value="Tutti">Tutti</option>
         <option value="attivo">Solo Attivi</option>
         <option value="scomparso">Solo Scomparsi</option>
     </select>
-
     <label class="stat-item">Epoca Fondazione:</label>
     <select id="filter-epoca">
         <option value="Tutti">Tutte le epoche</option>
@@ -116,6 +116,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
 <script>
     const urlFoglio = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB3hRuuuzUhGho2Wr_c0KBa8BYYMyASu6n0DrQ8q_o3GU3aw4_oC2vEvhuVbtmqR3Z3y0C5Zgh8Dji/pub?output=csv'; 
@@ -124,8 +125,15 @@
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
     
+    // Inizializzazione Cluster e Spiderfier
+    var markers = L.markerClusterGroup({ disableClusteringAtZoom: 17, spiderfyOnMaxZoom: false });
     var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 30 });
     var allMarkers = [];
+
+    // Funzione per rimuovere accenti (accent-folding)
+    const normalizeText = (str) => {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    };
 
     window.toggleLoghi = function(btn) {
         const container = btn.previousElementSibling;
@@ -143,7 +151,6 @@
         header: true,
         complete: function(results) {
             const data = results.data;
-            
             const nazioni = [...new Set(data.map(s => s.nazione))].filter(n => n).sort();
             nazioni.forEach(n => {
                 let opt = document.createElement('option');
@@ -168,14 +175,9 @@
 
                 var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: customIcon });
                 marker.dati = s;
-                
-                let flagHtml = s.codiceNazione ? `<img src="https://flagcdn.com/w40/${s.codiceNazione.toLowerCase()}.png" class="flag-icon">` : '';
+                marker.nomeNormalizzato = normalizeText(s.nome); // Pre-normalizzazione per velocità
 
-                let centenarioHtml = s.logoCentenario ? `
-                    <div class="centenario-box">
-                        <span class="box-label centenario-label">Logo Centenario</span>
-                        <img src="${s.logoCentenario}" class="centenario-img">
-                    </div>` : '';
+                let flagHtml = s.codiceNazione ? `<img src="https://flagcdn.com/w40/${s.codiceNazione.toLowerCase()}.png" class="flag-icon">` : '';
 
                 let loghiItems = [];
                 for(let i=1; i<=10; i++) {
@@ -186,18 +188,13 @@
                     }
                 }
 
-                let storiciHtml = "";
-                if(loghiItems.length > 0) {
-                    let visibili = loghiItems.slice(0, 3).join('');
-                    let extra = loghiItems.slice(3).join('');
-                    storiciHtml = `
-                        <div class="storici-container">
-                            <span class="box-label">Loghi Storici</span>
-                            <div class="storico-grid">${visibili}</div>
-                            ${extra ? `<div class="storico-grid hidden-logos" style="margin-top:8px;">${extra}</div>
-                                       <button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}
-                        </div>`;
-                }
+                let storiciHtml = loghiItems.length > 0 ? `
+                    <div class="storici-container">
+                        <span class="box-label">Loghi Storici</span>
+                        <div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
+                        ${loghiItems.length > 3 ? `<div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div>
+                        <button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}
+                    </div>` : "";
 
                 marker.descrizione = `
                     <div class="popup-card">
@@ -208,28 +205,27 @@
                             Sport: <b>${s.sport}</b>
                             ${s.stato === 'scomparso' ? '<p style="color:#d32f2f; font-weight:900; margin:5px 0;">CLUB NON PIÙ ATTIVO</p>' : ''}
                         </div>
-                        ${centenarioHtml}
+                        ${s.logoCentenario ? `<div class="centenario-box"><span class="box-label centenario-label">Logo Centenario</span><img src="${s.logoCentenario}" class="centenario-img"></div>` : ''}
                         ${storiciHtml}
                     </div>`;
 
-                marker.addTo(map);
                 oms.addMarker(marker);
                 allMarkers.push(marker);
             });
 
             function applicaFiltri() {
-                const searchVal = document.getElementById('search-input').value.toLowerCase();
+                const searchVal = normalizeText(document.getElementById('search-input').value);
                 const naz = document.getElementById('filter-nazione').value;
                 const stat = document.getElementById('filter-stato').value;
                 const epoc = document.getElementById('filter-epoca').value;
                 const spor = document.getElementById('filter-sport').value;
-                let vis = 0;
+                
+                markers.clearLayers();
+                let visibili = [];
 
                 allMarkers.forEach(m => {
                     let ok = true;
-                    // Filtro Ricerca Testuale
-                    if (searchVal && !m.dati.nome.toLowerCase().includes(searchVal)) ok = false;
-                    // Filtri Dropdown
+                    if (searchVal && !m.nomeNormalizzato.includes(searchVal)) ok = false;
                     if (naz !== "Tutti" && m.dati.nazione !== naz) ok = false;
                     if (stat !== "Tutti" && m.dati.stato !== stat) ok = false;
                     if (spor !== "Tutti" && m.dati.sport !== spor) ok = false;
@@ -239,21 +235,45 @@
                     if (epoc === "Novecento" && (anno < 1900 || anno >= 2000)) ok = false;
                     if (epoc === "Duemila" && anno < 2000) ok = false;
 
-                    if (ok) { map.addLayer(m); vis++; } else { map.removeLayer(m); }
+                    if (ok) {
+                        markers.addLayer(m);
+                        visibili.push(m);
+                    }
                 });
-                document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${vis}</b>`;
+
+                map.addLayer(markers);
+                document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibili.length}</b>`;
+
+                // Smart Focus: zoom se rimangono pochi risultati
+                if (visibili.length > 0 && visibili.length <= 3 && (searchVal || naz !== "Tutti")) {
+                    const group = new L.featureGroup(visibili);
+                    map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 14 });
+                }
             }
 
-            // Eventi per filtri e ricerca
             document.getElementById('search-input').oninput = applicaFiltri;
             document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
             applicaFiltri();
         }
     });
 
+    // Geolocalizzazione
+    const locateControl = L.Control.extend({
+        options: { position: 'bottomright' },
+        onAdd: function() {
+            const container = L.DomUtil.create('div', 'locate-button');
+            container.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>`;
+            container.onclick = () => {
+                map.locate({setView: true, maxZoom: 12});
+            };
+            return container;
+        }
+    });
+    map.addControl(new locateControl());
+
     var popup = L.popup({ className: 'custom-popup' });
-    oms.addListener('click', m => {
-        popup.setContent(m.descrizione).setLatLng(m.getLatLng()).openOn(map);
+    markers.on('click', function(a) {
+        popup.setContent(a.layer.descrizione).setLatLng(a.layer.getLatLng()).openOn(map);
     });
 </script>
 </body>
