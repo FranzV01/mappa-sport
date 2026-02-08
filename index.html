@@ -11,97 +11,92 @@
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         #map { height: 100vh; width: 100%; background: #aad3df; }
         
+        /* Loading Overlay */
+        #loader {
+            position: fixed; top:0; left:0; width:100%; height:100%; background:white;
+            display:flex; flex-direction:column; justify-content:center; align-items:center;
+            z-index: 9999; transition: opacity 0.5s;
+        }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         /* Pannello UI */
         #ui-panel {
             position: absolute; top: 15px; left: 15px; z-index: 1000;
             background: rgba(255, 255, 255, 0.95); padding: 18px; border-radius: 15px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.15); width: 260px;
-            border: 1px solid rgba(255,255,255,0.3);
-            max-height: 90vh; overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.3); max-height: 90vh; overflow-y: auto;
         }
         
-        #search-container { margin-bottom: 15px; position: relative; display: flex; gap: 5px; }
-        #search-input {
-            flex-grow: 1; padding: 10px 12px; border-radius: 8px;
-            border: 1px solid #ddd; background: white;
-            font-family: inherit; font-size: 14px; outline: none;
-        }
+        #search-container { margin-bottom: 15px; display: flex; gap: 5px; }
+        #search-input { flex-grow: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd; outline: none; }
         
-        /* Bottoni Aggiuntivi */
         .btn-ui {
             background: #f0f0f0; border: 1px solid #ddd; border-radius: 8px;
             padding: 8px; cursor: pointer; font-size: 12px; font-weight: bold;
             transition: all 0.2s; display: flex; align-items: center; justify-content: center;
         }
-        .btn-ui:hover { background: #e0e0e0; }
-        .btn-reset { background: #fee; border-color: #fcc; color: #c33; }
-        
-        /* Effetto Hover sui Loghi */
+        .btn-reset { background: #fee; color: #c33; border-color: #fcc; }
+        .btn-wiki { background: #e7f3ff; color: #007bff; border: 1px solid #b2d7ff; margin-top: 10px; width: 100%; text-decoration: none; display: inline-flex; }
+
+        /* Icone e Cluster */
         .custom-div-icon { background: none; border: none; }
         .logo-container {
-            border-radius: 50%; padding: 3px;
-            display: flex; justify-content: center; align-items: center;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            border-radius: 50%; padding: 3px; display: flex; justify-content: center; align-items: center;
+            transition: all 0.3s; cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.3);
             width: 44px; height: 44px;
         }
-        .logo-container:hover { transform: scale(1.4); z-index: 9999 !important; filter: grayscale(0%) !important; opacity: 1 !important; }
+        .logo-container:hover { transform: scale(1.3); z-index: 1000 !important; }
         .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
         .club-scomparso { filter: grayscale(100%); opacity: 0.8; }
         
-        /* Stile Popup */
-        .custom-popup .leaflet-popup-content-wrapper { border-radius: 12px; padding: 5px; }
-        .popup-card { text-align: center; font-family: 'Segoe UI', sans-serif; width: 220px; }
-        .popup-header { border-bottom: 2px solid #eee; margin-bottom: 10px; padding-bottom: 8px; }
-        .popup-title { margin: 5px 0; color: #222; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; }
-        .popup-info { font-size: 13px; color: #555; line-height: 1.5; }
-        
-        .centenario-box, .storici-container { margin: 10px 0; padding: 8px; border-radius: 8px; }
-        .centenario-box { background: #fff9c4; border: 1px solid #fbc02d; }
-        .storici-container { background: #f8f9fa; border: 1px solid #ddd; }
-        .box-label { font-size: 9px; font-weight: bold; display: block; margin-bottom: 5px; text-transform: uppercase; color: #666; }
-        .centenario-img, .storico-img { width: 45px; height: 45px; object-fit: contain; background: white; border: 1px solid #eee; border-radius: 4px; }
-        .storico-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-        .storico-item { flex: 0 0 45px; text-align: center; font-size: 9px; color: #777; }
-        .btn-espandi { background: none; border: none; color: #007bff; font-size: 10px; cursor: pointer; text-decoration: underline; margin-top: 5px; display: block; width: 100%; }
-        .hidden-logos { display: none; }
+        /* Popup */
+        .custom-popup .leaflet-popup-content-wrapper { border-radius: 12px; }
+        .popup-card { text-align: center; width: 220px; }
+        .popup-title { margin: 5px 0; font-size: 1.1em; text-transform: uppercase; }
+        .popup-info { font-size: 13px; color: #555; }
+        .centenario-box { background: #fff9c4; padding: 8px; border-radius: 8px; margin-top: 10px; border: 1px solid #fbc02d; }
+        .centenario-img { width: 45px; height: 45px; object-fit: contain; }
 
-        .stat-item { font-size: 13px; font-weight: bold; margin: 8px 0; color: #444; }
-        select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: #fdfdfd; cursor: pointer; font-family: inherit; }
+        .stat-item { font-size: 13px; font-weight: bold; margin: 8px 0; color: #444; display: block; }
+        select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 10px; }
         hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
-        .flag-icon { width: 22px; border-radius: 3px; vertical-align: middle; margin-right: 6px; border: 1px solid #eee; }
+        .flag-icon { width: 22px; vertical-align: middle; margin-right: 6px; }
 
-        /* Controlli Mappa */
-        .custom-ctrl { background: white; border-radius: 4px; box-shadow: 0 1px 5px rgba(0,0,0,0.4); cursor: pointer; margin-bottom: 10px; display: flex; flex-direction: column; }
-        .ctrl-btn { width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-bottom: 1px solid #eee; }
-        .ctrl-btn:last-child { border-bottom: none; }
-        .ctrl-btn:hover { background: #f4f4f4; }
-        .ctrl-btn svg { width: 20px; height: 20px; fill: #444; }
+        .custom-ctrl { background: white; border-radius: 4px; box-shadow: 0 1px 5px rgba(0,0,0,0.4); cursor: pointer; }
+        .ctrl-btn { width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
 
+<div id="loader">
+    <div class="spinner"></div>
+    <p>Caricamento Database...</p>
+</div>
+
 <div id="ui-panel">
     <div id="search-container">
         <input type="text" id="search-input" placeholder="Cerca (premi '/' per focus)...">
-        <button class="btn-ui btn-reset" onclick="resetFiltri()" title="Resetta filtri">✕</button>
+        <button class="btn-ui btn-reset" onclick="resetFiltri()">✕</button>
     </div>
     
     <button class="btn-ui" style="width:100%; margin-bottom:10px;" onclick="clubCasuale()">🎲 Club Casuale</button>
     
-    <div id="count-box" class="stat-item">Caricamento...</div>
+    <div id="count-box" class="stat-item">Pronto</div>
     <hr>
     
-    <label class="stat-item">Mappa:</label>
+    <label class="stat-item">Visualizzazione:</label>
     <select id="map-style" onchange="changeMapStyle(this.value)">
         <option value="chiara">Mappa Chiara</option>
         <option value="satellite">Satellite</option>
         <option value="oscura">Dark Mode</option>
+        <option value="heatmap">Mappa di Calore (Heatmap)</option>
     </select>
     
     <hr>
     <label class="stat-item">Nazione:</label>
     <select id="filter-nazione"><option value="Tutti">Tutte le nazioni</option></select>
+    
     <label class="stat-item">Sport:</label>
     <select id="filter-sport">
         <option value="Tutti">Tutti</option>
@@ -110,20 +105,17 @@
         <option value="Pallavolo">Pallavolo 🏐</option>
         <option value="Rugby">Rugby 🏉</option>
         <option value="Pallamano">Pallamano 🤾</option>
+        <option value="Pallanuoto">Pallanuoto 🤽</option>
         <option value="Hockey su ghiaccio">Hockey su ghiaccio 🏒</option>
+        <option value="Football americano">Football americano 🏈</option>
+        <option value="Baseball">Baseball ⚾</option>
     </select>
+
     <label class="stat-item">Stato Club:</label>
     <select id="filter-stato">
         <option value="Tutti">Tutti</option>
         <option value="attivo">Solo Attivi</option>
         <option value="scomparso">Solo Scomparsi</option>
-    </select>
-    <label class="stat-item">Epoca:</label>
-    <select id="filter-epoca">
-        <option value="Tutti">Tutte</option>
-        <option value="Antiche">Prima del 1900</option>
-        <option value="Novecento">1900 - 1999</option>
-        <option value="Duemila">Dal 2000 in poi</option>
     </select>
 </div>
 
@@ -133,31 +125,74 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
 
 <script>
     const urlFoglio = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB3hRuuuzUhGho2Wr_c0KBa8BYYMyASu6n0DrQ8q_o3GU3aw4_oC2vEvhuVbtmqR3Z3y0C5Zgh8Dji/pub?output=csv'; 
 
-    // Layer Mappe
     const layers = {
         chiara: L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'),
         satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'),
         oscura: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png')
     };
 
-    var map = L.map('map', { zoomControl: false, layers: [layers.chiara] }).setView([45, 10], 5);
+    var map = L.map('map', { 
+        zoomControl: false, 
+        layers: [layers.chiara],
+        dragging: !L.Browser.mobile,
+        tap: !L.Browser.mobile
+    }).setView([45, 10], 5);
+
+    // Gesture handling per mobile
+    if (L.Browser.mobile) {
+        map.dragging.disable();
+        map.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) map.dragging.enable();
+        });
+        map.addEventListener('touchend', function(e) {
+            map.dragging.disable();
+        });
+    }
+
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     
-    var markers = L.markerClusterGroup({ disableClusteringAtZoom: 17, showCoverageOnHover: false });
+    var markers = L.markerClusterGroup({ 
+        disableClusteringAtZoom: 17, 
+        showCoverageOnHover: false,
+        iconCreateFunction: function(cluster) {
+            return new L.DivIcon({ 
+                html: '<div><span>' + cluster.getChildCount() + '</span></div>', 
+                className: 'marker-cluster marker-cluster-small', 
+                iconSize: new L.Point(40, 40) 
+            });
+        }
+    });
+
+    var heatLayer = L.heatLayer([], {radius: 25, blur: 15, max: 1.0});
     var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 30 });
     var allMarkers = [];
     var visibiliAttualmente = [];
+    var popup = L.popup({ className: 'custom-popup', offset: [0, -10] });
 
-    // Funzioni Core
     const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
 
     function changeMapStyle(style) {
         Object.values(layers).forEach(l => map.removeLayer(l));
-        layers[style].addTo(map);
+        map.removeLayer(markers);
+        map.removeLayer(heatLayer);
+
+        if (style === 'heatmap') {
+            updateHeatmap();
+            heatLayer.addTo(map);
+        } else {
+            layers[style].addTo(map);
+            map.addLayer(markers);
+        }
+    }
+
+    function updateHeatmap() {
+        const points = visibiliAttualmente.map(m => [m.getLatLng().lat, m.getLatLng().lng, 0.5]);
+        heatLayer.setLatLngs(points);
     }
 
     function resetFiltri() {
@@ -166,16 +201,19 @@
         applicaFiltri();
     }
 
+    function focalizzaClub(marker) {
+        map.flyTo(marker.getLatLng(), 16, { animate: true, duration: 1 });
+        map.once('moveend', () => {
+            popup.setContent(marker.descrizione).setLatLng(marker.getLatLng()).openOn(map);
+        });
+    }
+
     function clubCasuale() {
         if (visibiliAttualmente.length === 0) return;
         const randomMarker = visibiliAttualmente[Math.floor(Math.random() * visibiliAttualmente.length)];
-        map.setView(randomMarker.getLatLng(), 15);
-        setTimeout(() => {
-            popup.setContent(randomMarker.descrizione).setLatLng(randomMarker.getLatLng()).openOn(map);
-        }, 500);
+        focalizzaClub(randomMarker);
     }
 
-    // Keyboard Shortcut
     window.addEventListener('keydown', (e) => {
         if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
             e.preventDefault();
@@ -183,20 +221,11 @@
         }
     });
 
-    window.toggleLoghi = function(btn) {
-        const container = btn.previousElementSibling;
-        const isHidden = container.style.display !== "flex";
-        container.style.display = isHidden ? "flex" : "none";
-        btn.innerText = isHidden ? "comprimi ▲" : "mostra altri ▼";
-    };
-
     Papa.parse(urlFoglio, {
         download: true,
         header: true,
         complete: function(results) {
             const data = results.data;
-            
-            // Popolamento Nazioni
             const nazioni = [...new Set(data.map(s => s.nazione))].filter(n => n).sort();
             nazioni.forEach(n => {
                 let opt = document.createElement('option');
@@ -206,40 +235,33 @@
 
             data.forEach(s => {
                 if(!s.lat || !s.lng) return;
-
                 let coloriArray = s.colori ? s.colori.split(',') : ['#333'];
                 let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
                 
-                var customIcon = L.divIcon({
-                    className: 'custom-div-icon',
-                    html: `<div class="logo-container ${s.stato==='scomparso'?'club-scomparso':''}" style="background: ${borderStyle};">
-                             <img src="${s.logoAttuale}" class="logo-img-inner">
-                           </div>`,
-                    iconSize: [44, 44]
+                var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
+                    icon: L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div class="logo-container ${s.stato==='scomparso'?'club-scomparso':''}" style="background: ${borderStyle};">
+                                 <img src="${s.logoAttuale}" class="logo-img-inner">
+                               </div>`,
+                        iconSize: [44, 44], iconAnchor: [22, 22]
+                    })
                 });
 
-                var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: customIcon });
                 marker.dati = s;
                 marker.nomeNormalizzato = normalizeText(s.nome);
-
-                let flagHtml = s.codiceNazione ? `<img src="https://flagcdn.com/w40/${s.codiceNazione.toLowerCase()}.png" class="flag-icon">` : '';
-                let loghiItems = [];
-                for(let i=1; i<=10; i++) {
-                    let url = s[`logo_storia_${i}_url`];
-                    if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
-                }
+                
+                const wikiUrl = `https://it.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(s.nome)}`;
 
                 marker.descrizione = `
                     <div class="popup-card">
-                        <div class="popup-header"><h2 class="popup-title">${s.nome}</h2></div>
+                        <div class="popup-header"><h3 class="popup-title">${s.nome}</h3></div>
                         <div class="popup-info">
-                            ${flagHtml} <b>${s.nazione}</b><br>
-                            Fondazione: <b>${s.fondazione}</b> | Sport: <b>${s.sport}</b>
-                            ${s.stato === 'scomparso' ? '<p style="color:#d32f2f; font-weight:bold; margin:5px 0;">SCOMPARSO</p>' : ''}
+                            <b>${s.nazione}</b> | Fondazione: ${s.fondazione}<br>
+                            Sport: ${s.sport}
                         </div>
-                        ${s.logoCentenario ? `<div class="centenario-box"><span class="box-label">Logo Centenario</span><img src="${s.logoCentenario}" class="centenario-img"></div>` : ''}
-                        ${loghiItems.length > 0 ? `<div class="storici-container"><span class="box-label">Storia</span><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
-                        ${loghiItems.length > 3 ? `<div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div><button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
+                        ${s.logoCentenario ? `<div class="centenario-box"><img src="${s.logoCentenario}" class="centenario-img"></div>` : ''}
+                        <a href="${wikiUrl}" target="_blank" class="btn-ui btn-wiki">📖 Wikipedia</a>
                     </div>`;
 
                 oms.addMarker(marker);
@@ -249,51 +271,51 @@
             window.applicaFiltri = function() {
                 const sVal = normalizeText(document.getElementById('search-input').value);
                 const nVal = document.getElementById('filter-nazione').value;
-                const stVal = document.getElementById('filter-stato').value;
                 const spVal = document.getElementById('filter-sport').value;
-                const eVal = document.getElementById('filter-epoca').value;
-                
+                const stVal = document.getElementById('filter-stato').value;
+
                 markers.clearLayers();
                 visibiliAttualmente = allMarkers.filter(m => {
-                    let ok = true;
-                    if (sVal && !m.nomeNormalizzato.includes(sVal)) ok = false;
-                    if (nVal !== "Tutti" && m.dati.nazione !== nVal) ok = false;
-                    if (stVal !== "Tutti" && m.dati.stato !== stVal) ok = false;
-                    if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
-                    
-                    const anno = parseInt(m.dati.fondazione);
-                    if (eVal === "Antiche" && anno >= 1900) ok = false;
-                    if (eVal === "Novecento" && (anno < 1900 || anno >= 2000)) ok = false;
-                    if (eVal === "Duemila" && anno < 2000) ok = false;
-                    return ok;
+                    if (sVal && !m.nomeNormalizzato.includes(sVal)) return false;
+                    if (nVal !== "Tutti" && m.dati.nazione !== nVal) return false;
+                    if (spVal !== "Tutti" && m.dati.sport !== spVal) return false;
+                    if (stVal !== "Tutti" && m.dati.stato !== stVal) return false;
+                    return true;
                 });
 
                 visibiliAttualmente.forEach(m => markers.addLayer(m));
-                map.addLayer(markers);
-                document.getElementById('count-box').innerHTML = `Club trovati: <b>${visibiliAttualmente.length}</b>`;
+                if (document.getElementById('map-style').value === 'heatmap') updateHeatmap();
+                
+                document.getElementById('count-box').innerHTML = `Club: <b>${visibiliAttualmente.length}</b>`;
+                
+                // Se c'è un solo risultato esatto dalla ricerca, focalizza
+                if (sVal && visibiliAttualmente.length === 1) {
+                    focalizzaClub(visibiliAttualmente[0]);
+                }
             }
 
             document.getElementById('search-input').oninput = applicaFiltri;
             document.querySelectorAll('select:not(#map-style)').forEach(sel => sel.onchange = applicaFiltri);
+            
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
             applicaFiltri();
         }
     });
 
-    // Controllo Posizione Custom
     var CustomControls = L.Control.extend({
         options: { position: 'bottomright' },
         onAdd: function (map) {
             var container = L.DomUtil.create('div', 'custom-ctrl');
-            container.innerHTML = `
-                <div class="ctrl-btn" title="Trovami" onclick="map.locate({setView: true, maxZoom: 13})"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg></div>
-            `;
+            container.innerHTML = `<div class="ctrl-btn" title="Trovami" onclick="map.locate({setView: true, maxZoom: 13})">📍</div>`;
             return container;
         }
     });
     map.addControl(new CustomControls());
 
-    var popup = L.popup({ className: 'custom-popup' });
-    markers.on('click', a => popup.setContent(a.layer.descrizione).setLatLng(a.layer.getLatLng()).openOn(map));
+    markers.on('click', a => {
+        popup.setContent(a.layer.descrizione).setLatLng(a.layer.getLatLng()).openOn(map);
+    });
 </script>
 </body>
 </html>
