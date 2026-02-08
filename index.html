@@ -8,7 +8,7 @@
         body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         #map { height: 100vh; width: 100%; background: #aad3df; }
         
-        /* Pannello UI Migliorato */
+        /* Pannello UI */
         #ui-panel {
             position: absolute; top: 15px; left: 15px; z-index: 1000;
             background: rgba(255, 255, 255, 0.95); padding: 18px; border-radius: 15px;
@@ -16,7 +16,6 @@
             border: 1px solid rgba(255,255,255,0.3);
         }
         
-        /* Icone Logo sulla Mappa */
         .logo-container {
             border-radius: 50%; padding: 3px;
             display: flex; justify-content: center; align-items: center;
@@ -25,42 +24,55 @@
         }
         .logo-container:hover { transform: scale(1.4); z-index: 1000 !important; filter: grayscale(0%) !important; opacity: 1 !important; }
         .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
-        
-        /* Scomparsi: Solo BN, no trasparenza */
         .club-scomparso { filter: grayscale(100%); opacity: 1; }
         
-        /* Stile Popup Migliorato */
-        .custom-popup .leaflet-popup-content-wrapper { border-radius: 12px; padding: 5px; }
-        .popup-card { text-align: center; font-family: 'Segoe UI', sans-serif; }
-        .popup-header { border-bottom: 2px solid #eee; margin-bottom: 10px; padding-bottom: 8px; }
-        .popup-title { margin: 5px 0; color: #222; font-size: 1.4em; text-transform: uppercase; letter-spacing: 1px; }
-        .popup-info { font-size: 13px; color: #555; line-height: 1.5; }
-        .centenario-box { margin: 10px 0; padding: 8px; background: #fff9c4; border: 1px solid #fbc02d; border-radius: 8px; }
-        .centenario-img { width: 60px; height: 60px; object-fit: contain; }
+        /* POPUP STYLE */
+        .custom-popup .leaflet-popup-content-wrapper { border-radius: 12px; padding: 2px; }
+        .popup-card { text-align: center; width: 210px; padding: 5px; }
+        .popup-header { border-bottom: 1px solid #eee; margin-bottom: 8px; padding-bottom: 5px; }
         
-        /* Loghi Storici */
-        .storico-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-top: 10px; }
-        .storico-item { text-align: center; font-size: 10px; color: #666; }
-        .storico-img { width: 45px; height: 45px; object-fit: contain; border-radius: 4px; background: white; border: 1px solid #ddd; margin-bottom: 4px; }
+        /* Nome squadra più piccolo */
+        .popup-title { margin: 2px 0; color: #222; font-size: 1.15em; text-transform: uppercase; font-weight: 800; }
+        .popup-info { font-size: 12px; color: #555; line-height: 1.4; }
+
+        /* Box Uniformi per Centenario e Storici */
+        .section-label { color: #888; font-weight: bold; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
         
-        /* UI Elements */
+        .centenario-box { margin: 8px 0; padding: 8px; background: #fff9c4; border: 1px solid #fbc02d; border-radius: 8px; }
+        .item-img { width: 45px; height: 45px; object-fit: contain; background: white; border-radius: 4px; display: block; margin: 0 auto 3px; }
+
+        /* Griglia Loghi Storici Libera */
+        .storico-section { margin-top: 10px; }
+        .storico-grid { 
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; 
+            padding: 5px 0; transition: max-height 0.3s ease-out; overflow: hidden;
+        }
+        .storico-grid.collapsed { max-height: 75px; } /* Altezza per una riga circa */
+        
+        .storico-item { width: 55px; text-align: center; font-size: 9px; color: #444; flex-shrink: 0; }
+        
+        /* Bottone Espandi */
+        .btn-expand { 
+            background: none; border: none; color: #007bff; font-size: 10px; 
+            cursor: pointer; font-weight: bold; margin-top: 5px; padding: 2px;
+        }
+
         .stat-item { font-size: 13px; font-weight: bold; margin: 8px 0; color: #444; }
-        select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: #fdfdfd; cursor: pointer; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
-        .flag-icon { width: 22px; border-radius: 3px; vertical-align: middle; margin-right: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; background: #fdfdfd; }
+        .flag-icon { width: 18px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
     </style>
 </head>
 <body>
 
 <div id="ui-panel">
-    <div id="count-box" class="stat-item">Calcolo squadre...</div>
+    <div id="count-box" class="stat-item">Calcolo...</div>
     <hr>
     <label class="stat-item">Nazione:</label>
-    <select id="filter-nazione"><option value="Tutti">Tutte le nazioni</option></select>
+    <select id="filter-nazione"><option value="Tutti">Tutte</option></select>
     
     <label class="stat-item">Sport:</label>
     <select id="filter-sport">
-        <option value="Tutti">Tutti gli sport</option>
+        <option value="Tutti">Tutti</option>
         <option value="Calcio">Calcio ⚽</option>
         <option value="Pallacanestro">Pallacanestro 🏀</option>
         <option value="Pallavolo">Pallavolo 🏐</option>
@@ -71,22 +83,7 @@
         <option value="Football americano">Football americano 🏈</option>
         <option value="Baseball">Baseball ⚾</option>
     </select>
-
-    <label class="stat-item">Stato Club:</label>
-    <select id="filter-stato">
-        <option value="Tutti">Tutti</option>
-        <option value="attivo">Solo Attivi</option>
-        <option value="scomparso">Solo Scomparsi</option>
-    </select>
-
-    <label class="stat-item">Epoca Fondazione:</label>
-    <select id="filter-epoca">
-        <option value="Tutti">Tutte le epoche</option>
-        <option value="Antiche">Prima del 1900</option>
-        <option value="Novecento">1900 - 1999</option>
-        <option value="Duemila">Dal 2000 in poi</option>
-    </select>
-</div>
+    </div>
 
 <div id="map"></div>
 
@@ -99,18 +96,17 @@
 
     var map = L.map('map', { zoomControl: false }).setView([45, 10], 5);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
-    
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
     
     var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 30 });
     var allMarkers = [];
 
     Papa.parse(urlFoglio, {
-        download: true,
-        header: true,
+        download: true, header: true,
         complete: function(results) {
             const data = results.data;
             
+            // Popolamento filtri... (omesso per brevità, resta uguale a prima)
             const nazioni = [...new Set(data.map(s => s.nazione))].filter(n => n).sort();
             nazioni.forEach(n => {
                 let opt = document.createElement('option');
@@ -138,39 +134,50 @@
                 
                 let flagHtml = s.codiceNazione ? `<img src="https://flagcdn.com/w40/${s.codiceNazione.toLowerCase()}.png" class="flag-icon">` : '';
 
-                // Logo Centenario
+                // HTML Centenario
                 let centenarioHtml = s.logoCentenario ? `
                     <div class="centenario-box">
-                        <small style="color:#856404; font-weight:bold; display:block; margin-bottom:5px;">LOGO CENTENARIO</small>
-                        <img src="${s.logoCentenario}" class="centenario-img">
+                        <span class="section-label">Logo Centenario</span>
+                        <img src="${s.logoCentenario}" class="item-img">
                     </div>` : '';
 
-                // Loghi Storici Semplificati
-                let storiciHtml = "";
-                for(let i=1; i<=3; i++) {
+                // Loghi Storici (scansione fino a 6 colonne)
+                let itemsStorici = "";
+                let count = 0;
+                for(let i=1; i<=6; i++) {
                     let url = s[`logo_storia_${i}_url`];
                     let date = s[`logo_storia_${i}_date`];
                     if(url && url.trim() !== "") {
-                        storiciHtml += `<div class="storico-item">
-                            <img src="${url}" class="storico-img">
+                        itemsStorici += `
+                        <div class="storico-item">
+                            <img src="${url}" class="item-img">
                             <b>${date || ''}</b>
                         </div>`;
+                        count++;
                     }
                 }
 
+                let btnExpand = count > 3 ? `<button class="btn-expand" onclick="this.previousElementSibling.classList.toggle('collapsed'); this.innerText = this.innerText === 'Mostra altri' ? 'Mostra meno' : 'Mostra altri'">Mostra altri</button>` : '';
+                
+                let sezioneStorica = itemsStorici !== "" ? `
+                    <div class="storico-section">
+                        <span class="section-label">Loghi Storici</span>
+                        <div class="storico-grid ${count > 3 ? 'collapsed' : ''}">
+                            ${itemsStorici}
+                        </div>
+                        ${btnExpand}
+                    </div>` : '';
+
                 marker.descrizione = `
                     <div class="popup-card">
-                        <div class="popup-header">
-                            <h2 class="popup-title">${s.nome}</h2>
-                        </div>
+                        <div class="popup-header"><h2 class="popup-title">${s.nome}</h2></div>
                         <div class="popup-info">
                             ${flagHtml} <b>${s.nazione}</b><br>
-                            Fondazione: <b>${s.fondazione}</b><br>
-                            Sport: <b>${s.sport}</b><br>
-                            ${s.stato === 'scomparso' ? '<p style="color:#d32f2f; font-weight:900; margin:5px 0;">CLUB NON PIÙ ATTIVO</p>' : ''}
+                            Fondazione: <b>${s.fondazione}</b> | Sport: <b>${s.sport}</b>
+                            ${s.stato === 'scomparso' ? '<p style="color:#d32f2f; font-weight:bold; margin:3px 0; font-size:10px;">CLUB NON PIÙ ATTIVO</p>' : ''}
                         </div>
                         ${centenarioHtml}
-                        ${storiciHtml !== "" ? '<div class="storico-grid">' + storiciHtml + '</div>' : ''}
+                        ${sezioneStorica}
                     </div>`;
 
                 marker.addTo(map);
@@ -178,27 +185,25 @@
                 allMarkers.push(marker);
             });
 
-            function applicaFiltri() {
+            // Funzione filtri... (resta uguale)
+            window.applicaFiltri = function() {
                 const naz = document.getElementById('filter-nazione').value;
+                const spor = document.getElementById('filter-sport').value;
                 const stat = document.getElementById('filter-stato').value;
                 const epoc = document.getElementById('filter-epoca').value;
-                const spor = document.getElementById('filter-sport').value;
                 let vis = 0;
-
                 allMarkers.forEach(m => {
                     let ok = true;
                     if (naz !== "Tutti" && m.dati.nazione !== naz) ok = false;
-                    if (stat !== "Tutti" && m.dati.stato !== stat) ok = false;
                     if (spor !== "Tutti" && m.dati.sport !== spor) ok = false;
+                    if (stat !== "Tutti" && m.dati.stato !== stat) ok = false;
                     if (epoc === "Antiche" && parseInt(m.dati.fondazione) >= 1900) ok = false;
                     if (epoc === "Novecento" && (parseInt(m.dati.fondazione) < 1900 || parseInt(m.dati.fondazione) >= 2000)) ok = false;
                     if (epoc === "Duemila" && parseInt(m.dati.fondazione) < 2000) ok = false;
-
                     if (ok) { map.addLayer(m); vis++; } else { map.removeLayer(m); }
                 });
-                document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${vis}</b>`;
+                document.getElementById('count-box').innerHTML = `Squadre: <b>${vis}</b>`;
             }
-
             document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
             applicaFiltri();
         }
