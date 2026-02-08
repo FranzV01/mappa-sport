@@ -28,15 +28,25 @@
         }
         #search-input:focus { border-color: #007bff; box-shadow: 0 0 0 2px rgba(0,123,255,0.1); }
         
-        /* Icone Logo */
+        /* Effetto Hover sui Loghi */
+        .custom-div-icon { background: none; border: none; }
         .logo-container {
             border-radius: 50%; padding: 3px;
             display: flex; justify-content: center; align-items: center;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            width: 44px; height: 44px;
         }
+        /* L'effetto ingrandimento richiesto */
+        .logo-container:hover { 
+            transform: scale(1.4); 
+            z-index: 9999 !important; 
+            filter: grayscale(0%) !important; 
+            opacity: 1 !important; 
+        }
+        
         .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
-        .club-scomparso { filter: grayscale(100%); opacity: 1; }
+        .club-scomparso { filter: grayscale(100%); opacity: 0.8; }
         
         /* Stile Popup */
         .custom-popup .leaflet-popup-content-wrapper { border-radius: 12px; padding: 5px; }
@@ -63,21 +73,22 @@
         hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
         .flag-icon { width: 22px; border-radius: 3px; vertical-align: middle; margin-right: 6px; }
 
-        /* Bottone Localizzazione Custom */
-        .locate-button {
+        /* Tasto Geolocalizzazione */
+        .locate-btn {
             background: white; width: 34px; height: 34px; display: flex;
             justify-content: center; align-items: center; border-radius: 4px;
             box-shadow: 0 1px 5px rgba(0,0,0,0.4); cursor: pointer;
+            margin-bottom: 10px;
         }
-        .locate-button:hover { background: #f4f4f4; }
-        .locate-button svg { width: 20px; height: 20px; fill: #444; }
+        .locate-btn:hover { background: #f4f4f4; }
+        .locate-btn svg { width: 20px; height: 20px; fill: #444; }
     </style>
 </head>
 <body>
 
 <div id="ui-panel">
     <div id="search-container">
-        <input type="text" id="search-input" placeholder="Cerca squadra (es: Atletico)...">
+        <input type="text" id="search-input" placeholder="Cerca squadra...">
     </div>
     <div id="count-box" class="stat-item">Caricamento squadre...</div>
     <hr>
@@ -92,7 +103,7 @@
         <option value="Rugby">Rugby 🏉</option>
         <option value="Pallamano">Pallamano 🤾</option>
         <option value="Pallanuoto">Pallanuoto 🤽</option>
-        <option value="Hockey su ghiaccio">Hockey su ghiaccio  operativo 🏒</option>
+        <option value="Hockey su ghiaccio">Hockey su ghiaccio 🏒</option>
         <option value="Football americano">Football americano 🏈</option>
         <option value="Baseball">Baseball ⚾</option>
     </select>
@@ -125,12 +136,17 @@
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
     
-    // Inizializzazione Cluster e Spiderfier
-    var markers = L.markerClusterGroup({ disableClusteringAtZoom: 17, spiderfyOnMaxZoom: false });
+    // Cluster con poligono rimosso (showCoverageOnHover: false)
+    var markers = L.markerClusterGroup({ 
+        disableClusteringAtZoom: 17, 
+        spiderfyOnMaxZoom: false,
+        showCoverageOnHover: false 
+    });
+    
     var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 30 });
     var allMarkers = [];
 
-    // Funzione per rimuovere accenti (accent-folding)
+    // Funzione Accent-folding
     const normalizeText = (str) => {
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     };
@@ -167,7 +183,7 @@
 
                 var customIcon = L.divIcon({
                     className: 'custom-div-icon',
-                    html: `<div class="logo-container ${classeScomparso}" style="background: ${borderStyle}; width:44px; height:44px;">
+                    html: `<div class="logo-container ${classeScomparso}" style="background: ${borderStyle};">
                              <img src="${s.logoAttuale}" class="logo-img-inner">
                            </div>`,
                     iconSize: [44, 44], iconAnchor: [22, 22]
@@ -175,9 +191,7 @@
 
                 var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: customIcon });
                 marker.dati = s;
-                marker.nomeNormalizzato = normalizeText(s.nome); // Pre-normalizzazione per velocità
-
-                let flagHtml = s.codiceNazione ? `<img src="https://flagcdn.com/w40/${s.codiceNazione.toLowerCase()}.png" class="flag-icon">` : '';
+                marker.nomeNormalizzato = normalizeText(s.nome);
 
                 let loghiItems = [];
                 for(let i=1; i<=10; i++) {
@@ -188,25 +202,16 @@
                     }
                 }
 
-                let storiciHtml = loghiItems.length > 0 ? `
-                    <div class="storici-container">
-                        <span class="box-label">Loghi Storici</span>
-                        <div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
-                        ${loghiItems.length > 3 ? `<div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div>
-                        <button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}
-                    </div>` : "";
-
                 marker.descrizione = `
                     <div class="popup-card">
                         <div class="popup-header"><h2 class="popup-title">${s.nome}</h2></div>
                         <div class="popup-info">
-                            ${flagHtml} <b>${s.nazione}</b><br>
+                            <b>${s.nazione}</b><br>
                             Fondazione: <b>${s.fondazione}</b><br>
                             Sport: <b>${s.sport}</b>
-                            ${s.stato === 'scomparso' ? '<p style="color:#d32f2f; font-weight:900; margin:5px 0;">CLUB NON PIÙ ATTIVO</p>' : ''}
                         </div>
-                        ${s.logoCentenario ? `<div class="centenario-box"><span class="box-label centenario-label">Logo Centenario</span><img src="${s.logoCentenario}" class="centenario-img"></div>` : ''}
-                        ${storiciHtml}
+                        ${s.logoCentenario ? `<div class="centenario-box"><img src="${s.logoCentenario}" class="centenario-img"></div>` : ''}
+                        ${loghiItems.length > 0 ? `<div class="storici-container"><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div></div>` : ''}
                     </div>`;
 
                 oms.addMarker(marker);
@@ -217,8 +222,8 @@
                 const searchVal = normalizeText(document.getElementById('search-input').value);
                 const naz = document.getElementById('filter-nazione').value;
                 const stat = document.getElementById('filter-stato').value;
-                const epoc = document.getElementById('filter-epoca').value;
                 const spor = document.getElementById('filter-sport').value;
+                const epoc = document.getElementById('filter-epoca').value;
                 
                 markers.clearLayers();
                 let visibili = [];
@@ -244,10 +249,9 @@
                 map.addLayer(markers);
                 document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibili.length}</b>`;
 
-                // Smart Focus: zoom se rimangono pochi risultati
-                if (visibili.length > 0 && visibili.length <= 3 && (searchVal || naz !== "Tutti")) {
+                if (visibili.length > 0 && visibili.length <= 2 && searchVal) {
                     const group = new L.featureGroup(visibili);
-                    map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 14 });
+                    map.fitBounds(group.getBounds(), { padding: [100, 100], maxZoom: 15 });
                 }
             }
 
@@ -257,19 +261,20 @@
         }
     });
 
-    // Geolocalizzazione
-    const locateControl = L.Control.extend({
+    // Controllo Geolocalizzazione manuale
+    var LocateControl = L.Control.extend({
         options: { position: 'bottomright' },
-        onAdd: function() {
-            const container = L.DomUtil.create('div', 'locate-button');
-            container.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>`;
-            container.onclick = () => {
-                map.locate({setView: true, maxZoom: 12});
+        onAdd: function (map) {
+            var div = L.DomUtil.create('div', 'locate-btn');
+            div.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>';
+            div.onclick = function(e){
+                e.stopPropagation();
+                map.locate({setView: true, maxZoom: 13});
             };
-            return container;
+            return div;
         }
     });
-    map.addControl(new locateControl());
+    map.addControl(new LocateControl());
 
     var popup = L.popup({ className: 'custom-popup' });
     markers.on('click', function(a) {
