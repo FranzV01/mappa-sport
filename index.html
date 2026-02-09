@@ -38,7 +38,7 @@
         }
         .btn-reset { background: #fee; color: #c33; border-color: #fcc; }
 
-        /* Icone e Cluster Moderni */
+        /* Icone e Cluster */
         .custom-div-icon { background: none; border: none; }
         .logo-container {
             border-radius: 50%; padding: 3px; display: flex; justify-content: center; align-items: center;
@@ -48,29 +48,42 @@
         .logo-container:hover { transform: scale(1.4); z-index: 9999 !important; }
         .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
         
-        /* Stile Cluster Moderno (Azzurro) */
+        /* Cluster Azzurro Pieno (No trasparenza, No mini-logo) */
         .cluster-modern {
-            background: rgba(0, 123, 255, 0.2); border: 2px solid rgba(0, 123, 255, 0.6);
+            background: #007bff; border: 2px solid #ffffff;
             border-radius: 50%; width: 40px; height: 40px;
             display: flex; align-items: center; justify-content: center;
-            color: #0056b3; font-weight: 800; font-family: 'Segoe UI', sans-serif;
-            box-shadow: 0 0 15px rgba(0,123,255,0.2); position: relative;
-        }
-        .cluster-mini-logo {
-            width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid white;
-            position: absolute; top: -8px; right: -8px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            color: #ffffff; font-weight: bold; font-family: inherit;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
         /* Stile Popup */
         .custom-popup .leaflet-popup-content-wrapper { border-radius: 12px; padding: 5px; }
         .popup-card { text-align: center; font-family: 'Segoe UI', sans-serif; width: 220px; }
+        .popup-header { border-bottom: 2px solid #eee; margin-bottom: 10px; padding-bottom: 8px; }
+        .popup-title { margin: 5px 0; color: #222; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; }
+        .popup-info { font-size: 13px; color: #555; line-height: 1.5; }
+
+        /* Pulsante Wikipedia Leggibile */
         .btn-wiki {
-            display: inline-block; margin-top: 10px; padding: 6px 12px;
-            background: #3366cc; color: white; text-decoration: none;
-            border-radius: 6px; font-size: 11px; font-weight: bold; transition: background 0.2s;
+            display: inline-block; margin: 10px 0; padding: 6px 14px;
+            background: #ffffff; color: #3366cc; text-decoration: none;
+            border: 2px solid #3366cc; border-radius: 20px; font-size: 11px; 
+            font-weight: bold; transition: all 0.2s;
         }
-        .btn-wiki:hover { background: #2a52a3; }
+        .btn-wiki:hover { background: #3366cc; color: #ffffff; }
         
+        /* Box Loghi Storici e Centenario (Ripristinati originali) */
+        .centenario-box, .storici-container { margin: 10px 0; padding: 8px; border-radius: 8px; }
+        .centenario-box { background: #fff9c4; border: 1px solid #fbc02d; }
+        .storici-container { background: #f8f9fa; border: 1px solid #ddd; }
+        .box-label { font-size: 9px; font-weight: bold; display: block; margin-bottom: 5px; text-transform: uppercase; color: #666; }
+        .centenario-img, .storico-img { width: 45px; height: 45px; object-fit: contain; background: white; border: 1px solid #eee; border-radius: 4px; }
+        .storico-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+        .storico-item { flex: 0 0 45px; text-align: center; font-size: 9px; color: #777; }
+        .btn-espandi { background: none; border: none; color: #007bff; font-size: 10px; cursor: pointer; text-decoration: underline; margin-top: 5px; display: block; width: 100%; }
+        .hidden-logos { display: none; }
+
         .stat-item { font-size: 13px; font-weight: bold; margin: 8px 0; color: #444; }
         select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; }
         hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
@@ -90,11 +103,11 @@
 <div id="ui-panel">
     <div id="search-container">
         <input type="text" id="search-input" placeholder="Cerca squadra (premi '/')...">
-        <button class="btn-ui btn-reset" onclick="resetFiltri()" title="Resetta filtri">✕</button>
+        <button class="btn-ui btn-reset" onclick="resetFiltri()">✕</button>
     </div>
     
     <button class="btn-ui" style="width:100%; margin-bottom:10px;" onclick="clubCasuale()">🎲 Club Casuale</button>
-    <div id="count-box" class="stat-item">Inizializzazione...</div>
+    <div id="count-box" class="stat-item">Caricamento...</div>
     <hr>
     
     <label class="stat-item">Nazione:</label>
@@ -114,7 +127,7 @@
         <option value="Baseball">Baseball ⚾</option>
     </select>
 
-    <label class="stat-item">Stato:</label>
+    <label class="stat-item">Stato Club:</label>
     <select id="filter-stato">
         <option value="Tutti">Tutti</option>
         <option value="attivo">Solo Attivi</option>
@@ -140,7 +153,6 @@
 <script>
     const urlFoglio = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB3hRuuuzUhGho2Wr_c0KBa8BYYMyASu6n0DrQ8q_o3GU3aw4_oC2vEvhuVbtmqR3Z3y0C5Zgh8Dji/pub?output=csv'; 
 
-    // Gesture Handling per Mobile
     var map = L.map('map', { 
         zoomControl: false,
         dragging: !L.Browser.mobile,
@@ -155,18 +167,12 @@
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     
-    // Cluster con Nuovo Stile Moderno e Mini-Logo
     var markers = L.markerClusterGroup({ 
         disableClusteringAtZoom: 17, 
         showCoverageOnHover: false,
         iconCreateFunction: function(cluster) {
-            var childMarkers = cluster.getAllChildMarkers();
-            var firstLogo = childMarkers[0].dati.logoAttuale;
             return L.divIcon({
-                html: `<div class="cluster-modern">
-                        ${cluster.getChildCount()}
-                        <img src="${firstLogo}" class="cluster-mini-logo">
-                       </div>`,
+                html: `<div class="cluster-modern">${cluster.getChildCount()}</div>`,
                 className: 'custom-cluster-icon',
                 iconSize: L.point(40, 40)
             });
@@ -189,7 +195,6 @@
     function clubCasuale() {
         if (visibiliAttualmente.length === 0) return;
         const randomMarker = visibiliAttualmente[Math.floor(Math.random() * visibiliAttualmente.length)];
-        // Correzione centramento: flyTo centra esattamente le coordinate
         map.flyTo(randomMarker.getLatLng(), 16, { animate: true, duration: 1.5 });
         map.once('moveend', () => {
             popup.setContent(randomMarker.descrizione).setLatLng(randomMarker.getLatLng()).openOn(map);
@@ -220,7 +225,6 @@
             data.forEach((s, index) => {
                 if(!s.lat || !s.lng) return;
 
-                // Barra caricamento
                 document.getElementById('loader-progress').style.width = (index / data.length * 100) + '%';
 
                 let coloriArray = s.colori ? s.colori.split(',') : ['#333'];
@@ -245,7 +249,6 @@
                     if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
-                // Wikipedia link
                 let wikiUrl = `https://it.wikipedia.org/wiki/${encodeURIComponent(s.nome)}`;
 
                 marker.descrizione = `
@@ -255,9 +258,9 @@
                             ${flagHtml} <b>${s.nazione}</b><br>
                             Fondazione: <b>${s.fondazione}</b> | Sport: <b>${s.sport}</b>
                         </div>
-                        <a href="${wikiUrl}" target="_blank" class="btn-wiki">Wikipedia 📖</a>
+                        <a href="${wikiUrl}" target="_blank" class="btn-wiki">Vedi su Wikipedia 📖</a>
                         ${s.logoCentenario ? `<div class="centenario-box"><span class="box-label">Logo Centenario</span><img src="${s.logoCentenario}" class="centenario-img"></div>` : ''}
-                        ${loghiItems.length > 0 ? `<div class="storici-container"><span class="box-label">Storia</span><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
+                        ${loghiItems.length > 0 ? `<div class="storici-container"><span class="box-label">Loghi Storici</span><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
                         ${loghiItems.length > 3 ? `<div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div><button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
                     </div>`;
 
@@ -290,9 +293,9 @@
                 map.addLayer(markers);
                 document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibiliAttualmente.length}</b>`;
                 
-                // Focus automatico se c'è un solo risultato
                 if (sVal.length > 2 && visibiliAttualmente.length === 1) {
-                    map.flyTo(visibiliAttualmente[0].getLatLng(), 15);
+                    let target = visibiliAttualmente[0];
+                    map.flyTo(target.getLatLng(), 15);
                 }
             }
 
@@ -302,7 +305,6 @@
         }
     });
 
-    // Controllo Posizione
     var LocateControl = L.Control.extend({
         options: { position: 'bottomright' },
         onAdd: function (map) {
@@ -314,7 +316,6 @@
     });
     map.addControl(new LocateControl());
 
-    // Shortcut tastiera '/'
     window.addEventListener('keydown', (e) => {
         if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
             e.preventDefault();
