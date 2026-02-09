@@ -57,4 +57,246 @@
         }
         .logo-container:hover { transform: scale(1.4); z-index: 9999 !important; }
         .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
-        .club-scomparso { filter: grayscale(
+        .club-scomparso { filter: grayscale(100%); opacity: 0.8; }
+        
+        /* Modern Cluster con Mini-Logo */
+        .cluster-custom {
+            background: rgba(255, 255, 255, 0.9); border: 2px solid #007bff;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: #333; position: relative;
+        }
+        .cluster-mini-logo {
+            position: absolute; bottom: -5px; right: -5px;
+            width: 20px; height: 20px; border-radius: 50%; border: 1px solid white;
+            background: white; object-fit: contain;
+        }
+
+        /* Stile Popup */
+        .popup-card { text-align: center; width: 220px; }
+        .popup-header { border-bottom: 2px solid #eee; margin-bottom: 10px; padding-bottom: 8px; }
+        .popup-title { margin: 5px 0; color: #222; font-size: 1.1em; text-transform: uppercase; }
+        
+        .stat-item { font-size: 13px; font-weight: bold; margin: 8px 0; color: #444; }
+        select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
+    </style>
+</head>
+<body>
+
+<div id="loader-bar"><div id="loader-progress"></div></div>
+
+<div id="ui-panel">
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="Cerca (premi '/' per focus)...">
+        <button class="btn-ui btn-reset" onclick="resetFiltri()" title="Resetta filtri">✕</button>
+    </div>
+    
+    <button class="btn-ui" style="width:100%; margin-bottom:10px;" onclick="clubCasuale()">🎲 Club Casuale</button>
+    
+    <div id="count-box" class="stat-item">Caricamento...</div>
+    <hr>
+    
+    <label class="stat-item">Stile Mappa:</label>
+    <select id="map-style" onchange="changeMapStyle(this.value)">
+        <option value="chiara">Mappa Chiara</option>
+        <option value="satellite">Satellite 🛰️</option>
+        <option value="oscura">Dark Mode 🌙</option>
+    </select>
+    
+    <hr>
+    <label class="stat-item">Nazione:</label>
+    <select id="filter-nazione"><option value="Tutti">Tutte le nazioni</option></select>
+    <label class="stat-item">Sport:</label>
+    <select id="filter-sport">
+        <option value="Tutti">Tutti</option>
+        <option value="Calcio">Calcio ⚽</option>
+        <option value="Pallacanestro">Pallacanestro 🏀</option>
+        <option value="Pallavolo">Pallavolo 🏐</option>
+        <option value="Rugby">Rugby 🏉</option>
+        <option value="Pallamano">Pallamano 🤾</option>
+        <option value="Pallanuoto">Pallanuoto 🤽</option>
+        <option value="Hockey su ghiaccio">Hockey su ghiaccio 🏒</option>
+        <option value="Football americano">Football americano 🏈</option>
+        <option value="Baseball">Baseball ⚾</option>
+    </select>
+    <label class="stat-item">Stato Club:</label>
+    <select id="filter-stato">
+        <option value="Tutti">Tutti</option>
+        <option value="attivo">Solo Attivi</option>
+        <option value="scomparso">Solo Scomparsi</option>
+    </select>
+    <label class="stat-item">Epoca:</label>
+    <select id="filter-epoca">
+        <option value="Tutti">Tutte</option>
+        <option value="Antiche">Prima del 1900</option>
+        <option value="Novecento">1900 - 1999</option>
+        <option value="Duemila">Dal 2000 in poi</option>
+    </select>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+<script>
+    const urlFoglio = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB3hRuuuzUhGho2Wr_c0KBa8BYYMyASu6n0DrQ8q_o3GU3aw4_oC2vEvhuVbtmqR3Z3y0C5Zgh8Dji/pub?output=csv'; 
+
+    const layers = {
+        chiara: L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'),
+        satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'),
+        oscura: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png')
+    };
+
+    // Gesture Handling: Disabilita dragging con un dito su mobile (necessita due dita o tocco prolungato)
+    var map = L.map('map', { 
+        zoomControl: false, 
+        layers: [layers.chiara],
+        dragging: !L.Browser.mobile,
+        tap: !L.Browser.mobile
+    }).setView([45, 10], 5);
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    
+    // Cluster Moderno con Mini-Logo
+    var markers = L.markerClusterGroup({ 
+        disableClusteringAtZoom: 17, 
+        showCoverageOnHover: false,
+        iconCreateFunction: function(cluster) {
+            var child = cluster.getAllChildMarkers()[0];
+            return L.divIcon({
+                html: `<div class="cluster-custom">${cluster.getChildCount()}<img src="${child.dati.logoAttuale}" class="cluster-mini-logo"></div>`,
+                className: 'marker-cluster-custom',
+                iconSize: L.point(40, 40)
+            });
+        }
+    });
+
+    var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 30 });
+    var allMarkers = [];
+    var visibiliAttualmente = [];
+
+    const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
+
+    function changeMapStyle(style) {
+        Object.values(layers).forEach(l => map.removeLayer(l));
+        layers[style].addTo(map);
+    }
+
+    function resetFiltri() {
+        document.getElementById('search-input').value = '';
+        document.querySelectorAll('select:not(#map-style)').forEach(s => s.value = 'Tutti');
+        applicaFiltri();
+    }
+
+    function clubCasuale() {
+        if (visibiliAttualmente.length === 0) return;
+        const randomMarker = visibiliAttualmente[Math.floor(Math.random() * visibiliAttualmente.length)];
+        map.flyTo(randomMarker.getLatLng(), 15, { duration: 1.5 });
+        map.once('moveend', () => {
+            popup.setContent(randomMarker.descrizione).setLatLng(randomMarker.getLatLng()).openOn(map);
+        });
+    }
+
+    // Shortcut '/' per ricerca
+    window.addEventListener('keydown', (e) => {
+        if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault();
+            document.getElementById('search-input').focus();
+        }
+    });
+
+    Papa.parse(urlFoglio, {
+        download: true,
+        header: true,
+        complete: function(results) {
+            document.getElementById('loader-progress').style.width = '100%';
+            setTimeout(() => document.getElementById('loader-bar').style.display = 'none', 500);
+
+            const data = results.data;
+            const nazioni = [...new Set(data.map(s => s.nazione))].filter(n => n).sort();
+            nazioni.forEach(n => {
+                let opt = document.createElement('option');
+                opt.value = opt.innerText = n;
+                document.getElementById('filter-nazione').appendChild(opt);
+            });
+
+            data.forEach(s => {
+                if(!s.lat || !s.lng) return;
+                
+                let coloriArray = s.colori ? s.colori.split(',') : ['#333'];
+                let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
+                
+                var customIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div class="logo-container ${s.stato==='scomparso'?'club-scomparso':''}" style="background: ${borderStyle};">
+                             <img src="${s.logoAttuale}" class="logo-img-inner">
+                           </div>`,
+                    iconSize: [44, 44]
+                });
+
+                var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: customIcon });
+                marker.dati = s;
+                marker.nomeNormalizzato = normalizeText(s.nome);
+
+                // Wikipedia Integration Link
+                const wikiLink = `https://it.wikipedia.org/wiki/${encodeURIComponent(s.nome)}`;
+
+                marker.descrizione = `
+                    <div class="popup-card">
+                        <div class="popup-header"><h2 class="popup-title">${s.nome}</h2></div>
+                        <div class="popup-info">
+                            <b>${s.nazione}</b> | Fondazione: <b>${s.fondazione}</b><br>
+                            Sport: <b>${s.sport}</b>
+                        </div>
+                        <a href="${wikiLink}" target="_blank" class="btn-wiki">Integrazione Wikipedia 🌐</a>
+                    </div>`;
+
+                oms.addMarker(marker);
+                allMarkers.push(marker);
+            });
+
+            window.applicaFiltri = function() {
+                const sVal = normalizeText(document.getElementById('search-input').value);
+                const nVal = document.getElementById('filter-nazione').value;
+                const stVal = document.getElementById('filter-stato').value;
+                const spVal = document.getElementById('filter-sport').value;
+                const eVal = document.getElementById('filter-epoca').value;
+                
+                markers.clearLayers();
+                visibiliAttualmente = allMarkers.filter(m => {
+                    let ok = true;
+                    if (sVal && !m.nomeNormalizzato.includes(sVal)) ok = false;
+                    if (nVal !== "Tutti" && m.dati.nazione !== nVal) ok = false;
+                    if (stVal !== "Tutti" && m.dati.stato !== stVal) ok = false;
+                    if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
+                    const anno = parseInt(m.dati.fondazione);
+                    if (eVal === "Antiche" && anno >= 1900) ok = false;
+                    if (eVal === "Novecento" && (anno < 1900 || anno >= 2000)) ok = false;
+                    if (eVal === "Duemila" && anno < 2000) ok = false;
+                    return ok;
+                });
+
+                visibiliAttualmente.forEach(m => markers.addLayer(m));
+                map.addLayer(markers);
+                document.getElementById('count-box').innerHTML = `Club trovati: <b>${visibiliAttualmente.length}</b>`;
+
+                // Auto Focus: se la ricerca porta a 1 solo club, ci vola sopra
+                if (sVal.length > 2 && visibiliAttualmente.length === 1) {
+                    map.flyTo(visibiliAttualmente[0].getLatLng(), 15);
+                }
+            }
+
+            document.getElementById('search-input').oninput = applicaFiltri;
+            document.querySelectorAll('select:not(#map-style)').forEach(sel => sel.onchange = applicaFiltri);
+            applicaFiltri();
+        }
+    });
+
+    var popup = L.popup({ className: 'custom-popup' });
+    markers.on('click', a => popup.setContent(a.layer.descrizione).setLatLng(a.layer.getLatLng()).openOn(map));
+</script>
+</body>
+</html>
