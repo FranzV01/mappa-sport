@@ -48,7 +48,7 @@
         .logo-container:hover { transform: scale(1.4); z-index: 9999 !important; }
         .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
         
-        /* Cluster Azzurro Pieno (No trasparenza, No mini-logo) */
+        /* Cluster Azzurro Pieno */
         .cluster-modern {
             background: #007bff; border: 2px solid #ffffff;
             border-radius: 50%; width: 40px; height: 40px;
@@ -73,7 +73,7 @@
         }
         .btn-wiki:hover { background: #3366cc; color: #ffffff; }
         
-        /* Box Loghi Storici e Centenario (Ripristinati originali) */
+        /* Box Loghi Storici e Centenario */
         .centenario-box, .storici-container { margin: 10px 0; padding: 8px; border-radius: 8px; }
         .centenario-box { background: #fff9c4; border: 1px solid #fbc02d; }
         .storici-container { background: #f8f9fa; border: 1px solid #ddd; }
@@ -94,6 +94,9 @@
             justify-content: center; align-items: center; border-radius: 4px;
             box-shadow: 0 1px 5px rgba(0,0,0,0.4); cursor: pointer; margin-bottom: 10px;
         }
+
+        /* Controllo Livelli Personalizzato */
+        .leaflet-control-layers { border-radius: 10px !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; border: none !important; }
     </style>
 </head>
 <body>
@@ -122,7 +125,7 @@
         <option value="Rugby">Rugby 🏉</option>
         <option value="Pallamano">Pallamano 🤾</option>
         <option value="Pallanuoto">Pallanuoto 🤽</option>
-        <option value="Hockey su ghiaccio">Hockey su ghiaccio 🏒</option>
+        <option value="Hockey su ghiaccio">Hockey su ghiaccio  boyhood 🏒</option>
         <option value="Football americano">Football americano 🏈</option>
         <option value="Baseball">Baseball ⚾</option>
     </select>
@@ -149,22 +152,41 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
 
 <script>
     const urlFoglio = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB3hRuuuzUhGho2Wr_c0KBa8BYYMyASu6n0DrQ8q_o3GU3aw4_oC2vEvhuVbtmqR3Z3y0C5Zgh8Dji/pub?output=csv'; 
 
+    // Definizione dei Layer Mappa
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
+    var dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' });
+    var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' });
+    
+    var heatLayer = L.heatLayer([], { radius: 25, blur: 15, maxZoom: 10 });
+
     var map = L.map('map', { 
+        layers: [osm], // Mappa iniziale
         zoomControl: false,
         dragging: !L.Browser.mobile,
         tap: !L.Browser.mobile
     }).setView([45, 10], 5);
+
+    // Controllo Livelli
+    var baseMaps = {
+        "Standard": osm,
+        "Dark Mode 🌙": dark,
+        "Satellite 🛰️": satellite
+    };
+    var overlayMaps = {
+        "Mappa di Calore 🔥": heatLayer
+    };
+    L.control.layers(baseMaps, overlayMaps, { position: 'topright', collapsed: true }).addTo(map);
 
     if (L.Browser.mobile) {
         map.on('touchstart', function(e) { if (e.originalEvent.touches.length > 1) map.dragging.enable(); });
         map.on('touchend', function() { map.dragging.disable(); });
     }
 
-    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png').addTo(map);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     
     var markers = L.markerClusterGroup({ 
@@ -276,6 +298,8 @@
                 const eVal = document.getElementById('filter-epoca').value;
                 
                 markers.clearLayers();
+                let heatPoints = [];
+
                 visibiliAttualmente = allMarkers.filter(m => {
                     let ok = true;
                     if (sVal && !m.nomeNormalizzato.includes(sVal)) ok = false;
@@ -286,16 +310,18 @@
                     if (eVal === "Antiche" && anno >= 1900) ok = false;
                     if (eVal === "Novecento" && (anno < 1900 || anno >= 2000)) ok = false;
                     if (eVal === "Duemila" && anno < 2000) ok = false;
+                    
+                    if(ok) heatPoints.push([m.getLatLng().lat, m.getLatLng().lng, 0.5]);
                     return ok;
                 });
 
                 visibiliAttualmente.forEach(m => markers.addLayer(m));
+                heatLayer.setLatLngs(heatPoints);
                 map.addLayer(markers);
                 document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibiliAttualmente.length}</b>`;
                 
                 if (sVal.length > 2 && visibiliAttualmente.length === 1) {
-                    let target = visibiliAttualmente[0];
-                    map.flyTo(target.getLatLng(), 15);
+                    map.flyTo(visibiliAttualmente[0].getLatLng(), 15);
                 }
             }
 
