@@ -12,39 +12,37 @@
         #map { height: 100vh; width: 100%; background: #aad3df; }
         
         /* Barra di Caricamento */
-        #loader-bar {
+        #loader-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 4px;
-            background: #eee; z-index: 9999;
+            z-index: 9999; background: #eee;
         }
-        #loader-progress { width: 0%; height: 100%; background: #007bff; transition: width 0.3s; }
+        #loader-bar { width: 0%; height: 100%; background: #007bff; transition: width 0.3s; }
 
         /* Pannello UI */
         #ui-panel {
             position: absolute; top: 15px; left: 15px; z-index: 1000;
             background: rgba(255, 255, 255, 0.95); padding: 18px; border-radius: 15px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.15); width: 260px;
-            max-height: 90vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.3); max-height: 90vh; overflow-y: auto;
         }
         
         #search-container { margin-bottom: 15px; display: flex; gap: 5px; }
         #search-input {
-            flex-grow: 1; padding: 10px; border-radius: 8px;
-            border: 1px solid #ddd; outline: none; font-size: 14px;
+            flex-grow: 1; padding: 10px 12px; border-radius: 8px;
+            border: 1px solid #ddd; font-family: inherit; font-size: 14px; outline: none;
         }
         
-        /* Bottoni */
         .btn-ui {
             background: #f0f0f0; border: 1px solid #ddd; border-radius: 8px;
             padding: 8px; cursor: pointer; font-size: 12px; font-weight: bold;
-            transition: all 0.2s;
+            transition: all 0.2s; display: flex; align-items: center; justify-content: center;
         }
         .btn-ui:hover { background: #e0e0e0; }
         .btn-reset { background: #fee; border-color: #fcc; color: #c33; }
-        .btn-wiki {
-            display: inline-block; margin-top: 10px; padding: 6px 12px;
-            background: #3366cc; color: white; text-decoration: none;
-            border-radius: 6px; font-size: 11px; font-weight: bold;
-        }
+
+        /* Cluster Moderni Azur */
+        .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-color: rgba(0, 157, 255, 0.2); }
+        .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { background-color: rgba(0, 123, 255, 0.8); color: white; font-weight: bold; }
 
         /* Effetto Hover sui Loghi */
         .custom-div-icon { background: none; border: none; }
@@ -57,50 +55,56 @@
         }
         .logo-container:hover { transform: scale(1.4); z-index: 9999 !important; }
         .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
-        .club-scomparso { filter: grayscale(100%); opacity: 0.8; }
         
-        /* Modern Cluster con Mini-Logo */
-        .cluster-custom {
-            background: rgba(255, 255, 255, 0.9); border: 2px solid #007bff;
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: #333; position: relative;
+        /* Stile Popup e Wikipedia */
+        .custom-popup .leaflet-popup-content-wrapper { border-radius: 12px; padding: 5px; }
+        .popup-card { text-align: center; font-family: 'Segoe UI', sans-serif; width: 220px; }
+        .btn-wikipedia {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: #f8f9fa; color: #3366cc; border: 1px solid #3366cc;
+            padding: 6px 12px; border-radius: 6px; text-decoration: none;
+            font-size: 12px; font-weight: bold; margin-top: 10px; width: 100%;
         }
-        .cluster-mini-logo {
-            position: absolute; bottom: -5px; right: -5px;
-            width: 20px; height: 20px; border-radius: 50%; border: 1px solid white;
-            background: white; object-fit: contain;
-        }
+        .btn-wikipedia:hover { background: #3366cc; color: white; }
 
-        /* Stile Popup */
-        .popup-card { text-align: center; width: 220px; }
-        .popup-header { border-bottom: 2px solid #eee; margin-bottom: 10px; padding-bottom: 8px; }
-        .popup-title { margin: 5px 0; color: #222; font-size: 1.1em; text-transform: uppercase; }
-        
+        /* Box Uniformi */
+        .centenario-box, .storici-container { margin: 10px 0; padding: 8px; border-radius: 8px; }
+        .centenario-box { background: #fff9c4; border: 1px solid #fbc02d; }
+        .storici-container { background: #f8f9fa; border: 1px solid #ddd; }
+        .box-label { font-size: 9px; font-weight: bold; display: block; margin-bottom: 5px; text-transform: uppercase; color: #666; }
+        .storico-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+        .storico-img { width: 45px; height: 45px; object-fit: contain; background: white; border: 1px solid #eee; }
+
         .stat-item { font-size: 13px; font-weight: bold; margin: 8px 0; color: #444; }
-        select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; }
+        select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; }
         hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
+        .flag-icon { width: 22px; border-radius: 3px; vertical-align: middle; margin-right: 6px; }
+
+        .custom-ctrl { background: white; border-radius: 4px; box-shadow: 0 1px 5px rgba(0,0,0,0.4); cursor: pointer; margin-bottom: 10px; overflow: hidden; }
+        .ctrl-btn { width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-bottom: 1px solid #eee; }
+        .ctrl-btn:hover { background: #f4f4f4; }
+        .ctrl-btn svg { width: 18px; height: 18px; fill: #444; }
     </style>
 </head>
 <body>
 
-<div id="loader-bar"><div id="loader-progress"></div></div>
+<div id="loader-container"><div id="loader-bar"></div></div>
 
 <div id="ui-panel">
     <div id="search-container">
-        <input type="text" id="search-input" placeholder="Cerca (premi '/' per focus)...">
-        <button class="btn-ui btn-reset" onclick="resetFiltri()" title="Resetta filtri">✕</button>
+        <input type="text" id="search-input" placeholder="Cerca club (premi /)...">
+        <button class="btn-ui btn-reset" onclick="resetFiltri()" title="Resetta">✕</button>
     </div>
     
     <button class="btn-ui" style="width:100%; margin-bottom:10px;" onclick="clubCasuale()">🎲 Club Casuale</button>
-    
-    <div id="count-box" class="stat-item">Caricamento...</div>
+    <div id="count-box" class="stat-item">Inizializzazione...</div>
     <hr>
     
     <label class="stat-item">Stile Mappa:</label>
     <select id="map-style" onchange="changeMapStyle(this.value)">
-        <option value="chiara">Mappa Chiara</option>
-        <option value="satellite">Satellite 🛰️</option>
-        <option value="oscura">Dark Mode 🌙</option>
+        <option value="chiara">Standard (Chiara)</option>
+        <option value="satellite">Satellite (Reale)</option>
+        <option value="oscura">Dark Mode (Notte)</option>
     </select>
     
     <hr>
@@ -119,18 +123,10 @@
         <option value="Football americano">Football americano 🏈</option>
         <option value="Baseball">Baseball ⚾</option>
     </select>
-    <label class="stat-item">Stato Club:</label>
-    <select id="filter-stato">
-        <option value="Tutti">Tutti</option>
-        <option value="attivo">Solo Attivi</option>
-        <option value="scomparso">Solo Scomparsi</option>
-    </select>
-    <label class="stat-item">Epoca:</label>
-    <select id="filter-epoca">
-        <option value="Tutti">Tutte</option>
-        <option value="Antiche">Prima del 1900</option>
-        <option value="Novecento">1900 - 1999</option>
-        <option value="Duemila">Dal 2000 in poi</option>
+    <label class="stat-item">Visualizzazione:</label>
+    <select id="view-mode" onchange="toggleHeatmap(this.value)">
+        <option value="markers">Loghi Squadre</option>
+        <option value="heatmap">Mappa di Calore (Densità)</option>
     </select>
 </div>
 
@@ -140,69 +136,68 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
 
 <script>
     const urlFoglio = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB3hRuuuzUhGho2Wr_c0KBa8BYYMyASu6n0DrQ8q_o3GU3aw4_oC2vEvhuVbtmqR3Z3y0C5Zgh8Dji/pub?output=csv'; 
 
-    const layers = {
+    // Layer Mappe
+    const baseLayers = {
         chiara: L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'),
         satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'),
         oscura: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png')
     };
 
-    // Gesture Handling: Disabilita dragging con un dito su mobile (necessita due dita o tocco prolungato)
+    // Gesture Handling (One finger pan workaround per mobile)
     var map = L.map('map', { 
         zoomControl: false, 
-        layers: [layers.chiara],
-        dragging: !L.Browser.mobile,
-        tap: !L.Browser.mobile
+        layers: [baseLayers.chiara],
+        tap: false,
+        dragging: !L.Browser.mobile || { inertia: true }
     }).setView([45, 10], 5);
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     
-    // Cluster Moderno con Mini-Logo
-    var markers = L.markerClusterGroup({ 
-        disableClusteringAtZoom: 17, 
-        showCoverageOnHover: false,
-        iconCreateFunction: function(cluster) {
-            var child = cluster.getAllChildMarkers()[0];
-            return L.divIcon({
-                html: `<div class="cluster-custom">${cluster.getChildCount()}<img src="${child.dati.logoAttuale}" class="cluster-mini-logo"></div>`,
-                className: 'marker-cluster-custom',
-                iconSize: L.point(40, 40)
-            });
-        }
-    });
-
+    var markers = L.markerClusterGroup({ disableClusteringAtZoom: 17, showCoverageOnHover: false });
+    var heatLayer = L.heatLayer([], { radius: 25, blur: 15, maxZoom: 10 });
     var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 30 });
     var allMarkers = [];
-    var visibiliAttualmente = [];
 
     const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
 
     function changeMapStyle(style) {
-        Object.values(layers).forEach(l => map.removeLayer(l));
-        layers[style].addTo(map);
+        Object.values(baseLayers).forEach(l => map.removeLayer(l));
+        baseLayers[style].addTo(map);
     }
 
     function resetFiltri() {
         document.getElementById('search-input').value = '';
-        document.querySelectorAll('select:not(#map-style)').forEach(s => s.value = 'Tutti');
+        document.querySelectorAll('select:not(#map-style):not(#view-mode)').forEach(s => s.value = 'Tutti');
         applicaFiltri();
     }
 
     function clubCasuale() {
-        if (visibiliAttualmente.length === 0) return;
-        const randomMarker = visibiliAttualmente[Math.floor(Math.random() * visibiliAttualmente.length)];
-        map.flyTo(randomMarker.getLatLng(), 15, { duration: 1.5 });
+        if (allMarkers.length === 0) return;
+        const randomMarker = allMarkers[Math.floor(Math.random() * allMarkers.length)];
+        map.flyTo(randomMarker.getLatLng(), 16);
         map.once('moveend', () => {
             popup.setContent(randomMarker.descrizione).setLatLng(randomMarker.getLatLng()).openOn(map);
         });
     }
 
-    // Shortcut '/' per ricerca
+    function toggleHeatmap(mode) {
+        if (mode === 'heatmap') {
+            map.removeLayer(markers);
+            heatLayer.addTo(map);
+        } else {
+            map.removeLayer(heatLayer);
+            map.addLayer(markers);
+        }
+    }
+
+    // Shortcut Focus Search
     window.addEventListener('keydown', (e) => {
-        if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+        if (e.key === '/') {
             e.preventDefault();
             document.getElementById('search-input').focus();
         }
@@ -212,10 +207,10 @@
         download: true,
         header: true,
         complete: function(results) {
-            document.getElementById('loader-progress').style.width = '100%';
-            setTimeout(() => document.getElementById('loader-bar').style.display = 'none', 500);
-
             const data = results.data;
+            const loaderBar = document.getElementById('loader-bar');
+            
+            // Popolamento Nazioni
             const nazioni = [...new Set(data.map(s => s.nazione))].filter(n => n).sort();
             nazioni.forEach(n => {
                 let opt = document.createElement('option');
@@ -223,9 +218,12 @@
                 document.getElementById('filter-nazione').appendChild(opt);
             });
 
-            data.forEach(s => {
+            data.forEach((s, index) => {
                 if(!s.lat || !s.lng) return;
                 
+                // Update Loader
+                loaderBar.style.width = ((index / data.length) * 100) + "%";
+
                 let coloriArray = s.colori ? s.colori.split(',') : ['#333'];
                 let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
                 
@@ -234,16 +232,20 @@
                     html: `<div class="logo-container ${s.stato==='scomparso'?'club-scomparso':''}" style="background: ${borderStyle};">
                              <img src="${s.logoAttuale}" class="logo-img-inner">
                            </div>`,
-                    iconSize: [44, 44]
+                    iconSize: [44, 44], iconAnchor: [22, 22]
                 });
 
                 var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: customIcon });
                 marker.dati = s;
                 marker.nomeNormalizzato = normalizeText(s.nome);
 
-                // Wikipedia Integration Link
-                const wikiLink = `https://it.wikipedia.org/wiki/${encodeURIComponent(s.nome)}`;
+                let loghiItems = [];
+                for(let i=1; i<=10; i++) {
+                    let url = s[`logo_storia_${i}_url`];
+                    if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"></div>`);
+                }
 
+                // Popup con Wikipedia integrata
                 marker.descrizione = `
                     <div class="popup-card">
                         <div class="popup-header"><h2 class="popup-title">${s.nome}</h2></div>
@@ -251,7 +253,11 @@
                             <b>${s.nazione}</b> | Fondazione: <b>${s.fondazione}</b><br>
                             Sport: <b>${s.sport}</b>
                         </div>
-                        <a href="${wikiLink}" target="_blank" class="btn-wiki">Integrazione Wikipedia 🌐</a>
+                        <a href="https://it.wikipedia.org/wiki/${encodeURIComponent(s.nome)}" target="_blank" class="btn-wikipedia">
+                            WIKIPEDIA 📖
+                        </a>
+                        ${s.logoCentenario ? `<div class="centenario-box"><span class="box-label">Logo Centenario</span><img src="${s.logoCentenario}" style="width:50px"></div>` : ''}
+                        ${loghiItems.length > 0 ? `<div class="storici-container"><span class="box-label">Storia</span><div class="storico-grid">${loghiItems.slice(0,4).join('')}</div></div>` : ''}
                     </div>`;
 
                 oms.addMarker(marker);
@@ -261,41 +267,43 @@
             window.applicaFiltri = function() {
                 const sVal = normalizeText(document.getElementById('search-input').value);
                 const nVal = document.getElementById('filter-nazione').value;
-                const stVal = document.getElementById('filter-stato').value;
                 const spVal = document.getElementById('filter-sport').value;
-                const eVal = document.getElementById('filter-epoca').value;
                 
                 markers.clearLayers();
-                visibiliAttualmente = allMarkers.filter(m => {
+                let heatData = [];
+                let visibili = [];
+
+                allMarkers.forEach(m => {
                     let ok = true;
                     if (sVal && !m.nomeNormalizzato.includes(sVal)) ok = false;
                     if (nVal !== "Tutti" && m.dati.nazione !== nVal) ok = false;
-                    if (stVal !== "Tutti" && m.dati.stato !== stVal) ok = false;
                     if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
-                    const anno = parseInt(m.dati.fondazione);
-                    if (eVal === "Antiche" && anno >= 1900) ok = false;
-                    if (eVal === "Novecento" && (anno < 1900 || anno >= 2000)) ok = false;
-                    if (eVal === "Duemila" && anno < 2000) ok = false;
-                    return ok;
+
+                    if (ok) {
+                        markers.addLayer(m);
+                        visibili.push(m);
+                        heatData.push([m.getLatLng().lat, m.getLatLng().lng, 1]);
+                    }
                 });
 
-                visibiliAttualmente.forEach(m => markers.addLayer(m));
-                map.addLayer(markers);
-                document.getElementById('count-box').innerHTML = `Club trovati: <b>${visibiliAttualmente.length}</b>`;
+                heatLayer.setLatLngs(heatData);
+                document.getElementById('count-box').innerHTML = `Club trovati: <b>${visibili.length}</b>`;
 
-                // Auto Focus: se la ricerca porta a 1 solo club, ci vola sopra
-                if (sVal.length > 2 && visibiliAttualmente.length === 1) {
-                    map.flyTo(visibiliAttualmente[0].getLatLng(), 15);
+                // Auto-focus sulla ricerca
+                if (sVal.length > 2 && visibili.length > 0 && visibili.length <= 3) {
+                    const group = L.featureGroup(visibili);
+                    map.flyToBounds(group.getBounds(), { padding: [100, 100], maxZoom: 15 });
                 }
-            }
+            };
 
             document.getElementById('search-input').oninput = applicaFiltri;
-            document.querySelectorAll('select:not(#map-style)').forEach(sel => sel.onchange = applicaFiltri);
+            document.querySelectorAll('select').forEach(s => s.onchange = applicaFiltri);
             applicaFiltri();
+            document.getElementById('loader-container').style.display = 'none';
         }
     });
 
-    var popup = L.popup({ className: 'custom-popup' });
+    var popup = L.popup({ className: 'custom-popup', offset: [0, -10] });
     markers.on('click', a => popup.setContent(a.layer.descrizione).setLatLng(a.layer.getLatLng()).openOn(map));
 </script>
 </body>
