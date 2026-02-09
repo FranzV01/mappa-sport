@@ -339,3 +339,241 @@
 </script>
 </body>
 </html>
+            box-shadow: 0 1px 5px rgba(0,0,0,0.4); cursor: pointer; margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="loader"><div id="loader-progress"></div></div>
+
+<div id="ui-panel">
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="Cerca squadra...">
+        <button class="btn-ui btn-reset" onclick="resetFiltri()">✕</button>
+    </div>
+    
+    <button class="btn-ui" style="width:100%; margin-bottom:10px;" onclick="clubCasuale()">🎲 Club Casuale</button>
+    <div id="count-box" class="stat-item">Caricamento...</div>
+    <hr>
+    
+    <label class="stat-item">Nazione:</label>
+    <select id="filter-nazione"><option value="Tutti">Tutte le nazioni</option></select>
+    
+    <label class="stat-item">Sport:</label>
+    <select id="filter-sport">
+        <option value="Tutti">Tutti</option>
+        <option value="Calcio">Calcio ⚽</option>
+        <option value="Pallacanestro">Pallacanestro 🏀</option>
+        <option value="Pallavolo">Pallavolo 🏐</option>
+        <option value="Rugby">Rugby 🏉</option>
+        <option value="Pallamano">Pallamano 🤾</option>
+        <option value="Pallanuoto">Pallanuoto 🤽</option>
+        <option value="Hockey su ghiaccio">Hockey su ghiaccio 🏒</option>
+        <option value="Football americano">Football americano 🏈</option>
+        <option value="Baseball">Baseball ⚾</option>
+    </select>
+
+    <label class="stat-item">Stato Club:</label>
+    <select id="filter-stato">
+        <option value="Tutti">Tutti</option>
+        <option value="attivo">Solo Attivi</option>
+        <option value="scomparso">Solo Scomparsi</option>
+    </select>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
+
+<script>
+    const urlFoglio = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB3hRuuuzUhGho2Wr_c0KBa8BYYMyASu6n0DrQ8q_o3GU3aw4_oC2vEvhuVbtmqR3Z3y0C5Zgh8Dji/pub?output=csv'; 
+
+    var osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
+    var dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' });
+    var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' });
+    var heatLayer = L.heatLayer([], { radius: 25, blur: 15, maxZoom: 10 });
+
+    var map = L.map('map', { layers: [osm], zoomControl: false, dragging: !L.Browser.mobile, tap: !L.Browser.mobile }).setView([45, 10], 5);
+    L.control.layers({ "Standard": osm, "Dark Mode 🌙": dark, "Satellite 🛰️": satellite }, { "Heatmap 🔥": heatLayer }, { position: 'topright' }).addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    var markers = L.markerClusterGroup({ 
+        disableClusteringAtZoom: 17, 
+        iconCreateFunction: (cluster) => L.divIcon({ html: `<div class="cluster-modern">${cluster.getChildCount()}</div>`, className: 'custom-cluster-icon', iconSize: L.point(40, 40) })
+    });
+
+    var oms = new OverlappingMarkerSpiderfier(map, { keepSpiderfied: true, nearbyDistance: 30 });
+    var allMarkers = [];
+    var visibiliAttualmente = [];
+    var clubMap = {}; // Per ricerca rapida dei club per nome
+    var popup = L.popup({ className: 'custom-popup' });
+
+    const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
+
+    window.vaiAClub = function(nome) {
+        const target = clubMap[nome.trim()];
+        if(target) {
+            map.closePopup();
+            map.flyTo(target.getLatLng(), 16);
+            setTimeout(() => {
+                popup.setContent(target.descrizione).setLatLng(target.getLatLng()).openOn(map);
+            }, 1000);
+        } else {
+            alert("Club non trovato sulla mappa: " + nome);
+        }
+    };
+
+    Papa.parse(urlFoglio, {
+        download: true, header: true,
+        complete: function(results) {
+            document.getElementById('loader').style.display = 'none';
+            const data = results.data;
+            
+            const nazioni = [...new Set(data.map(s => s.nazione))].filter(n => n).sort();
+            nazioni.forEach(n => {
+                let opt = document.createElement('option');
+                opt.value = opt.innerText = n;
+                document.getElementById('filter-nazione').appendChild(opt);
+            });
+
+            // Passaggio 1: Creazione Marker e Mappatura nomi
+            data.forEach((s) => {
+                if(!s.lat || !s.lng) return;
+                let coloriArray = s.colori ? s.colori.split(',') : ['#333'];
+                let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
+                
+                var customIcon = L.divIcon({
+                    className: 'custom-div-icon',
+                    html: `<div class="logo-container ${s.stato === "scomparso" ? "club-scomparso" : ""}" style="background: ${borderStyle};">
+                             <img src="${s.logo_attuale}" class="logo-img-inner">
+                           </div>`,
+                    iconSize: [44, 44], iconAnchor: [22, 22]
+                });
+
+                var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], { icon: customIcon });
+                marker.dati = s;
+                marker.nomeNormalizzato = normalizeText(s.nome);
+                clubMap[s.nome.trim()] = marker;
+                allMarkers.push(marker);
+            });
+
+            // Passaggio 2: Generazione descrizioni (Popup)
+            allMarkers.forEach(marker => {
+                const s = marker.dati;
+                let flag = s.codice_nazione ? `<img src="https://flagcdn.com/w40/${s.codice_nazione.toLowerCase()}.png" class="flag-icon">` : '';
+                
+                // Trofei
+                let bachecaHtml = '';
+                if(s.scudetti || s.coppe_nazionali || s.coppe_internazionali) {
+                    bachecaHtml = `<div class="trophy-case">
+                        ${s.scudetti > 0 ? `<div class="trophy-item">⭐ ${s.scudetti}</div>` : ''}
+                        ${s.coppe_nazionali > 0 ? `<div class="trophy-item">🏆 ${s.coppe_nazionali}</div>` : ''}
+                        ${s.coppe_internazionali > 0 ? `<div class="trophy-item">🌍 ${s.coppe_internazionali}</div>` : ''}
+                    </div>`;
+                }
+
+                // Club Precedenti (Linkabili)
+                let precHtml = '';
+                let precList = [s.club_precedente_1, s.club_precedente_2, s.club_precedente_3].filter(p => p && p.trim() !== "");
+                if(precList.length > 0) {
+                    precHtml = `<div class="precedenti-box"><span class="box-label">Club Precedenti</span><div class="precedenti-grid">`;
+                    precList.forEach(p => {
+                        const mPrec = clubMap[p.trim()];
+                        const logoPrec = mPrec ? mPrec.dati.logo_attuale : 'https://via.placeholder.com/45?text=?';
+                        precHtml += `<div class="precedente-link" onclick="vaiAClub('${p.replace(/'/g, "\\'")}')" title="${p}">
+                                        <img src="${logoPrec}" class="storico-img"><br><b style="font-size:8px;">${p.substring(0,8)}..</b>
+                                     </div>`;
+                    });
+                    precHtml += `</div></div>`;
+                }
+
+                let loghiStorici = [];
+                for(let i=1; i<=10; i++) {
+                    if(s[`logo_storia_${i}_url`]) loghiStorici.push(`<div class="storico-item"><img src="${s[`logo_storia_${i}_url`]}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
+                }
+
+                marker.descrizione = `
+                    <div class="popup-card">
+                        <div class="popup-header"><h2 class="popup-title">${s.nome}</h2></div>
+                        <div class="popup-info">
+                            ${flag} <b>${s.nazione}</b><br>
+                            ${s.fondazione ? `Fondata: <b>${s.fondazione}</b>` : ''} 
+                            ${s.scioglimento ? ` | Sciolta: <b style="color:red">${s.scioglimento}</b>` : ''}<br>
+                            ${s.stadio_nome ? `📍 ${s.stadio_nome}` : ''}
+                        </div>
+                        ${bachecaHtml}
+                        <a href="https://it.wikipedia.org/wiki/${encodeURIComponent(s.nome)}" target="_blank" class="btn-wiki">Wikipedia 📖</a>
+                        ${precHtml}
+                        ${s.logo_centenario ? `<div class="centenario-box"><span class="box-label">Centenario</span><img src="${s.logo_centenario}" class="centenario-img"></div>` : ''}
+                        ${loghiStorici.length > 0 ? `<div class="storici-container"><span class="box-label">Storia</span><div class="storico-grid">${loghiStorici.slice(0,3).join('')}</div>
+                        ${loghiStorici.length > 3 ? `<div class="storico-grid hidden-logos">${loghiLoghi.slice(3).join('')}</div><button class="btn-espandi" onclick="window.toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
+                    </div>`;
+                
+                oms.addMarker(marker);
+            });
+
+            window.applicaFiltri = function() {
+                const sVal = normalizeText(document.getElementById('search-input').value);
+                const nVal = document.getElementById('filter-nazione').value;
+                const stVal = document.getElementById('filter-stato').value;
+                const spVal = document.getElementById('filter-sport').value;
+                
+                markers.clearLayers();
+                let hPts = [];
+                visibiliAttualmente = allMarkers.filter(m => {
+                    let ok = true;
+                    if (sVal && !m.nomeNormalizzato.includes(sVal)) ok = false;
+                    if (nVal !== "Tutti" && m.dati.nazione !== nVal) ok = false;
+                    if (stVal !== "Tutti" && m.dati.stato !== stVal) ok = false;
+                    if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
+                    if(ok) hPts.push([m.getLatLng().lat, m.getLatLng().lng, 0.5]);
+                    return ok;
+                });
+                visibiliAttualmente.forEach(m => markers.addLayer(m));
+                heatLayer.setLatLngs(hPts);
+                map.addLayer(markers);
+                document.getElementById('count-box').innerHTML = `Squadre: <b>${visibiliAttualmente.length}</b>`;
+                if (sVal.length >= 2 && visibiliAttualmente.length === 1) map.flyTo(visibiliAttualmente[0].getLatLng(), 15);
+            };
+
+            document.getElementById('search-input').oninput = applicaFiltri;
+            document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
+            applicaFiltri();
+        }
+    });
+
+    window.toggleLoghi = function(btn) {
+        const div = btn.previousElementSibling;
+        const isH = div.style.display !== "flex";
+        div.style.display = isH ? "flex" : "none";
+        btn.innerText = isH ? "comprimi ▲" : "mostra altri ▼";
+    };
+
+    function clubCasuale() {
+        if (visibiliAttualmente.length === 0) return;
+        const r = visibiliAttualmente[Math.floor(Math.random() * visibiliAttualmente.length)];
+        map.flyTo(r.getLatLng(), 16);
+        map.once('moveend', () => popup.setContent(r.descrizione).setLatLng(r.getLatLng()).openOn(map));
+    }
+
+    var LocateControl = L.Control.extend({
+        options: { position: 'bottomright' },
+        onAdd: function (map) {
+            var div = L.DomUtil.create('div', 'locate-btn');
+            div.innerHTML = '<svg viewBox="0 0 24 24" width="20"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>';
+            div.onclick = (e) => { e.stopPropagation(); map.locate({setView: true, maxZoom: 14}); };
+            return div;
+        }
+    });
+    map.addControl(new LocateControl());
+
+    markers.on('click', a => popup.setContent(a.layer.descrizione).setLatLng(a.layer.getLatLng()).openOn(map));
+</script>
+</body>
+</html>
+
