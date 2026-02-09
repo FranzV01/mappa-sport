@@ -48,9 +48,9 @@
         .logo-container:hover { transform: scale(1.4); z-index: 9999 !important; }
         .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
         
-        /* Effetto Scomparso: Grigio -> Colore su Hover */
-        .club-scomparso { filter: grayscale(100%); opacity: 0.8; }
-        .logo-container:hover.club-scomparso { filter: grayscale(0%); opacity: 1; }
+        /* Effetto Scomparso: Solo Grigio (No trasparenza) -> Colore su Hover */
+        .club-scomparso { filter: grayscale(100%); }
+        .logo-container:hover.club-scomparso { filter: grayscale(0%); }
 
         /* Cluster Azzurro Pieno */
         .cluster-modern {
@@ -259,10 +259,14 @@
                 marker.nomeNormalizzato = normalizeText(s.nome);
 
                 let flagHtml = s.codiceNazione ? `<img src="https://flagcdn.com/w40/${s.codiceNazione.toLowerCase()}.png" class="flag-icon">` : '';
+                
+                // Generazione loghi storici
                 let loghiItems = [];
                 for(let i=1; i<=10; i++) {
                     let url = s[`logo_storia_${i}_url`];
-                    if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
+                    if(url) {
+                        loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
+                    }
                 }
 
                 let wikiUrl = `https://it.wikipedia.org/wiki/${encodeURIComponent(s.nome)}`;
@@ -276,8 +280,15 @@
                         </div>
                         <a href="${wikiUrl}" target="_blank" class="btn-wiki">Vedi su Wikipedia 📖</a>
                         ${s.logoCentenario ? `<div class="centenario-box"><span class="box-label">Logo Centenario</span><img src="${s.logoCentenario}" class="centenario-img"></div>` : ''}
-                        ${loghiItems.length > 0 ? `<div class="storici-container"><span class="box-label">Loghi Storici</span><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
-                        ${loghiItems.length > 3 ? `<div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div><button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
+                        ${loghiItems.length > 0 ? `
+                            <div class="storici-container">
+                                <span class="box-label">Loghi Storici</span>
+                                <div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
+                                ${loghiItems.length > 3 ? `
+                                    <div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div>
+                                    <button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>
+                                ` : ''}
+                            </div>` : ''}
                     </div>`;
 
                 oms.addMarker(marker);
@@ -314,7 +325,6 @@
                 map.addLayer(markers);
                 document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibiliAttualmente.length}</b>`;
                 
-                // FlyTo se c'è un solo risultato trovato tramite ricerca testuale
                 if (sVal.length >= 1 && visibiliAttualmente.length === 1) {
                     map.flyTo(visibiliAttualmente[0].getLatLng(), 15, { animate: true });
                 }
