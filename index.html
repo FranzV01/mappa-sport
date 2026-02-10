@@ -31,11 +31,21 @@
         .logo-container {
             border-radius: 50%; padding: 3px; display: flex; justify-content: center; align-items: center;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            box-shadow: 0 3px 6px rgba(0,0,0,0.3); width: 44px; height: 44px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3); width: 44px; height: 44px; position: relative;
         }
         .logo-container:hover { transform: scale(1.4); z-index: 9999 !important; }
         .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
         
+        /* NUOVO: Badge Genere Femminile */
+        .gender-badge {
+            position: absolute; top: -2px; right: -2px;
+            width: 16px; height: 16px; background: #ff69b4; /* Rosa */
+            color: white; border-radius: 50%; border: 2px solid white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: bold; z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
         .club-scomparso { filter: grayscale(100%); }
         .logo-container:hover.club-scomparso { filter: grayscale(0%); }
 
@@ -47,11 +57,11 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
-        /* MODIFICA: Popup con transizione per il bordo colorato */
+        /* FIX: Bordo Popup più specifico */
         .custom-popup .leaflet-popup-content-wrapper { 
             border-radius: 12px; padding: 5px; 
-            border: 4px solid #fff; /* Default */
-            transition: border-color 0.3s ease;
+            border: 4px solid transparent; /* Placeholder */
+            box-shadow: 0 3px 14px rgba(0,0,0,0.4);
         }
         
         .popup-card { text-align: center; font-family: 'Segoe UI', sans-serif; width: 220px; }
@@ -72,7 +82,7 @@
         }
         .btn-wiki:hover { background: #3366cc; color: #ffffff; }
 
-        /* AGGIUNTA: Link Crowdsourcing */
+        /* Link Crowdsourcing */
         .btn-update {
             display: block; margin-top: 10px; font-size: 10px; color: #999; 
             text-decoration: none; border-top: 1px dotted #ccc; padding-top: 5px;
@@ -91,7 +101,6 @@
         .origin-logo:hover { transform: scale(1.2); border-color: #007bff; }
         .origin-name { font-size: 9px; margin-top: 3px; color: #555; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
-        /* Fallback bottone se manca logo precedente */
         .btn-link-club {
             display: block; background: #fff; border: 1px solid #90caf9; color: #1976d2; 
             font-size: 10px; padding: 4px; border-radius: 4px; cursor: pointer;
@@ -125,7 +134,7 @@
 
 <div id="ui-panel">
     <div id="search-container">
-        <input type="text" id="search-input" placeholder="Cerca squadra o stadio...">
+        <input type="text" id="search-input" placeholder="Cerca squadra o stadio... (premi /)">
         <button class="btn-ui btn-reset" onclick="resetFiltri()">✕</button>
     </div>
     
@@ -148,6 +157,13 @@
         <option value="Hockey su ghiaccio">Hockey su ghiaccio 🏒</option>
         <option value="Football americano">Football americano 🏈</option>
         <option value="Baseball">Baseball ⚾</option>
+    </select>
+    
+    <label class="stat-item">Genere:</label>
+    <select id="filter-genere">
+        <option value="Tutti">Tutti</option>
+        <option value="m">Maschile</option>
+        <option value="f">Femminile ♀</option>
     </select>
 
     <label class="stat-item">Stato Club:</label>
@@ -176,7 +192,6 @@
 
 <script>
     const urlFoglio = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB3hRuuuzUhGho2Wr_c0KBa8BYYMyASu6n0DrQ8q_o3GU3aw4_oC2vEvhuVbtmqR3Z3y0C5Zgh8Dji/pub?output=csv'; 
-    // Sostituisci questo link con il tuo vero Google Form se ne hai uno
     const linkCrowdsourcing = "https://docs.google.com/forms/";
 
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
@@ -205,20 +220,25 @@
 
     const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
 
-    // AGGIUNTA: Gestione bordo colorato dinamico
+    // AGGIUNTA: Scorciatoia tastiera "/"
+    document.addEventListener('keydown', function(e) {
+        if (e.key === '/' && document.activeElement !== document.getElementById('search-input')) {
+            e.preventDefault();
+            document.getElementById('search-input').focus();
+        }
+    });
+
+    // FIX: Bordo colorato potenziato
     map.on('popupopen', function(e) {
         var marker = e.popup._source;
         if (marker && marker.dati && marker.dati.colori) {
             let cols = marker.dati.colori.split(',');
-            // Prende il wrapper del popup appena aperto
             let wrapper = e.popup.getElement().querySelector('.leaflet-popup-content-wrapper');
-            // Applica il primo colore trovato come bordo
-            wrapper.style.borderColor = cols[0];
-            // Se vuoi resettare lo stile quando si chiude non serve, perché ogni popupopen sovrascrive
+            // Forziamo lo stile completo per assicurarci che appaia
+            wrapper.style.border = `4px solid ${cols[0]}`;
         } else {
-            // Default bianco
             let wrapper = e.popup.getElement().querySelector('.leaflet-popup-content-wrapper');
-            wrapper.style.borderColor = "#fff";
+            wrapper.style.border = "4px solid #fff";
         }
     });
 
@@ -245,7 +265,8 @@
         map.closePopup();
         if (visibiliAttualmente.length === 0) return;
         const randomMarker = visibiliAttualmente[Math.floor(Math.random() * visibiliAttualmente.length)];
-        map.flyTo(randomMarker.getLatLng(), 16, { animate: true, duration: 1.5 });
+        // MODIFICA: Rimossa durata personalizzata lenta, ora usa default (veloce come search)
+        map.flyTo(randomMarker.getLatLng(), 16); 
         map.once('moveend', () => { 
             popup.setContent(randomMarker.descrizione).setLatLng(randomMarker.getLatLng()).openOn(map); 
         });
@@ -278,10 +299,17 @@
                 let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
                 let classeScomparso = s.stato === "scomparso" ? "club-scomparso" : "";
                 
+                // NUOVO: Badge Femminile
+                let badgeFemminile = (s.genere && s.genere.toLowerCase() === 'f') ? '<div class="gender-badge">♀</div>' : '';
+
                 var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
                     icon: L.divIcon({
                         className: 'custom-div-icon',
-                        html: `<div class="logo-container ${classeScomparso}" style="background: ${borderStyle};"><img src="${s.logo_attuale}" class="logo-img-inner"></div>`,
+                        // Inserito badgeFemminile nell'HTML del marker
+                        html: `<div class="logo-container ${classeScomparso}" style="background: ${borderStyle};">
+                                ${badgeFemminile}
+                                <img src="${s.logo_attuale}" class="logo-img-inner">
+                               </div>`,
                         iconSize: [44, 44], iconAnchor: [22, 22]
                     })
                 });
@@ -348,19 +376,25 @@
                 const stVal = document.getElementById('filter-stato').value;
                 const spVal = document.getElementById('filter-sport').value;
                 const eVal = document.getElementById('filter-epoca').value;
+                // NUOVO: Valore Genere
+                const gVal = document.getElementById('filter-genere').value;
                 
                 markers.clearLayers();
                 let heatPoints = [];
                 
                 visibiliAttualmente = allMarkers.filter(m => {
                     let ok = true;
-                    // AGGIUNTA: Ricerca anche per stadio_nome
                     const stadioNorm = normalizeText(m.dati.stadio_nome);
                     if (sVal && !m.nomeNormalizzato.includes(sVal) && !stadioNorm.includes(sVal)) ok = false;
                     
                     if (nVal !== "Tutti" && m.dati.nazione !== nVal) ok = false;
                     if (stVal !== "Tutti" && m.dati.stato !== stVal) ok = false;
                     if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
+                    
+                    // Logica Filtro Genere
+                    if (gVal === "f" && (!m.dati.genere || m.dati.genere.toLowerCase() !== 'f')) ok = false;
+                    if (gVal === "m" && m.dati.genere && m.dati.genere.toLowerCase() === 'f') ok = false;
+
                     const anno = parseInt(m.dati.fondazione);
                     if (eVal === "Antiche" && anno >= 1900) ok = false;
                     if (eVal === "Novecento" && (anno < 1900 || anno >= 2000)) ok = false;
