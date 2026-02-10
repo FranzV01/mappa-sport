@@ -192,7 +192,7 @@
 
 <script>
     const urlFoglio = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB3hRuuuzUhGho2Wr_c0KBa8BYYMyASu6n0DrQ8q_o3GU3aw4_oC2vEvhuVbtmqR3Z3y0C5Zgh8Dji/pub?output=csv'; 
-    const linkCrowdsourcing = "https://docs.google.com/forms/";
+    const linkCrowdsourcing = "https://docs.google.com/forms/d/e/1FAIpQLScnl0Qz7286ghO6Rkb2UxugFHGaCU_gGVAljUdkbp95zqhr2g/viewform?usp=pp_url&entry.1326851473=";
 
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
     var dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' });
@@ -363,7 +363,7 @@
                         ${loghiItems.length > 0 ? `<div class="storici-container"><span class="box-label">Loghi Storici</span><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
                         ${loghiItems.length > 3 ? `<div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div><button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
                         
-                        <a href="${linkCrowdsourcing}" target="_blank" class="btn-update">Segnala aggiornamento/errore ✏️</a>
+                        <a href="${linkCrowdsourcingBase}${encodeURIComponent(s.nome)}" target="_blank" class="btn-update">Segnala aggiornamento/errore ✏️</a>
                     </div>`;
 
                 oms.addMarker(marker);
