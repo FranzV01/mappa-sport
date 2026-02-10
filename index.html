@@ -67,13 +67,17 @@
         .btn-wiki:hover { background: #3366cc; color: #ffffff; }
 
         /* Box d'origine (Precedenti) */
-        .precedenti-box { background: #e3f2fd; border: 1px solid #90caf9; margin-top: 8px; padding: 8px; border-radius: 8px; }
-        .btn-link-club { 
-            display: block; background: white; border: 1px solid #90caf9; color: #1976d2; 
-            font-size: 10px; padding: 4px; margin-top: 4px; cursor: pointer; border-radius: 4px;
-            text-decoration: none; font-weight: bold;
+        .precedenti-box { background: #e3f2fd; border: 1px solid #90caf9; margin-top: 8px; padding: 8px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; }
+        .precedenti-grid { display: flex; justify-content: center; gap: 10px; margin-top: 5px; }
+        .origin-wrapper { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .origin-logo { 
+            width: 35px; height: 35px; object-fit: contain; border-radius: 50%; 
+            background: white; border: 1px solid #bbb; padding: 2px;
+            transition: transform 0.2s;
         }
-        
+        .origin-logo:hover { transform: scale(1.2); border-color: #007bff; }
+        .origin-name { font-size: 9px; margin-top: 3px; color: #555; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
         .centenario-box, .storici-container { margin: 10px 0; padding: 8px; border-radius: 8px; }
         .centenario-box { background: #fff9c4; border: 1px solid #fbc02d; }
         .storici-container { background: #f8f9fa; border: 1px solid #ddd; }
@@ -181,12 +185,19 @@
     const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
 
     window.vaiAClub = function(nomeClub) {
+        // Chiude il popup attuale prima di muoversi
+        map.closePopup();
+        
+        // Cerca il marker corrispondente
         const target = allMarkers.find(m => m.dati.nome.trim() === nomeClub.trim());
         if(target) {
             map.flyTo(target.getLatLng(), 16);
-            setTimeout(() => {
-                popup.setContent(target.descrizione).setLatLng(target.getLatLng()).openOn(map);
-            }, 1000);
+            // Attende la fine dell'animazione per aprire il nuovo popup
+            map.once('moveend', function() {
+                setTimeout(() => {
+                    popup.setContent(target.descrizione).setLatLng(target.getLatLng()).openOn(map);
+                }, 100);
+            });
         }
     };
 
@@ -197,10 +208,16 @@
     }
 
     function clubCasuale() {
+        // FIX: Chiude il popup attivo per evitare conflitti di movimento
+        map.closePopup();
+        
         if (visibiliAttualmente.length === 0) return;
         const randomMarker = visibiliAttualmente[Math.floor(Math.random() * visibiliAttualmente.length)];
+        
         map.flyTo(randomMarker.getLatLng(), 16, { animate: true, duration: 1.5 });
-        map.once('moveend', () => { popup.setContent(randomMarker.descrizione).setLatLng(randomMarker.getLatLng()).openOn(map); });
+        map.once('moveend', () => { 
+            popup.setContent(randomMarker.descrizione).setLatLng(randomMarker.getLatLng()).openOn(map); 
+        });
     }
 
     window.toggleLoghi = function(btn) {
@@ -216,12 +233,14 @@
             document.getElementById('loader').style.display = 'none';
             const data = results.data;
             
+            // Popolamento select Nazioni
             const nazioni = [...new Set(data.map(s => s.nazione))].filter(n => n).sort();
             nazioni.forEach(n => {
                 let opt = document.createElement('option'); opt.value = opt.innerText = n;
                 document.getElementById('filter-nazione').appendChild(opt);
             });
 
+            // Creazione Markers
             data.forEach((s, index) => {
                 if(!s.lat || !s.lng) return;
                 document.getElementById('loader-progress').style.width = (index / data.length * 100) + '%';
@@ -248,10 +267,27 @@
                 if(s.coppe_nazionali > 0) bacheca += `<span class="trofeo-item">🏆 ${s.coppe_nazionali}</span>`;
                 if(s.coppe_internazionali > 0) bacheca += `<span class="trofeo-item">🌍 ${s.coppe_internazionali}</span>`;
 
-                // Club Precedenti
-                let precedenti = '';
+                // Club Precedenti (Logica Logo)
+                let precedentiHTML = '';
                 [s.club_precedente_1, s.club_precedente_2, s.club_precedente_3].forEach(cp => {
-                    if(cp && cp.trim() !== "") precedenti += `<button class="btn-link-club" onclick="vaiAClub('${cp.replace(/'/g, "\\'")}')">Vai a: ${cp}</button>`;
+                    if(cp && cp.trim() !== "") {
+                        // Cerca il club nel database completo per recuperare il logo
+                        let clubTrovato = data.find(item => item.nome.trim() === cp.trim());
+                        let nomeEscaped = cp.replace(/'/g, "\\'");
+                        
+                        if (clubTrovato && clubTrovato.logo_attuale) {
+                            // Se trovato e ha logo, mostra logo cliccabile
+                            precedentiHTML += `
+                                <div class="origin-wrapper" onclick="vaiAClub('${nomeEscaped}')" title="Vai a ${cp}">
+                                    <img src="${clubTrovato.logo_attuale}" class="origin-logo">
+                                    <span class="origin-name">${cp}</span>
+                                </div>
+                            `;
+                        } else {
+                            // Fallback testo se non trova il logo
+                            precedentiHTML += `<button class="btn-link-club" onclick="vaiAClub('${nomeEscaped}')">${cp}</button>`;
+                        }
+                    }
                 });
 
                 let loghiItems = [];
@@ -270,7 +306,9 @@
                         </div>
                         <div class="trofei-box">${bacheca}</div>
                         <a href="https://it.wikipedia.org/wiki/${encodeURIComponent(s.nome)}" target="_blank" class="btn-wiki">Wikipedia 📖</a>
-                        ${precedenti !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span>${precedenti}</div>` : ''}
+                        
+                        ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
+                        
                         ${s.logo_centenario ? `<div class="centenario-box"><span class="box-label">Logo Centenario</span><img src="${s.logo_centenario}" class="centenario-img"></div>` : ''}
                         ${loghiItems.length > 0 ? `<div class="storici-container"><span class="box-label">Loghi Storici</span><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
                         ${loghiItems.length > 3 ? `<div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div><button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
@@ -280,6 +318,7 @@
                 allMarkers.push(marker);
             });
 
+            // Funzione Filtri Definita e Assegnata
             window.applicaFiltri = function() {
                 const sVal = normalizeText(document.getElementById('search-input').value);
                 const nVal = document.getElementById('filter-nazione').value;
@@ -289,6 +328,8 @@
                 
                 markers.clearLayers();
                 let heatPoints = [];
+                
+                // Aggiornamento array visibili
                 visibiliAttualmente = allMarkers.filter(m => {
                     let ok = true;
                     if (sVal && !m.nomeNormalizzato.includes(sVal)) ok = false;
@@ -299,18 +340,33 @@
                     if (eVal === "Antiche" && anno >= 1900) ok = false;
                     if (eVal === "Novecento" && (anno < 1900 || anno >= 2000)) ok = false;
                     if (eVal === "Duemila" && anno < 2000) ok = false;
+                    
                     if(ok) heatPoints.push([m.getLatLng().lat, m.getLatLng().lng, 0.5]);
                     return ok;
                 });
+
+                // Aggiunta markers alla mappa
                 visibiliAttualmente.forEach(m => markers.addLayer(m));
                 heatLayer.setLatLngs(heatPoints);
                 map.addLayer(markers);
+                
+                // FIX: Aggiornamento Contatore
                 document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibiliAttualmente.length}</b>`;
-                if (sVal.length >= 1 && visibiliAttualmente.length === 1) map.flyTo(visibiliAttualmente[0].getLatLng(), 15);
+                
+                // FIX: FlyTo ripristinato
+                if (sVal.length >= 1 && visibiliAttualmente.length === 1) {
+                    map.flyTo(visibiliAttualmente[0].getLatLng(), 15, { animate: true });
+                    map.once('moveend', () => {
+                        popup.setContent(visibiliAttualmente[0].descrizione).setLatLng(visibiliAttualmente[0].getLatLng()).openOn(map);
+                    });
+                }
             }
 
+            // Assegnazione Eventi
             document.getElementById('search-input').oninput = applicaFiltri;
             document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
+            
+            // Esecuzione iniziale
             applicaFiltri();
         }
     });
@@ -326,7 +382,9 @@
     });
     map.addControl(new LocateControl());
 
-    markers.on('click', a => { popup.setContent(a.layer.descrizione).setLatLng(a.layer.getLatLng()).openOn(map); });
+    markers.on('click', a => { 
+        popup.setContent(a.layer.descrizione).setLatLng(a.layer.getLatLng()).openOn(map); 
+    });
 </script>
 </body>
 </html>
