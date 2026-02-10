@@ -47,7 +47,13 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
-        .custom-popup .leaflet-popup-content-wrapper { border-radius: 12px; padding: 5px; }
+        /* MODIFICA: Popup con transizione per il bordo colorato */
+        .custom-popup .leaflet-popup-content-wrapper { 
+            border-radius: 12px; padding: 5px; 
+            border: 4px solid #fff; /* Default */
+            transition: border-color 0.3s ease;
+        }
+        
         .popup-card { text-align: center; font-family: 'Segoe UI', sans-serif; width: 220px; }
         .popup-header { border-bottom: 2px solid #eee; margin-bottom: 10px; padding-bottom: 8px; }
         .popup-title { margin: 5px 0; color: #222; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; }
@@ -66,6 +72,13 @@
         }
         .btn-wiki:hover { background: #3366cc; color: #ffffff; }
 
+        /* AGGIUNTA: Link Crowdsourcing */
+        .btn-update {
+            display: block; margin-top: 10px; font-size: 10px; color: #999; 
+            text-decoration: none; border-top: 1px dotted #ccc; padding-top: 5px;
+        }
+        .btn-update:hover { color: #555; text-decoration: underline; }
+
         /* Box d'origine (Precedenti) */
         .precedenti-box { background: #e3f2fd; border: 1px solid #90caf9; margin-top: 8px; padding: 8px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; }
         .precedenti-grid { display: flex; justify-content: center; gap: 10px; margin-top: 5px; }
@@ -77,6 +90,12 @@
         }
         .origin-logo:hover { transform: scale(1.2); border-color: #007bff; }
         .origin-name { font-size: 9px; margin-top: 3px; color: #555; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        /* Fallback bottone se manca logo precedente */
+        .btn-link-club {
+            display: block; background: #fff; border: 1px solid #90caf9; color: #1976d2; 
+            font-size: 10px; padding: 4px; border-radius: 4px; cursor: pointer;
+        }
 
         .centenario-box, .storici-container { margin: 10px 0; padding: 8px; border-radius: 8px; }
         .centenario-box { background: #fff9c4; border: 1px solid #fbc02d; }
@@ -106,7 +125,7 @@
 
 <div id="ui-panel">
     <div id="search-container">
-        <input type="text" id="search-input" placeholder="Cerca squadra...">
+        <input type="text" id="search-input" placeholder="Cerca squadra o stadio...">
         <button class="btn-ui btn-reset" onclick="resetFiltri()">✕</button>
     </div>
     
@@ -157,6 +176,8 @@
 
 <script>
     const urlFoglio = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB3hRuuuzUhGho2Wr_c0KBa8BYYMyASu6n0DrQ8q_o3GU3aw4_oC2vEvhuVbtmqR3Z3y0C5Zgh8Dji/pub?output=csv'; 
+    // Sostituisci questo link con il tuo vero Google Form se ne hai uno
+    const linkCrowdsourcing = "https://docs.google.com/forms/";
 
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
     var dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' });
@@ -184,15 +205,28 @@
 
     const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
 
+    // AGGIUNTA: Gestione bordo colorato dinamico
+    map.on('popupopen', function(e) {
+        var marker = e.popup._source;
+        if (marker && marker.dati && marker.dati.colori) {
+            let cols = marker.dati.colori.split(',');
+            // Prende il wrapper del popup appena aperto
+            let wrapper = e.popup.getElement().querySelector('.leaflet-popup-content-wrapper');
+            // Applica il primo colore trovato come bordo
+            wrapper.style.borderColor = cols[0];
+            // Se vuoi resettare lo stile quando si chiude non serve, perché ogni popupopen sovrascrive
+        } else {
+            // Default bianco
+            let wrapper = e.popup.getElement().querySelector('.leaflet-popup-content-wrapper');
+            wrapper.style.borderColor = "#fff";
+        }
+    });
+
     window.vaiAClub = function(nomeClub) {
-        // Chiude il popup attuale prima di muoversi
         map.closePopup();
-        
-        // Cerca il marker corrispondente
         const target = allMarkers.find(m => m.dati.nome.trim() === nomeClub.trim());
         if(target) {
             map.flyTo(target.getLatLng(), 16);
-            // Attende la fine dell'animazione per aprire il nuovo popup
             map.once('moveend', function() {
                 setTimeout(() => {
                     popup.setContent(target.descrizione).setLatLng(target.getLatLng()).openOn(map);
@@ -208,12 +242,9 @@
     }
 
     function clubCasuale() {
-        // FIX: Chiude il popup attivo per evitare conflitti di movimento
         map.closePopup();
-        
         if (visibiliAttualmente.length === 0) return;
         const randomMarker = visibiliAttualmente[Math.floor(Math.random() * visibiliAttualmente.length)];
-        
         map.flyTo(randomMarker.getLatLng(), 16, { animate: true, duration: 1.5 });
         map.once('moveend', () => { 
             popup.setContent(randomMarker.descrizione).setLatLng(randomMarker.getLatLng()).openOn(map); 
@@ -233,14 +264,12 @@
             document.getElementById('loader').style.display = 'none';
             const data = results.data;
             
-            // Popolamento select Nazioni
             const nazioni = [...new Set(data.map(s => s.nazione))].filter(n => n).sort();
             nazioni.forEach(n => {
                 let opt = document.createElement('option'); opt.value = opt.innerText = n;
                 document.getElementById('filter-nazione').appendChild(opt);
             });
 
-            // Creazione Markers
             data.forEach((s, index) => {
                 if(!s.lat || !s.lng) return;
                 document.getElementById('loader-progress').style.width = (index / data.length * 100) + '%';
@@ -261,30 +290,23 @@
 
                 let flagHtml = s.codice_nazione ? `<img src="https://flagcdn.com/w40/${s.codice_nazione.toLowerCase()}.png" class="flag-icon">` : '';
                 
-                // Bacheca Trofei
                 let bacheca = '';
                 if(s.scudetti > 0) bacheca += `<span class="trofeo-item">⭐ ${s.scudetti}</span>`;
                 if(s.coppe_nazionali > 0) bacheca += `<span class="trofeo-item">🏆 ${s.coppe_nazionali}</span>`;
                 if(s.coppe_internazionali > 0) bacheca += `<span class="trofeo-item">🌍 ${s.coppe_internazionali}</span>`;
 
-                // Club Precedenti (Logica Logo)
                 let precedentiHTML = '';
                 [s.club_precedente_1, s.club_precedente_2, s.club_precedente_3].forEach(cp => {
                     if(cp && cp.trim() !== "") {
-                        // Cerca il club nel database completo per recuperare il logo
                         let clubTrovato = data.find(item => item.nome.trim() === cp.trim());
                         let nomeEscaped = cp.replace(/'/g, "\\'");
-                        
                         if (clubTrovato && clubTrovato.logo_attuale) {
-                            // Se trovato e ha logo, mostra logo cliccabile
                             precedentiHTML += `
                                 <div class="origin-wrapper" onclick="vaiAClub('${nomeEscaped}')" title="Vai a ${cp}">
                                     <img src="${clubTrovato.logo_attuale}" class="origin-logo">
                                     <span class="origin-name">${cp}</span>
-                                </div>
-                            `;
+                                </div>`;
                         } else {
-                            // Fallback testo se non trova il logo
                             precedentiHTML += `<button class="btn-link-club" onclick="vaiAClub('${nomeEscaped}')">${cp}</button>`;
                         }
                     }
@@ -312,13 +334,14 @@
                         ${s.logo_centenario ? `<div class="centenario-box"><span class="box-label">Logo Centenario</span><img src="${s.logo_centenario}" class="centenario-img"></div>` : ''}
                         ${loghiItems.length > 0 ? `<div class="storici-container"><span class="box-label">Loghi Storici</span><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
                         ${loghiItems.length > 3 ? `<div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div><button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
+                        
+                        <a href="${linkCrowdsourcing}" target="_blank" class="btn-update">Segnala aggiornamento/errore ✏️</a>
                     </div>`;
 
                 oms.addMarker(marker);
                 allMarkers.push(marker);
             });
 
-            // Funzione Filtri Definita e Assegnata
             window.applicaFiltri = function() {
                 const sVal = normalizeText(document.getElementById('search-input').value);
                 const nVal = document.getElementById('filter-nazione').value;
@@ -329,10 +352,12 @@
                 markers.clearLayers();
                 let heatPoints = [];
                 
-                // Aggiornamento array visibili
                 visibiliAttualmente = allMarkers.filter(m => {
                     let ok = true;
-                    if (sVal && !m.nomeNormalizzato.includes(sVal)) ok = false;
+                    // AGGIUNTA: Ricerca anche per stadio_nome
+                    const stadioNorm = normalizeText(m.dati.stadio_nome);
+                    if (sVal && !m.nomeNormalizzato.includes(sVal) && !stadioNorm.includes(sVal)) ok = false;
+                    
                     if (nVal !== "Tutti" && m.dati.nazione !== nVal) ok = false;
                     if (stVal !== "Tutti" && m.dati.stato !== stVal) ok = false;
                     if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
@@ -345,15 +370,12 @@
                     return ok;
                 });
 
-                // Aggiunta markers alla mappa
                 visibiliAttualmente.forEach(m => markers.addLayer(m));
                 heatLayer.setLatLngs(heatPoints);
                 map.addLayer(markers);
                 
-                // FIX: Aggiornamento Contatore
                 document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibiliAttualmente.length}</b>`;
                 
-                // FIX: FlyTo ripristinato
                 if (sVal.length >= 1 && visibiliAttualmente.length === 1) {
                     map.flyTo(visibiliAttualmente[0].getLatLng(), 15, { animate: true });
                     map.once('moveend', () => {
@@ -362,11 +384,8 @@
                 }
             }
 
-            // Assegnazione Eventi
             document.getElementById('search-input').oninput = applicaFiltri;
             document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
-            
-            // Esecuzione iniziale
             applicaFiltri();
         }
     });
