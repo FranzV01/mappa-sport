@@ -346,13 +346,14 @@
                     if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
-                // Logica Wikipedia: Forza il "Vai alla pagina" (Go Match)
+                // Logica Wikipedia: usa il "Bang" di DuckDuckGo per il salto diretto
 let wikiBtn = "";
 if (s.wiki && s.wiki.toLowerCase() === "si") {
-    // Il parametro 'go=Vai' istruisce Wikipedia a caricare la pagina diretta se esiste un redirect
-    const wikiUrl = `https://it.wikipedia.org/w/index.php?search=${encodeURIComponent(s.nome)}&go=Vai`;
+    // Il comando !w dice a DuckDuckGo di portarti direttamente al primo risultato su Wikipedia
+    const query = encodeURIComponent("!w " + s.nome);
+    const duckUrl = `https://duckduckgo.com/?q=${query}`;
     
-    wikiBtn = `<a href="${wikiUrl}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
+    wikiBtn = `<a href="${duckUrl}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
 }
                 
                 marker.descrizione = `
@@ -450,6 +451,7 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
 </script>
 </body>
 </html>
+
 
 
 
