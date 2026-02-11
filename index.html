@@ -346,16 +346,15 @@
                     if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
-                // Logica Wikipedia: Salto diretto tramite DuckDuckGo (senza avvisi)
+                // Logica Wikipedia: Forza il salto diretto "Mi sento fortunato" tramite DuckDuckGo
 let wikiBtn = "";
 if (s.wiki && s.wiki.toLowerCase() === "si") {
-    // Usiamo il parametro !w (Wikipedia) e forziamo il redirect automatico
-    const query = encodeURIComponent("!w " + s.nome);
-    // L'aggiunta di &ia=web e l'uso dell'URL di duckduckgo con il bang !w 
-    // istruisce il browser a tentare il salto immediato
-    const duckUrl = `https://duckduckgo.com/?q=${query}`;
+    // Il segreto è usare !w prima del nome. 
+    // DuckDuckGo interpreterà "!w Brentford FC" come "Vai al primo risultato su Wikipedia"
+    const queryWiki = encodeURIComponent("!w " + s.nome);
+    const duckLink = `https://duckduckgo.com/?q=${queryWiki}`;
     
-    wikiBtn = `<a href="${duckUrl}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
+    wikiBtn = `<a href="${duckLink}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
 }
                 
                 marker.descrizione = `
@@ -453,6 +452,7 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
 </script>
 </body>
 </html>
+
 
 
 
