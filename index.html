@@ -345,15 +345,7 @@
                     let url = s[`logo_storia_${i}_url`];
                     if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
-                
-                // Creiamo il pulsante solo se nella colonna 'wiki' c'è scritto 'si'
-let wikiBtn = "";
-if (s.wiki && s.wiki.toLowerCase() === "si") {
-    const queryWiki = encodeURIComponent(s.nome + " wikipedia");
-    let wikiBtn = (s.wiki && s.wiki.toLowerCase() === "si") 
-    ? `<a href="https://www.google.com/search?q=${encodeURIComponent(s.nome + ' wikipedia')}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
-}
-                
+
                 marker.descrizione = `
                     <div class="popup-card">
                         <div class="popup-header"><h2 class="popup-title">${s.nome}</h2></div>
@@ -363,7 +355,7 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
                             Stadio: <b>${s.stadio_nome || 'N.D.'}</b>
                         </div>
                         <div class="trofei-box">${bacheca}</div>
-                        ${wikiBtn}
+                        <a href="https://it.wikipedia.org/wiki/${encodeURIComponent(s.nome)}" target="_blank" class="btn-wiki">Wikipedia 📖</a>
                         
                         ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
                         
@@ -449,6 +441,3 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
 </script>
 </body>
 </html>
-
-
-
