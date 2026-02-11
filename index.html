@@ -346,6 +346,17 @@
                     if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
+                // Creiamo il pulsante che sfrutta il "Mi sento fortunato" di Google
+let wikiBtn = "";
+if (s.wiki && s.wiki.toLowerCase() === "si") {
+    // Cerchiamo specificamente su Wikipedia tramite Google
+    const queryWiki = encodeURIComponent(s.nome + " wikipedia");
+    // L'aggiunta di &btnI=1 istruisce Google a tentare il salto diretto al primo risultato
+    const luckyLink = `https://www.google.com/search?q=${queryWiki}&btnI=1`;
+    
+    wikiBtn = `<a href="${luckyLink}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
+}
+                
                 marker.descrizione = `
                     <div class="popup-card">
                         <div class="popup-header"><h2 class="popup-title">${s.nome}</h2></div>
@@ -441,3 +452,4 @@
 </script>
 </body>
 </html>
+
