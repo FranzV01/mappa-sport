@@ -350,7 +350,8 @@
 let wikiBtn = "";
 if (s.wiki && s.wiki.toLowerCase() === "si") {
     const queryWiki = encodeURIComponent(s.nome + " wikipedia");
-    wikiBtn = `<a href="https://www.google.com/search?q=${queryWiki}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
+    let wikiBtn = (s.wiki && s.wiki.toLowerCase() === "si") 
+    ? `<a href="https://www.google.com/search?q=${encodeURIComponent(s.nome + ' wikipedia')}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
 }
                 
                 marker.descrizione = `
@@ -448,5 +449,6 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
 </script>
 </body>
 </html>
+
 
 
