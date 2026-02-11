@@ -346,11 +346,11 @@
                     if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
-                // Logica Wikipedia: usa la ricerca interna di Wikipedia (salto diretto se esiste corrispondenza)
+                // Logica Wikipedia: Forza il "Vai alla pagina" (Go Match)
 let wikiBtn = "";
 if (s.wiki && s.wiki.toLowerCase() === "si") {
-    // Usiamo l'URL di ricerca speciale che esegue il redirect automatico alla pagina più pertinente
-    const wikiUrl = `https://it.wikipedia.org/w/index.php?search=${encodeURIComponent(s.nome)}&title=Speciale:Ricerca&fulltext=0`;
+    // Il parametro 'go=Vai' istruisce Wikipedia a caricare la pagina diretta se esiste un redirect
+    const wikiUrl = `https://it.wikipedia.org/w/index.php?search=${encodeURIComponent(s.nome)}&go=Vai`;
     
     wikiBtn = `<a href="${wikiUrl}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
 }
@@ -450,6 +450,7 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
 </script>
 </body>
 </html>
+
 
 
 
