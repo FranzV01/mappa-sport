@@ -346,15 +346,15 @@
                     if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
-                // Logica Wikipedia: Forza il salto diretto "Mi sento fortunato" tramite DuckDuckGo
+                // 1. Logica per il pulsante Wikipedia intelligente (FORZATO tramite DuckDuckGo)
 let wikiBtn = "";
 if (s.wiki && s.wiki.toLowerCase() === "si") {
-    // Il segreto è usare !w prima del nome. 
-    // DuckDuckGo interpreterà "!w Brentford FC" come "Vai al primo risultato su Wikipedia"
+    // Il comando "!w" dice a DuckDuckGo di portarti direttamente alla pagina Wikipedia
+    // È l'equivalente del "Mi sento fortunato" ma senza avvisi di sicurezza
     const queryWiki = encodeURIComponent("!w " + s.nome);
-    const duckLink = `https://duckduckgo.com/?q=${queryWiki}`;
+    const luckyLink = `https://duckduckgo.com/?q=${queryWiki}`;
     
-    wikiBtn = `<a href="${duckLink}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
+    wikiBtn = `<a href="${luckyLink}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
 }
                 
                 marker.descrizione = `
@@ -452,6 +452,7 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
 </script>
 </body>
 </html>
+
 
 
 
