@@ -346,13 +346,13 @@
                     if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
-                // Logica per il pulsante Wikipedia intelligente
+                // Logica Wikipedia: usa la ricerca interna di Wikipedia (salto diretto se esiste corrispondenza)
 let wikiBtn = "";
 if (s.wiki && s.wiki.toLowerCase() === "si") {
-    // Usiamo il trucco del "Mi sento fortunato" (&btnI=1)
-    const queryWiki = encodeURIComponent(s.nome + " wikipedia");
-    const luckyLink = `https://www.google.com/search?q=${queryWiki}&btnI=1`;
-    wikiBtn = `<a href="${luckyLink}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
+    // Usiamo l'URL di ricerca speciale che esegue il redirect automatico alla pagina più pertinente
+    const wikiUrl = `https://it.wikipedia.org/w/index.php?search=${encodeURIComponent(s.nome)}&title=Speciale:Ricerca&fulltext=0`;
+    
+    wikiBtn = `<a href="${wikiUrl}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
 }
                 
                 marker.descrizione = `
@@ -450,5 +450,6 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
 </script>
 </body>
 </html>
+
 
 
