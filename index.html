@@ -346,14 +346,12 @@
                     if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
-                // Creiamo il pulsante che sfrutta il "Mi sento fortunato" di Google
+                // Logica per il pulsante Wikipedia intelligente
 let wikiBtn = "";
 if (s.wiki && s.wiki.toLowerCase() === "si") {
-    // Cerchiamo specificamente su Wikipedia tramite Google
+    // Usiamo il trucco del "Mi sento fortunato" (&btnI=1)
     const queryWiki = encodeURIComponent(s.nome + " wikipedia");
-    // L'aggiunta di &btnI=1 istruisce Google a tentare il salto diretto al primo risultato
     const luckyLink = `https://www.google.com/search?q=${queryWiki}&btnI=1`;
-    
     wikiBtn = `<a href="${luckyLink}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
 }
                 
@@ -366,7 +364,7 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
                             Stadio: <b>${s.stadio_nome || 'N.D.'}</b>
                         </div>
                         <div class="trofei-box">${bacheca}</div>
-                        <a href="https://it.wikipedia.org/wiki/${encodeURIComponent(s.nome)}" target="_blank" class="btn-wiki">Wikipedia 📖</a>
+                        ${wikiBtn}
                         
                         ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
                         
@@ -452,4 +450,5 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
 </script>
 </body>
 </html>
+
 
