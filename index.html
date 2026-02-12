@@ -346,15 +346,14 @@
                     if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
-                // 1. Logica per il pulsante Wikipedia intelligente (FORZATO tramite DuckDuckGo)
+                // 1. Logica per Wikipedia Inglese (Link Diretto)
 let wikiBtn = "";
 if (s.wiki && s.wiki.toLowerCase() === "si") {
-    // Il comando "!w" dice a DuckDuckGo di portarti direttamente alla pagina Wikipedia
-    // È l'equivalente del "Mi sento fortunato" ma senza avvisi di sicurezza
-    const queryWiki = encodeURIComponent("!w " + s.nome);
-    const luckyLink = `https://duckduckgo.com/?q=${queryWiki}`;
+    // Trasformiamo gli spazi in underscore per l'URL di Wikipedia
+    const wikiNome = s.nome.replace(/\s+/g, '_');
+    const wikiUrl = `https://en.wikipedia.org/wiki/${wikiNome}`;
     
-    wikiBtn = `<a href="${luckyLink}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
+    wikiBtn = `<a href="${wikiUrl}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
 }
                 
                 marker.descrizione = `
@@ -452,6 +451,7 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
 </script>
 </body>
 </html>
+
 
 
 
