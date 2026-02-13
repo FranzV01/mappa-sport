@@ -14,13 +14,25 @@
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: #eee; z-index: 9999; display: block; }
         #loader-progress { width: 0%; height: 100%; background: #007bff; transition: width 0.3s; }
 
+        /* MODIFICA: Pannello richiudibile */
         #ui-panel {
             position: absolute; top: 15px; left: 15px; z-index: 1000;
             background: rgba(255, 255, 255, 0.95); padding: 18px; border-radius: 15px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.15); width: 260px;
             max-height: 85vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.3);
+            transition: transform 0.3s ease;
         }
-        
+        #ui-panel.collapsed { transform: translateX(-300px); }
+
+        /* NUOVO: Pulsante Toggle Pannello */
+        #toggle-panel-btn {
+            position: absolute; top: 15px; left: 15px; z-index: 1001;
+            background: white; border: none; border-radius: 8px; width: 40px; height: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2); cursor: pointer; display: none;
+            justify-content: center; align-items: center; font-size: 20px;
+        }
+        .close-panel { float: right; cursor: pointer; font-size: 20px; color: #999; }
+
         #search-container { margin-bottom: 15px; display: flex; gap: 5px; }
         #search-input { flex-grow: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd; outline: none; font-size: 14px; font-family: inherit; }
         
@@ -36,10 +48,9 @@
         .logo-container:hover { transform: scale(1.4); z-index: 9999 !important; }
         .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
         
-        /* NUOVO: Badge Genere Femminile */
         .gender-badge {
             position: absolute; top: -2px; right: -2px;
-            width: 16px; height: 16px; background: #ff69b4; /* Rosa */
+            width: 16px; height: 16px; background: #ff69b4;
             color: white; border-radius: 50%; border: 2px solid white;
             display: flex; align-items: center; justify-content: center;
             font-size: 10px; font-weight: bold; z-index: 100;
@@ -57,10 +68,9 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
-        /* FIX: Bordo Popup più specifico */
         .custom-popup .leaflet-popup-content-wrapper { 
             border-radius: 12px; padding: 5px; 
-            border: 4px solid transparent; /* Placeholder */
+            border: 4px solid transparent;
             box-shadow: 0 3px 14px rgba(0,0,0,0.4);
         }
         
@@ -69,11 +79,9 @@
         .popup-title { margin: 5px 0; color: #222; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; }
         .popup-info { font-size: 13px; color: #555; line-height: 1.4; }
 
-        /* Icone Bacheca */
         .trofei-box { margin: 8px 0; font-size: 14px; }
         .trofeo-item { display: inline-block; margin: 0 4px; }
 
-        /* Pulsante Wikipedia */
         .btn-wiki {
             display: inline-block; margin: 8px 0; padding: 6px 14px;
             background: #ffffff; color: #3366cc; text-decoration: none;
@@ -82,14 +90,12 @@
         }
         .btn-wiki:hover { background: #3366cc; color: #ffffff; }
 
-        /* Link Crowdsourcing */
         .btn-update {
             display: block; margin-top: 10px; font-size: 10px; color: #999; 
             text-decoration: none; border-top: 1px dotted #ccc; padding-top: 5px;
         }
         .btn-update:hover { color: #555; text-decoration: underline; }
 
-        /* Box d'origine (Precedenti) */
         .precedenti-box { background: #e3f2fd; border: 1px solid #90caf9; margin-top: 8px; padding: 8px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; }
         .precedenti-grid { display: flex; justify-content: center; gap: 10px; margin-top: 5px; }
         .origin-wrapper { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
@@ -126,13 +132,24 @@
             justify-content: center; align-items: center; border-radius: 4px;
             box-shadow: 0 1px 5px rgba(0,0,0,0.4); cursor: pointer; margin-bottom: 10px;
         }
+
+        /* NUOVO: Switch Style per Cluster */
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; vertical-align: middle; margin-left: 10px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #007bff; }
+        input:checked + .slider:before { transform: translateX(20px); }
     </style>
 </head>
 <body>
 
 <div id="loader"><div id="loader-progress"></div></div>
 
+<button id="toggle-panel-btn" onclick="togglePanel()">☰</button>
+
 <div id="ui-panel">
+    <span class="close-panel" onclick="togglePanel()">×</span>
     <div id="search-container">
         <input type="text" id="search-input" placeholder="Cerca squadra o stadio... (premi /)">
         <button class="btn-ui btn-reset" onclick="resetFiltri()">✕</button>
@@ -140,6 +157,15 @@
     
     <button class="btn-ui" style="width:100%; margin-bottom:10px;" onclick="clubCasuale()">🎲 Club Casuale</button>
     <div id="count-box" class="stat-item">Caricamento...</div>
+    
+    <div class="stat-item" style="background: #f0f7ff; padding: 8px; border-radius: 8px; border: 1px solid #cce5ff;">
+        Raggruppa loghi: 
+        <label class="switch">
+            <input type="checkbox" id="cluster-toggle" checked onchange="applicaFiltri()">
+            <span class="slider"></span>
+        </label>
+    </div>
+
     <hr>
     
     <label class="stat-item">Nazione:</label>
@@ -205,6 +231,9 @@
     L.control.layers(baseMaps, overlayMaps, { position: 'topright' }).addTo(map);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
+    // NUOVO: Layer separato per markers quando il cluster è disattivato
+    var markersLayer = L.featureGroup();
+
     var markers = L.markerClusterGroup({ 
         disableClusteringAtZoom: 17, 
         showCoverageOnHover: false,
@@ -220,7 +249,14 @@
 
     const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
 
-    // AGGIUNTA: Scorciatoia tastiera "/"
+    // NUOVO: Toggle Pannello
+    function togglePanel() {
+        const panel = document.getElementById('ui-panel');
+        const btn = document.getElementById('toggle-panel-btn');
+        panel.classList.toggle('collapsed');
+        btn.style.display = panel.classList.contains('collapsed') ? 'flex' : 'none';
+    }
+
     document.addEventListener('keydown', function(e) {
         if (e.key === '/' && document.activeElement !== document.getElementById('search-input')) {
             e.preventDefault();
@@ -228,13 +264,11 @@
         }
     });
 
-    // FIX: Bordo colorato potenziato
     map.on('popupopen', function(e) {
         var marker = e.popup._source;
         if (marker && marker.dati && marker.dati.colori) {
             let cols = marker.dati.colori.split(',');
             let wrapper = e.popup.getElement().querySelector('.leaflet-popup-content-wrapper');
-            // Forziamo lo stile completo per assicurarci che appaia
             wrapper.style.border = `4px solid ${cols[0]}`;
         } else {
             let wrapper = e.popup.getElement().querySelector('.leaflet-popup-content-wrapper');
@@ -265,7 +299,6 @@
         map.closePopup();
         if (visibiliAttualmente.length === 0) return;
         const randomMarker = visibiliAttualmente[Math.floor(Math.random() * visibiliAttualmente.length)];
-        // MODIFICA: Rimossa durata personalizzata lenta, ora usa default (veloce come search)
         map.flyTo(randomMarker.getLatLng(), 16); 
         map.once('moveend', () => { 
             popup.setContent(randomMarker.descrizione).setLatLng(randomMarker.getLatLng()).openOn(map); 
@@ -299,13 +332,11 @@
                 let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
                 let classeScomparso = s.stato === "scomparso" ? "club-scomparso" : "";
                 
-                // NUOVO: Badge Femminile
                 let badgeFemminile = (s.genere && s.genere.toLowerCase() === 'f') ? '<div class="gender-badge">♀</div>' : '';
 
                 var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
                     icon: L.divIcon({
                         className: 'custom-div-icon',
-                        // Inserito badgeFemminile nell'HTML del marker
                         html: `<div class="logo-container ${classeScomparso}" style="background: ${borderStyle};">
                                 ${badgeFemminile}
                                 <img src="${s.logo_attuale}" class="logo-img-inner">
@@ -346,15 +377,12 @@
                     if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
-                // 1. Logica per Wikipedia Inglese (Link Diretto)
-let wikiBtn = "";
-if (s.wiki && s.wiki.toLowerCase() === "si") {
-    // Trasformiamo gli spazi in underscore per l'URL di Wikipedia
-    const wikiNome = s.nome.replace(/\s+/g, '_');
-    const wikiUrl = `https://en.wikipedia.org/wiki/${wikiNome}`;
-    
-    wikiBtn = `<a href="${wikiUrl}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
-}
+                let wikiBtn = "";
+                if (s.wiki && s.wiki.toLowerCase() === "si") {
+                    const wikiNome = s.nome.replace(/\s+/g, '_');
+                    const wikiUrl = `https://en.wikipedia.org/wiki/${wikiNome}`;
+                    wikiBtn = `<a href="${wikiUrl}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
+                }
                 
                 marker.descrizione = `
                     <div class="popup-card">
@@ -386,10 +414,11 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
                 const stVal = document.getElementById('filter-stato').value;
                 const spVal = document.getElementById('filter-sport').value;
                 const eVal = document.getElementById('filter-epoca').value;
-                // NUOVO: Valore Genere
                 const gVal = document.getElementById('filter-genere').value;
+                const isClusterEnabled = document.getElementById('cluster-toggle').checked;
                 
                 markers.clearLayers();
+                markersLayer.clearLayers();
                 let heatPoints = [];
                 
                 visibiliAttualmente = allMarkers.filter(m => {
@@ -401,7 +430,6 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
                     if (stVal !== "Tutti" && m.dati.stato !== stVal) ok = false;
                     if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
                     
-                    // Logica Filtro Genere
                     if (gVal === "f" && (!m.dati.genere || m.dati.genere.toLowerCase() !== 'f')) ok = false;
                     if (gVal === "m" && m.dati.genere && m.dati.genere.toLowerCase() === 'f') ok = false;
 
@@ -414,10 +442,18 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
                     return ok;
                 });
 
-                visibiliAttualmente.forEach(m => markers.addLayer(m));
+                // NUOVO: Logica per mostrare i markers con o senza cluster
+                if (isClusterEnabled) {
+                    map.removeLayer(markersLayer);
+                    visibiliAttualmente.forEach(m => markers.addLayer(m));
+                    map.addLayer(markers);
+                } else {
+                    map.removeLayer(markers);
+                    visibiliAttualmente.forEach(m => markersLayer.addLayer(m));
+                    map.addLayer(markersLayer);
+                }
+
                 heatLayer.setLatLngs(heatPoints);
-                map.addLayer(markers);
-                
                 document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibiliAttualmente.length}</b>`;
                 
                 if (sVal.length >= 1 && visibiliAttualmente.length === 1) {
@@ -445,18 +481,15 @@ if (s.wiki && s.wiki.toLowerCase() === "si") {
     });
     map.addControl(new LocateControl());
 
-    markers.on('click', a => { 
-        popup.setContent(a.layer.descrizione).setLatLng(a.layer.getLatLng()).openOn(map); 
-    });
+    // MODIFICA: Click sui markers (include l'auto-centratura)
+    function onMarkerClick(a) {
+        // NUOVO: Centra la mappa sul logo cliccato
+        map.setView(a.layer.getLatLng(), map.getZoom());
+        popup.setContent(a.layer.descrizione).setLatLng(a.layer.getLatLng()).openOn(map);
+    }
+
+    markers.on('click', onMarkerClick);
+    markersLayer.on('click', onMarkerClick); // Funziona anche quando il cluster è spento
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
