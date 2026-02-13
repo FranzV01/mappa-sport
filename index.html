@@ -22,7 +22,7 @@
             max-height: 85vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.3);
             transition: transform 0.3s ease;
         }
-        #ui-panel.collapsed { transform: translateX(-300px); }
+        #ui-panel.collapsed { transform: translateX(-310px); }
 
         /* NUOVO: Pulsante Toggle Pannello */
         #toggle-panel-btn {
@@ -40,12 +40,18 @@
         .btn-reset { background: #fee; color: #c33; border-color: #fcc; }
 
         .custom-div-icon { background: none; border: none; }
+        
+        /* MIGLIORIA 1: Leggibilità loghi con bordo bianco "sticker" */
         .logo-container {
             border-radius: 50%; padding: 3px; display: flex; justify-content: center; align-items: center;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            box-shadow: 0 3px 6px rgba(0,0,0,0.3); width: 44px; height: 44px; position: relative;
+            box-shadow: 0 0 0 2px white, 0 3px 8px rgba(0,0,0,0.4); 
+            width: 44px; height: 44px; position: relative;
         }
         .logo-container:hover { transform: scale(1.4); z-index: 9999 !important; }
+        /* MIGLIORIA 2: Feedback visivo alla pressione */
+        .logo-container:active { transform: scale(0.9); }
+        
         .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
         
         .gender-badge {
@@ -123,6 +129,9 @@
         .hidden-logos { display: none; }
 
         .stat-item { font-size: 13px; font-weight: bold; margin: 8px 0; color: #444; }
+        /* MIGLIORIA 5: Box statistiche esteso */
+        #stats-breakdown { font-size: 11px; color: #666; font-weight: normal; margin-top: 5px; line-height: 1.2; }
+
         select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; }
         hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
         .flag-icon { width: 22px; border-radius: 3px; vertical-align: middle; margin-right: 6px; border: 1px solid #eee; }
@@ -133,7 +142,6 @@
             box-shadow: 0 1px 5px rgba(0,0,0,0.4); cursor: pointer; margin-bottom: 10px;
         }
 
-        /* NUOVO: Switch Style per Cluster */
         .switch { position: relative; display: inline-block; width: 40px; height: 20px; vertical-align: middle; margin-left: 10px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
@@ -157,8 +165,7 @@
     
     <button class="btn-ui" style="width:100%; margin-bottom:10px;" onclick="clubCasuale()">🎲 Club Casuale</button>
     <div id="count-box" class="stat-item">Caricamento...</div>
-    
-    <div class="stat-item" style="background: #f0f7ff; padding: 8px; border-radius: 8px; border: 1px solid #cce5ff;">
+    <div id="stats-breakdown"></div> <div class="stat-item" style="background: #f0f7ff; padding: 8px; border-radius: 8px; border: 1px solid #cce5ff; margin-top:10px;">
         Raggruppa loghi: 
         <label class="switch">
             <input type="checkbox" id="cluster-toggle" checked onchange="applicaFiltri()">
@@ -220,20 +227,34 @@
     const urlFoglio = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB3hRuuuzUhGho2Wr_c0KBa8BYYMyASu6n0DrQ8q_o3GU3aw4_oC2vEvhuVbtmqR3Z3y0C5Zgh8Dji/pub?output=csv'; 
     const linkCrowdsourcingBase = "https://docs.google.com/forms/d/e/1FAIpQLScnl0Qz7286ghO6Rkb2UxugFHGaCU_gGVAljUdkbp95zqhr2g/viewform?usp=pp_url&entry.1326851473=";
 
+    // Icone di backup e mappe emoji
+    const sportIcons = { "Calcio": "⚽", "Pallacanestro": "🏀", "Pallavolo": "🏐", "Rugby": "🏉", "Pallamano": "🤾", "Pallanuoto": "🤽", "Hockey su ghiaccio": "🏒", "Football americano": "🏈", "Baseball": "⚾" };
+    const placeholderLogo = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjY2MiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgMmwtMTAgOWgxNHoiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjEzIiByPSI5Ij48L2NpcmNsZT48L3N2Zz4=";
+
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
     var dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' });
     var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' });
     var heatLayer = L.heatLayer([], { radius: 25, blur: 15, maxZoom: 10 });
 
-    var map = L.map('map', { layers: [osm], zoomControl: false, dragging: !L.Browser.mobile, tap: !L.Browser.mobile }).setView([45, 10], 5);
+    // MIGLIORIA 3: Caricamento posizione da URL (Hash)
+    var hash = window.location.hash.substring(1).split('/');
+    var startCenter = hash.length === 3 ? [hash[1], hash[2]] : [45, 10];
+    var startZoom = hash.length === 3 ? hash[0] : 5;
+
+    var map = L.map('map', { layers: [osm], zoomControl: false, dragging: !L.Browser.mobile, tap: !L.Browser.mobile }).setView(startCenter, startZoom);
+    
+    // Aggiorna URL quando la mappa si muove
+    map.on('moveend', function() {
+        var center = map.getCenter();
+        window.history.replaceState(null, null, `#${map.getZoom()}/${center.lat.toFixed(4)}/${center.lng.toFixed(4)}`);
+    });
+
     var baseMaps = { "Standard": osm, "Dark Mode 🌙": dark, "Satellite 🛰️": satellite };
     var overlayMaps = { "Heatmap 🔥": heatLayer };
     L.control.layers(baseMaps, overlayMaps, { position: 'topright' }).addTo(map);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // NUOVO: Layer separato per markers quando il cluster è disattivato
     var markersLayer = L.featureGroup();
-
     var markers = L.markerClusterGroup({ 
         disableClusteringAtZoom: 17, 
         showCoverageOnHover: false,
@@ -249,12 +270,16 @@
 
     const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
 
-    // NUOVO: Toggle Pannello
     function togglePanel() {
         const panel = document.getElementById('ui-panel');
         const btn = document.getElementById('toggle-panel-btn');
         panel.classList.toggle('collapsed');
         btn.style.display = panel.classList.contains('collapsed') ? 'flex' : 'none';
+    }
+
+    // MIGLIORIA 4: Chiusura automatica pannello su mobile
+    if (window.innerWidth < 768) {
+        setTimeout(togglePanel, 500);
     }
 
     document.addEventListener('keydown', function(e) {
@@ -270,9 +295,6 @@
             let cols = marker.dati.colori.split(',');
             let wrapper = e.popup.getElement().querySelector('.leaflet-popup-content-wrapper');
             wrapper.style.border = `4px solid ${cols[0]}`;
-        } else {
-            let wrapper = e.popup.getElement().querySelector('.leaflet-popup-content-wrapper');
-            wrapper.style.border = "4px solid #fff";
         }
     });
 
@@ -331,15 +353,15 @@
                 let coloriArray = s.colori ? s.colori.split(',') : ['#333'];
                 let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
                 let classeScomparso = s.stato === "scomparso" ? "club-scomparso" : "";
-                
                 let badgeFemminile = (s.genere && s.genere.toLowerCase() === 'f') ? '<div class="gender-badge">♀</div>' : '';
 
+                // MIGLIORIA 6: onerror per loghi mancanti
                 var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
                     icon: L.divIcon({
                         className: 'custom-div-icon',
                         html: `<div class="logo-container ${classeScomparso}" style="background: ${borderStyle};">
-                                ${badgeFemminile}
-                                <img src="${s.logo_attuale}" class="logo-img-inner">
+                                 ${badgeFemminile}
+                                 <img src="${s.logo_attuale}" class="logo-img-inner" onerror="this.src='${placeholderLogo}';">
                                </div>`,
                         iconSize: [44, 44], iconAnchor: [22, 22]
                     })
@@ -348,7 +370,8 @@
                 marker.nomeNormalizzato = normalizeText(s.nome);
 
                 let flagHtml = s.codice_nazione ? `<img src="https://flagcdn.com/w40/${s.codice_nazione.toLowerCase()}.png" class="flag-icon">` : '';
-                
+                let emojiSport = sportIcons[s.sport] || "🏆"; // MIGLIORIA EXTRA: Icona sport nel titolo
+
                 let bacheca = '';
                 if(s.scudetti > 0) bacheca += `<span class="trofeo-item">⭐ ${s.scudetti}</span>`;
                 if(s.coppe_nazionali > 0) bacheca += `<span class="trofeo-item">🏆 ${s.coppe_nazionali}</span>`;
@@ -362,7 +385,7 @@
                         if (clubTrovato && clubTrovato.logo_attuale) {
                             precedentiHTML += `
                                 <div class="origin-wrapper" onclick="vaiAClub('${nomeEscaped}')" title="Vai a ${cp}">
-                                    <img src="${clubTrovato.logo_attuale}" class="origin-logo">
+                                    <img src="${clubTrovato.logo_attuale}" class="origin-logo" onerror="this.src='${placeholderLogo}';">
                                     <span class="origin-name">${cp}</span>
                                 </div>`;
                         } else {
@@ -374,7 +397,7 @@
                 let loghiItems = [];
                 for(let i=1; i<=10; i++) {
                     let url = s[`logo_storia_${i}_url`];
-                    if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
+                    if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img" onerror="this.src='${placeholderLogo}';"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
                 let wikiBtn = "";
@@ -386,21 +409,18 @@
                 
                 marker.descrizione = `
                     <div class="popup-card">
-                        <div class="popup-header"><h2 class="popup-title">${s.nome}</h2></div>
+                        <div class="popup-header"><h2 class="popup-title">${emojiSport} ${s.nome}</h2></div>
                         <div class="popup-info">
                             ${flagHtml} <b>${s.nazione}</b><br>
-                            Fondata: <b>${s.fondazione}</b> ${s.scioglimento ? `| Sciolta: <b>${s.scioglimento}</b>` : ''}<br>
-                            Stadio: <b>${s.stadio_nome || 'N.D.'}</b>
+                            Fondazione: <b>${s.fondazione}</b> ${s.scioglimento ? `| Sciolta: <b>${s.scioglimento}</b>` : ''}<br>
+                            Sport: <b>${s.sport}</b> | Stadio: <b>${s.stadio_nome || 'N.D.'}</b>
                         </div>
                         <div class="trofei-box">${bacheca}</div>
                         ${wikiBtn}
-                        
                         ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
-                        
-                        ${s.logo_centenario ? `<div class="centenario-box"><span class="box-label">Logo Centenario</span><img src="${s.logo_centenario}" class="centenario-img"></div>` : ''}
+                        ${s.logo_centenario ? `<div class="centenario-box"><span class="box-label">Logo Centenario</span><img src="${s.logo_centenario}" class="centenario-img" onerror="this.src='${placeholderLogo}';"></div>` : ''}
                         ${loghiItems.length > 0 ? `<div class="storici-container"><span class="box-label">Loghi Storici</span><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
                         ${loghiItems.length > 3 ? `<div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div><button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
-                        
                         <a href="${linkCrowdsourcingBase}${encodeURIComponent(s.nome)}" target="_blank" class="btn-update">Segnala aggiornamento/errore ✏️</a>
                     </div>`;
 
@@ -420,29 +440,29 @@
                 markers.clearLayers();
                 markersLayer.clearLayers();
                 let heatPoints = [];
+                let sportCounts = {}; // MIGLIORIA 5
                 
                 visibiliAttualmente = allMarkers.filter(m => {
                     let ok = true;
                     const stadioNorm = normalizeText(m.dati.stadio_nome);
                     if (sVal && !m.nomeNormalizzato.includes(sVal) && !stadioNorm.includes(sVal)) ok = false;
-                    
                     if (nVal !== "Tutti" && m.dati.nazione !== nVal) ok = false;
                     if (stVal !== "Tutti" && m.dati.stato !== stVal) ok = false;
                     if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
-                    
                     if (gVal === "f" && (!m.dati.genere || m.dati.genere.toLowerCase() !== 'f')) ok = false;
                     if (gVal === "m" && m.dati.genere && m.dati.genere.toLowerCase() === 'f') ok = false;
-
                     const anno = parseInt(m.dati.fondazione);
                     if (eVal === "Antiche" && anno >= 1900) ok = false;
                     if (eVal === "Novecento" && (anno < 1900 || anno >= 2000)) ok = false;
                     if (eVal === "Duemila" && anno < 2000) ok = false;
                     
-                    if(ok) heatPoints.push([m.getLatLng().lat, m.getLatLng().lng, 0.5]);
+                    if(ok) {
+                        heatPoints.push([m.getLatLng().lat, m.getLatLng().lng, 0.5]);
+                        sportCounts[m.dati.sport] = (sportCounts[m.dati.sport] || 0) + 1;
+                    }
                     return ok;
                 });
 
-                // NUOVO: Logica per mostrare i markers con o senza cluster
                 if (isClusterEnabled) {
                     map.removeLayer(markersLayer);
                     visibiliAttualmente.forEach(m => markers.addLayer(m));
@@ -456,7 +476,13 @@
                 heatLayer.setLatLngs(heatPoints);
                 document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibiliAttualmente.length}</b>`;
                 
-                if (sVal.length >= 1 && visibiliAttualmente.length === 1) {
+                // MIGLIORIA 5: Testo statistiche sport
+                let statsText = Object.entries(sportCounts)
+                    .sort((a,b) => b[1] - a[1])
+                    .map(([name, count]) => `${sportIcons[name] || ''} ${count}`).join(' • ');
+                document.getElementById('stats-breakdown').innerHTML = statsText;
+                
+                if (sVal.length >= 2 && visibiliAttualmente.length === 1) {
                     map.flyTo(visibiliAttualmente[0].getLatLng(), 15, { animate: true });
                     map.once('moveend', () => {
                         popup.setContent(visibiliAttualmente[0].descrizione).setLatLng(visibiliAttualmente[0].getLatLng()).openOn(map);
@@ -481,15 +507,15 @@
     });
     map.addControl(new LocateControl());
 
-    // MODIFICA: Click sui markers (include l'auto-centratura)
+    // MODIFICA: Auto-centratura cliccando sui markers
     function onMarkerClick(a) {
-        // NUOVO: Centra la mappa sul logo cliccato
-        map.setView(a.layer.getLatLng(), map.getZoom());
+        // Centra la mappa con una leggera animazione (smooth scroll)
+        map.panTo(a.layer.getLatLng()); 
         popup.setContent(a.layer.descrizione).setLatLng(a.layer.getLatLng()).openOn(map);
     }
 
     markers.on('click', onMarkerClick);
-    markersLayer.on('click', onMarkerClick); // Funziona anche quando il cluster è spento
+    markersLayer.on('click', onMarkerClick);
 </script>
 </body>
 </html>
