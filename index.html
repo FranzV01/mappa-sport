@@ -14,7 +14,6 @@
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: #eee; z-index: 9999; display: block; }
         #loader-progress { width: 0%; height: 100%; background: #007bff; transition: width 0.3s; }
 
-        /* MODIFICA: Pannello richiudibile */
         #ui-panel {
             position: absolute; top: 15px; left: 15px; z-index: 1000;
             background: rgba(255, 255, 255, 0.95); padding: 18px; border-radius: 15px;
@@ -24,7 +23,6 @@
         }
         #ui-panel.collapsed { transform: translateX(-310px); }
 
-        /* NUOVO: Pulsante Toggle Pannello */
         #toggle-panel-btn {
             position: absolute; top: 15px; left: 15px; z-index: 1001;
             background: white; border: none; border-radius: 8px; width: 40px; height: 40px;
@@ -41,15 +39,25 @@
 
         .custom-div-icon { background: none; border: none; }
         
-        /* MIGLIORIA 1: Leggibilità loghi con bordo bianco "sticker" */
         .logo-container {
             border-radius: 50%; padding: 3px; display: flex; justify-content: center; align-items: center;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             box-shadow: 0 0 0 2px white, 0 3px 8px rgba(0,0,0,0.4); 
             width: 44px; height: 44px; position: relative;
         }
+
+        /* NUOVO: Sistema Highlight (Pulsazione) */
+        .highlight-active {
+            animation: pulse-gold 2s infinite;
+            box-shadow: 0 0 0 4px #ffd700, 0 0 15px #ffd700 !important;
+        }
+        @keyframes pulse-gold {
+            0% { transform: scale(1); box-shadow: 0 0 0 0px rgba(255, 215, 0, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0px rgba(255, 215, 0, 0); }
+        }
+
         .logo-container:hover { transform: scale(1.4); z-index: 9999 !important; }
-        /* MIGLIORIA 2: Feedback visivo alla pressione */
         .logo-container:active { transform: scale(0.9); }
         
         .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
@@ -129,7 +137,6 @@
         .hidden-logos { display: none; }
 
         .stat-item { font-size: 13px; font-weight: bold; margin: 8px 0; color: #444; }
-        /* MIGLIORIA 5: Box statistiche esteso */
         #stats-breakdown { font-size: 11px; color: #666; font-weight: normal; margin-top: 5px; line-height: 1.2; }
 
         select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; }
@@ -148,11 +155,36 @@
         .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: #007bff; }
         input:checked + .slider:before { transform: translateX(20px); }
+
+        /* NUOVO: Stile Timeline */
+        #timeline-container {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px 20px;
+            border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex; align-items: center; gap: 15px; width: 80%; max-width: 600px;
+        }
+        #timeline-slider { flex-grow: 1; cursor: pointer; }
+        #year-display { font-weight: bold; color: #007bff; min-width: 80px; text-align: center; }
+
+        /* NUOVO: Notifiche Toast */
+        .notification-toast {
+            position: fixed; top: 20px; right: 20px; z-index: 10000;
+            background: #333; color: white; padding: 12px 20px; border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: none; animation: slideIn 0.5s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     </style>
 </head>
 <body>
 
 <div id="loader"><div id="loader-progress"></div></div>
+<div id="notification" class="notification-toast"></div>
+
+<div id="timeline-container">
+    <span style="font-size: 12px; font-weight: bold;">TIMELINE</span>
+    <input type="range" id="timeline-slider" min="1850" max="2026" value="2026">
+    <div id="year-display">Fino al 2026</div>
+</div>
 
 <button id="toggle-panel-btn" onclick="togglePanel()">☰</button>
 
@@ -210,7 +242,8 @@
     <select id="filter-epoca">
         <option value="Tutti">Tutte</option>
         <option value="Antiche">Prima del 1900</option>
-        <option value="Novecento">1900 - 1999</option>
+        <option value="PrimoNovecento">1900 - 1949</option>
+        <option value="SecondoNovecento">1950 - 1999</option>
         <option value="Duemila">Dal 2000 in poi</option>
     </select>
 </div>
@@ -227,23 +260,20 @@
     const urlFoglio = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB3hRuuuzUhGho2Wr_c0KBa8BYYMyASu6n0DrQ8q_o3GU3aw4_oC2vEvhuVbtmqR3Z3y0C5Zgh8Dji/pub?output=csv'; 
     const linkCrowdsourcingBase = "https://docs.google.com/forms/d/e/1FAIpQLScnl0Qz7286ghO6Rkb2UxugFHGaCU_gGVAljUdkbp95zqhr2g/viewform?usp=pp_url&entry.1326851473=";
 
-    // Icone di backup e mappe emoji
     const sportIcons = { "Calcio": "⚽", "Pallacanestro": "🏀", "Pallavolo": "🏐", "Rugby": "🏉", "Pallamano": "🤾", "Pallanuoto": "🤽", "Hockey su ghiaccio": "🏒", "Football americano": "🏈", "Baseball": "⚾" };
-    const placeholderLogo = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjY2MiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgMmwtMTAgOWgxNHoiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjEzIiByPSI5Ij48L2NpcmNsZT48L3N2Zz4=";
+    const placeholderLogo = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjY2MiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCB dPSJNMTIgMmwtMTAgOWgxNHoiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjEzIiByPSI5Ij48L2NpcmNsZT48L3N2Zz4=";
 
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
     var dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' });
     var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' });
     var heatLayer = L.heatLayer([], { radius: 25, blur: 15, maxZoom: 10 });
 
-    // MIGLIORIA 3: Caricamento posizione da URL (Hash)
     var hash = window.location.hash.substring(1).split('/');
     var startCenter = hash.length === 3 ? [hash[1], hash[2]] : [45, 10];
     var startZoom = hash.length === 3 ? hash[0] : 5;
 
     var map = L.map('map', { layers: [osm], zoomControl: false, dragging: !L.Browser.mobile, tap: !L.Browser.mobile }).setView(startCenter, startZoom);
     
-    // Aggiorna URL quando la mappa si muove
     map.on('moveend', function() {
         var center = map.getCenter();
         window.history.replaceState(null, null, `#${map.getZoom()}/${center.lat.toFixed(4)}/${center.lng.toFixed(4)}`);
@@ -277,9 +307,16 @@
         btn.style.display = panel.classList.contains('collapsed') ? 'flex' : 'none';
     }
 
-    // MIGLIORIA 4: Chiusura automatica pannello su mobile
     if (window.innerWidth < 768) {
         setTimeout(togglePanel, 500);
+    }
+
+    // NUOVO: Funzione Notifica
+    function showNotification(msg) {
+        const box = document.getElementById('notification');
+        box.innerText = msg;
+        box.style.display = 'block';
+        setTimeout(() => { box.style.display = 'none'; }, 5000);
     }
 
     document.addEventListener('keydown', function(e) {
@@ -313,6 +350,8 @@
 
     function resetFiltri() {
         document.getElementById('search-input').value = '';
+        document.getElementById('timeline-slider').value = 2026;
+        document.getElementById('year-display').innerText = "Fino al 2026";
         document.querySelectorAll('select').forEach(s => s.value = 'Tutti');
         applicaFiltri();
     }
@@ -354,12 +393,14 @@
                 let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
                 let classeScomparso = s.stato === "scomparso" ? "club-scomparso" : "";
                 let badgeFemminile = (s.genere && s.genere.toLowerCase() === 'f') ? '<div class="gender-badge">♀</div>' : '';
+                
+                // NUOVO: Classe Highlight
+                let highlightClass = (s.highlight && s.highlight.toUpperCase() === 'SI') ? 'highlight-active' : '';
 
-                // MIGLIORIA 6: onerror per loghi mancanti
                 var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
                     icon: L.divIcon({
                         className: 'custom-div-icon',
-                        html: `<div class="logo-container ${classeScomparso}" style="background: ${borderStyle};">
+                        html: `<div class="logo-container ${classeScomparso} ${highlightClass}" style="background: ${borderStyle};">
                                  ${badgeFemminile}
                                  <img src="${s.logo_attuale}" class="logo-img-inner" onerror="this.src='${placeholderLogo}';">
                                </div>`,
@@ -370,7 +411,7 @@
                 marker.nomeNormalizzato = normalizeText(s.nome);
 
                 let flagHtml = s.codice_nazione ? `<img src="https://flagcdn.com/w40/${s.codice_nazione.toLowerCase()}.png" class="flag-icon">` : '';
-                let emojiSport = sportIcons[s.sport] || "🏆"; // MIGLIORIA EXTRA: Icona sport nel titolo
+                let emojiSport = sportIcons[s.sport] || "🏆"; 
 
                 let bacheca = '';
                 if(s.scudetti > 0) bacheca += `<span class="trofeo-item">⭐ ${s.scudetti}</span>`;
@@ -435,25 +476,35 @@
                 const spVal = document.getElementById('filter-sport').value;
                 const eVal = document.getElementById('filter-epoca').value;
                 const gVal = document.getElementById('filter-genere').value;
+                const tVal = parseInt(document.getElementById('timeline-slider').value); // NUOVO: Timeline
                 const isClusterEnabled = document.getElementById('cluster-toggle').checked;
                 
+                document.getElementById('year-display').innerText = tVal === 2026 ? "Tutti i tempi" : "Fino al " + tVal;
+
                 markers.clearLayers();
                 markersLayer.clearLayers();
                 let heatPoints = [];
-                let sportCounts = {}; // MIGLIORIA 5
+                let sportCounts = {};
                 
                 visibiliAttualmente = allMarkers.filter(m => {
                     let ok = true;
                     const stadioNorm = normalizeText(m.dati.stadio_nome);
+                    const anno = parseInt(m.dati.fondazione);
+
                     if (sVal && !m.nomeNormalizzato.includes(sVal) && !stadioNorm.includes(sVal)) ok = false;
                     if (nVal !== "Tutti" && m.dati.nazione !== nVal) ok = false;
                     if (stVal !== "Tutti" && m.dati.stato !== stVal) ok = false;
                     if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
                     if (gVal === "f" && (!m.dati.genere || m.dati.genere.toLowerCase() !== 'f')) ok = false;
                     if (gVal === "m" && m.dati.genere && m.dati.genere.toLowerCase() === 'f') ok = false;
-                    const anno = parseInt(m.dati.fondazione);
+                    
+                    // NUOVO: Logica Timeline
+                    if (anno > tVal) ok = false;
+
+                    // NUOVO: Logica Epoche Separate
                     if (eVal === "Antiche" && anno >= 1900) ok = false;
-                    if (eVal === "Novecento" && (anno < 1900 || anno >= 2000)) ok = false;
+                    if (eVal === "PrimoNovecento" && (anno < 1900 || anno >= 1950)) ok = false;
+                    if (eVal === "SecondoNovecento" && (anno < 1950 || anno >= 2000)) ok = false;
                     if (eVal === "Duemila" && anno < 2000) ok = false;
                     
                     if(ok) {
@@ -476,7 +527,6 @@
                 heatLayer.setLatLngs(heatPoints);
                 document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibiliAttualmente.length}</b>`;
                 
-                // MIGLIORIA 5: Testo statistiche sport
                 let statsText = Object.entries(sportCounts)
                     .sort((a,b) => b[1] - a[1])
                     .map(([name, count]) => `${sportIcons[name] || ''} ${count}`).join(' • ');
@@ -491,6 +541,7 @@
             }
 
             document.getElementById('search-input').oninput = applicaFiltri;
+            document.getElementById('timeline-slider').oninput = applicaFiltri; // NUOVO
             document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
             applicaFiltri();
         }
@@ -501,15 +552,36 @@
         onAdd: function (map) {
             var div = L.DomUtil.create('div', 'locate-btn');
             div.innerHTML = '<svg viewBox="0 0 24 24" width="20"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>';
-            div.onclick = function(e){ e.stopPropagation(); map.locate({setView: true, maxZoom: 13}); };
+            div.onclick = function(e){ 
+                e.stopPropagation(); 
+                map.locate({setView: true, maxZoom: 13}); 
+            };
             return div;
         }
     });
     map.addControl(new LocateControl());
 
-    // MODIFICA: Auto-centratura cliccando sui markers
+    // NUOVO: Geofencing & Notifiche
+    map.on('locationfound', function(e) {
+        let nearby = null;
+        let minDist = 500; // 500 metri
+
+        allMarkers.forEach(m => {
+            let dist = e.latlng.distanceTo(m.getLatLng());
+            if (dist < minDist) {
+                nearby = m.dati.nome;
+                minDist = dist;
+            }
+        });
+
+        if (nearby) {
+            showNotification(`📍 Sei vicino allo stadio del ${nearby}!`);
+        } else {
+            showNotification("📍 Posizione trovata!");
+        }
+    });
+
     function onMarkerClick(a) {
-        // Centra la mappa con una leggera animazione (smooth scroll)
         map.panTo(a.layer.getLatLng()); 
         popup.setContent(a.layer.descrizione).setLatLng(a.layer.getLatLng()).openOn(map);
     }
