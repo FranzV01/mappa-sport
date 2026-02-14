@@ -164,6 +164,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: none; animation: slideIn 0.5s ease;
         }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        
         .btn-wiki {
             display: inline-block; margin: 8px 0; padding: 6px 14px;
             background: #ffffff; color: #3366cc; text-decoration: none;
@@ -171,6 +172,34 @@
             font-weight: bold; transition: all 0.2s;
         }
         .btn-wiki:hover { background: #3366cc; color: #ffffff; }
+
+        .wiki-dynamic-data {
+            margin: 10px 0;
+            padding: 8px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            font-size: 12px;
+            border: 1px solid #eee;
+        }
+        .wiki-league {
+            font-weight: bold;
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 3px;
+         }
+         .wiki-trophies {
+           color: #555;
+           font-style: italic;
+           line-height: 1.3;
+         }
+         .wiki-loading {
+           font-size: 10px;
+           color: #999;
+           animation: blink 1.5s infinite;
+         }
+           @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -471,11 +500,15 @@
                             Sport: <b>${s.sport}</b> | Stadio: <b>${s.stadio_nome || 'N.D.'}</b>
                         </div>
 
+                   <div id="wiki-data-${marker._leaflet_id}" class="wiki-dynamic-data">
+                        <span class="wiki-loading">Caricamento campionato e trofei...</span>
+                        </div>
+
                         ${wikiBtn} ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
                         
                         ${annivItems.length > 0 ? `
                             <div class="anniversario-box">
-                                <span class="box-label">✨ Loghi Anniversario</span>
+                                <span class="box-label">Loghi Anniversario</span>
                                 <div class="anniversario-grid">${annivItems.slice(0,3).join('')}</div>
                                 ${annivItems.length > 3 ? `
                                     <div class="anniversario-grid hidden-logos" style="margin-top:8px;">${annivItems.slice(3).join('')}</div>
@@ -485,7 +518,7 @@
 
                         ${loghiItems.length > 0 ? `
                             <div class="storici-container">
-                                <span class="box-label">📜 Loghi Storici</span>
+                                <span class="box-label">Loghi Storici</span>
                                 <div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
                                 ${loghiItems.length > 3 ? `
                                     <div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div>
@@ -612,14 +645,62 @@
     });
 
     function onMarkerClick(a) {
-        map.panTo(a.layer.getLatLng()); 
-        popup.setContent(a.layer.descrizione).setLatLng(a.layer.getLatLng()).openOn(map);
+    const marker = a.layer;
+    map.panTo(marker.getLatLng()); 
+    popup.setContent(marker.descrizione).setLatLng(marker.getLatLng()).openOn(map);
+
+    // Avvia il recupero dati solo se Wikipedia è attivo per questo club
+    if (marker.dati.wiki && marker.dati.wiki.toLowerCase() === "si") {
+        fetchWikiExtra(marker._leaflet_id, marker.dati.nome);
     }
+}
 
     markers.on('click', onMarkerClick);
     markersLayer.on('click', onMarkerClick);
+
+    async function fetchWikiExtra(markerId, teamName) {
+    const container = document.getElementById(`wiki-data-${markerId}`);
+    if (!container) return;
+
+    try {
+        const url = `https://en.wikipedia.org/api/rest_v1/page/mobile-sections/${encodeURIComponent(teamName.replace(/\s+/g, '_'))}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        // Cerchiamo l'infobox nei dati ricevuti
+        const infobox = data.lead.sections[0].text;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(infobox, 'text/html');
+
+        // Estrazione Lega
+        let league = "Lega non trovata";
+        const rows = doc.querySelectorAll('tr');
+        rows.forEach(row => {
+            if (row.innerText.includes('League') || row.innerText.includes('Division')) {
+                league = row.querySelector('td')?.innerText || league;
+            }
+        });
+
+        // Estrazione Trofei (semplificata per i titoli principali)
+        let trophies = [];
+        const trophyKeywords = ['Champions', 'League titles', 'Cup titles', 'National titles'];
+        rows.forEach(row => {
+            trophyKeywords.forEach(key => {
+                if (row.innerText.includes(key)) {
+                    let val = row.querySelector('td')?.innerText;
+                    if (val) trophies.push(val.trim());
+                }
+            });
+        });
+
+        container.innerHTML = `
+            <span class="wiki-league">🏆 ${league}</span>
+            <div class="wiki-trophies">${trophies.length > 0 ? trophies.join(' • ') : 'Dati trofei non disponibili'}</div>
+        `;
+    } catch (error) {
+        container.innerHTML = "<span style='color:#c33; font-size:10px;'>Dati Wikipedia non disponibili</span>";
+    }
+}
 </script>
 </body>
 </html>
-
-
