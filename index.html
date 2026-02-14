@@ -104,13 +104,6 @@
         }
         .btn-wiki:hover { background: #3366cc; color: #ffffff; }
 
-        /* AGGIUNTO: Stile Pulsante Condividi */
-        .btn-share {
-            background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;
-            padding: 4px 10px; border-radius: 15px; font-size: 10px; cursor: pointer;
-            margin-top: 5px; display: inline-flex; align-items: center; gap: 4px;
-        }
-
         .btn-update {
             display: block; margin-top: 10px; font-size: 10px; color: #999; 
             text-decoration: none; border-top: 1px dotted #ccc; padding-top: 5px;
@@ -163,6 +156,7 @@
         input:checked + .slider { background-color: #007bff; }
         input:checked + .slider:before { transform: translateX(20px); }
 
+        /* NUOVO: Stile Timeline */
         #timeline-container {
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
             z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px 20px;
@@ -172,6 +166,7 @@
         #timeline-slider { flex-grow: 1; cursor: pointer; }
         #year-display { font-weight: bold; color: #007bff; min-width: 80px; text-align: center; }
 
+        /* NUOVO: Notifiche Toast */
         .notification-toast {
             position: fixed; top: 20px; right: 20px; z-index: 10000;
             background: #333; color: white; padding: 12px 20px; border-radius: 10px;
@@ -202,21 +197,11 @@
     
     <button class="btn-ui" style="width:100%; margin-bottom:10px;" onclick="clubCasuale()">🎲 Club Casuale</button>
     <div id="count-box" class="stat-item">Caricamento...</div>
-    <div id="stats-breakdown"></div> 
-    
-    <div class="stat-item" style="background: #f0f7ff; padding: 8px; border-radius: 8px; border: 1px solid #cce5ff; margin-top:10px;">
+    <div id="stats-breakdown"></div> <div class="stat-item" style="background: #f0f7ff; padding: 8px; border-radius: 8px; border: 1px solid #cce5ff; margin-top:10px;">
         Raggruppa loghi: 
         <label class="switch">
             <input type="checkbox" id="cluster-toggle" checked onchange="applicaFiltri()">
             <span class="slider"></span>
-        </label>
-    </div>
-
-    <div class="stat-item" style="background: #fff9e6; padding: 8px; border-radius: 8px; border: 1px solid #ffeeba; margin-top:5px;">
-        Solo con titoli: 
-        <label class="switch">
-            <input type="checkbox" id="filter-titoli" onchange="applicaFiltri()">
-            <span class="slider" style="background-color: #ffd700 !important;"></span>
         </label>
     </div>
 
@@ -289,13 +274,6 @@
 
     var map = L.map('map', { layers: [osm], zoomControl: false, dragging: !L.Browser.mobile, tap: !L.Browser.mobile }).setView(startCenter, startZoom);
     
-    // AGGIUNTO: Auto-Night Mode (Cambia in Dark Mode se dopo le 20:00)
-    const oraAttuale = new Date().getHours();
-    if (oraAttuale >= 20 || oraAttuale < 7) {
-        map.removeLayer(osm);
-        map.addLayer(dark);
-    }
-
     map.on('moveend', function() {
         var center = map.getCenter();
         window.history.replaceState(null, null, `#${map.getZoom()}/${center.lat.toFixed(4)}/${center.lng.toFixed(4)}`);
@@ -333,23 +311,13 @@
         setTimeout(togglePanel, 500);
     }
 
+    // NUOVO: Funzione Notifica
     function showNotification(msg) {
         const box = document.getElementById('notification');
         box.innerText = msg;
         box.style.display = 'block';
         setTimeout(() => { box.style.display = 'none'; }, 5000);
     }
-
-    // AGGIUNTO: Funzione Condividi
-    window.condividiClub = function(nome) {
-        const text = `Guarda il club ${nome} sulla Mappa Mondiale Club! 🌍⚽`;
-        const url = window.location.href;
-        if (navigator.share) {
-            navigator.share({ title: nome, text: text, url: url });
-        } else {
-            window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`);
-        }
-    };
 
     document.addEventListener('keydown', function(e) {
         if (e.key === '/' && document.activeElement !== document.getElementById('search-input')) {
@@ -384,7 +352,6 @@
         document.getElementById('search-input').value = '';
         document.getElementById('timeline-slider').value = 2026;
         document.getElementById('year-display').innerText = "Fino al 2026";
-        document.getElementById('filter-titoli').checked = false; // AGGIUNTO
         document.querySelectorAll('select').forEach(s => s.value = 'Tutti');
         applicaFiltri();
     }
@@ -427,6 +394,7 @@
                 let classeScomparso = s.stato === "scomparso" ? "club-scomparso" : "";
                 let badgeFemminile = (s.genere && s.genere.toLowerCase() === 'f') ? '<div class="gender-badge">♀</div>' : '';
                 
+                // NUOVO: Classe Highlight
                 let highlightClass = (s.highlight && s.highlight.toUpperCase() === 'SI') ? 'highlight-active' : '';
 
                 var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
@@ -490,7 +458,6 @@
                         </div>
                         <div class="trofei-box">${bacheca}</div>
                         ${wikiBtn}
-                        <div onclick="condividiClub('${s.nome.replace(/'/g, "\\'")}')" class="btn-share">🔗 Condividi</div>
                         ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
                         ${s.logo_centenario ? `<div class="centenario-box"><span class="box-label">Logo Centenario</span><img src="${s.logo_centenario}" class="centenario-img" onerror="this.src='${placeholderLogo}';"></div>` : ''}
                         ${loghiItems.length > 0 ? `<div class="storici-container"><span class="box-label">Loghi Storici</span><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
@@ -509,8 +476,7 @@
                 const spVal = document.getElementById('filter-sport').value;
                 const eVal = document.getElementById('filter-epoca').value;
                 const gVal = document.getElementById('filter-genere').value;
-                const onlyTitoli = document.getElementById('filter-titoli').checked; // AGGIUNTO
-                const tVal = parseInt(document.getElementById('timeline-slider').value);
+                const tVal = parseInt(document.getElementById('timeline-slider').value); // NUOVO: Timeline
                 const isClusterEnabled = document.getElementById('cluster-toggle').checked;
                 
                 document.getElementById('year-display').innerText = tVal === 2026 ? "Tutti i tempi" : "Fino al " + tVal;
@@ -524,7 +490,6 @@
                     let ok = true;
                     const stadioNorm = normalizeText(m.dati.stadio_nome);
                     const anno = parseInt(m.dati.fondazione);
-                    const haTitoli = (parseInt(m.dati.scudetti) || 0) + (parseInt(m.dati.coppe_nazionali) || 0) + (parseInt(m.dati.coppe_internazionali) || 0) > 0;
 
                     if (sVal && !m.nomeNormalizzato.includes(sVal) && !stadioNorm.includes(sVal)) ok = false;
                     if (nVal !== "Tutti" && m.dati.nazione !== nVal) ok = false;
@@ -533,9 +498,10 @@
                     if (gVal === "f" && (!m.dati.genere || m.dati.genere.toLowerCase() !== 'f')) ok = false;
                     if (gVal === "m" && m.dati.genere && m.dati.genere.toLowerCase() === 'f') ok = false;
                     
-                    if (onlyTitoli && !haTitoli) ok = false; // AGGIUNTO: Logica titoli
+                    // NUOVO: Logica Timeline
                     if (anno > tVal) ok = false;
 
+                    // NUOVO: Logica Epoche Separate
                     if (eVal === "Antiche" && anno >= 1900) ok = false;
                     if (eVal === "PrimoNovecento" && (anno < 1900 || anno >= 1950)) ok = false;
                     if (eVal === "SecondoNovecento" && (anno < 1950 || anno >= 2000)) ok = false;
@@ -566,12 +532,6 @@
                     .map(([name, count]) => `${sportIcons[name] || ''} ${count}`).join(' • ');
                 document.getElementById('stats-breakdown').innerHTML = statsText;
                 
-                // AGGIUNTO: Zoom automatico se si filtra per nazione
-                if (nVal !== "Tutti" && visibiliAttualmente.length > 0 && sVal === "") {
-                    const group = new L.featureGroup(visibiliAttualmente);
-                    map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 7 });
-                }
-
                 if (sVal.length >= 2 && visibiliAttualmente.length === 1) {
                     map.flyTo(visibiliAttualmente[0].getLatLng(), 15, { animate: true });
                     map.once('moveend', () => {
@@ -581,7 +541,7 @@
             }
 
             document.getElementById('search-input').oninput = applicaFiltri;
-            document.getElementById('timeline-slider').oninput = applicaFiltri; 
+            document.getElementById('timeline-slider').oninput = applicaFiltri; // NUOVO
             document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
             applicaFiltri();
         }
@@ -601,9 +561,10 @@
     });
     map.addControl(new LocateControl());
 
+    // NUOVO: Geofencing & Notifiche
     map.on('locationfound', function(e) {
         let nearby = null;
-        let minDist = 500; 
+        let minDist = 500; // 500 metri
 
         allMarkers.forEach(m => {
             let dist = e.latlng.distanceTo(m.getLatLng());
