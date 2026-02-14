@@ -92,26 +92,13 @@
         .popup-title { margin: 5px 0; color: #222; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; }
         .popup-info { font-size: 13px; color: #555; line-height: 1.4; }
 
-        /* Stile Wikipedia e Lega */
-        .wiki-data-box { font-size: 12px; background: #f9f9f9; padding: 8px; border-radius: 8px; margin: 8px 0; border: 1px solid #ddd; text-align: left; }
-        .league-label { color: #d32f2f; font-weight: bold; display: block; margin-bottom: 4px; border-bottom: 1px solid #ffcdd2; padding-bottom: 2px; }
-        .trofei-wiki { font-size: 11px; color: #333; }
-
-        .btn-wiki {
-            display: inline-block; margin: 8px 0; padding: 6px 14px;
-            background: #ffffff; color: #3366cc; text-decoration: none;
-            border: 2px solid #3366cc; border-radius: 20px; font-size: 11px; 
-            font-weight: bold; transition: all 0.2s;
-        }
-        .btn-wiki:hover { background: #3366cc; color: #ffffff; }
-
         .btn-update {
             display: block; margin-top: 10px; font-size: 10px; color: #999; 
             text-decoration: none; border-top: 1px dotted #ccc; padding-top: 5px;
         }
         .btn-update:hover { color: #555; text-decoration: underline; }
 
-        .precedenti-box { background: #e3f2fd; border: 1px solid #90caf9; margin-top: 8px; padding: 8px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; }
+        .precedenti-box { background: #f5f5f5; border: 1px solid #ddd; margin-top: 8px; padding: 8px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; }
         .precedenti-grid { display: flex; justify-content: center; gap: 10px; margin-top: 5px; }
         .origin-wrapper { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
         .origin-logo { 
@@ -123,17 +110,23 @@
         .origin-name { font-size: 9px; margin-top: 3px; color: #555; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
         .btn-link-club {
-            display: block; background: #fff; border: 1px solid #90caf9; color: #1976d2; 
+            display: block; background: #fff; border: 1px solid #ccc; color: #555; 
             font-size: 10px; padding: 4px; border-radius: 4px; cursor: pointer;
         }
 
-        /* Sfondo oro per anniversario e storici */
-        .anniversario-box, .storici-container { margin: 10px 0; padding: 8px; border-radius: 8px; background: #fff9c4; border: 1px solid #fbc02d; }
-        .box-label { font-size: 9px; font-weight: bold; display: block; margin-bottom: 5px; text-transform: uppercase; color: #666; }
+        /* Tabelle Loghi Uniformate */
+        .anniversario-box, .storici-container { margin: 10px 0; padding: 8px; border-radius: 8px; }
+        
+        /* Colori specifici */
+        .anniversario-box { background: #fff9c4; border: 1px solid #fbc02d; } /* ORO */
+        .storici-container { background: #e3f2fd; border: 1px solid #90caf9; } /* AZZURRINO */
+
+        .box-label { font-size: 9px; font-weight: bold; display: block; margin-bottom: 5px; text-transform: uppercase; color: #555; }
         .anniversario-img, .storico-img { width: 45px; height: 45px; object-fit: contain; background: white; border: 1px solid #eee; border-radius: 4px; }
         .storico-grid, .anniversario-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-        .storico-item, .anniversario-item { flex: 0 0 45px; text-align: center; font-size: 9px; color: #777; }
-        .btn-espandi { background: none; border: none; color: #007bff; font-size: 10px; cursor: pointer; text-decoration: underline; margin-top: 5px; display: block; width: 100%; }
+        .storico-item, .anniversario-item { flex: 0 0 45px; text-align: center; font-size: 9px; color: #444; }
+        
+        .btn-espandi { background: none; border: none; color: #007bff; font-size: 10px; cursor: pointer; text-decoration: underline; margin-top: 5px; display: block; width: 100%; font-weight: bold; }
         .hidden-logos { display: none; }
 
         .stat-item { font-size: 13px; font-weight: bold; margin: 8px 0; color: #444; }
@@ -325,47 +318,6 @@
         setTimeout(() => { box.style.display = 'none'; }, 5000);
     }
 
-    // --- FUNZIONE INTEGRAZIONE WIKIPEDIA ---
-    async function fetchWikiData(marker) {
-        const clubName = marker.dati.nome;
-        const wikiId = `wiki-box-${marker._leaflet_id}`;
-        const box = document.getElementById(wikiId);
-        if (!box || box.dataset.loaded === "true") return;
-
-        try {
-            // Cerchiamo l'infobox nella wikipedia inglese
-            const response = await fetch(`https://en.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(clubName)}&prop=text&section=0&format=json&origin=*`);
-            const data = await response.json();
-            if (data.parse) {
-                const html = data.parse.text["*"];
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                
-                // Estrazione Lega
-                let league = "N.D.";
-                const leagueRow = Array.from(doc.querySelectorAll('tr')).find(tr => tr.innerText.includes('League'));
-                if (leagueRow) league = leagueRow.querySelector('td')?.innerText.replace(/\[.*?\]/g, '') || "N.D.";
-
-                // Estrazione Trofei (Semplificata: cerca la sezione Honours o conta le occorrenze di titoli comuni)
-                // Nota: In un'app reale servirebbe un parsing più complesso, qui estraiamo una sintesi
-                let honours = "Dati trofei non rilevati automaticamente.";
-                const rows = Array.from(doc.querySelectorAll('tr'));
-                const honoursRows = rows.filter(r => r.innerText.match(/winners|titles|champions/i));
-                if(honoursRows.length > 0) {
-                    honours = "Controlla sezione 'Honours' su Wikipedia per i dettagli.";
-                }
-
-                box.innerHTML = `
-                    <span class="league-label">🏆 ${league}</span>
-                    <div class="trofei-wiki"><i>Dati Wikipedia:</i><br>${honours}</div>
-                `;
-                box.dataset.loaded = "true";
-            }
-        } catch (e) {
-            box.innerHTML = "Impossibile caricare dati live.";
-        }
-    }
-
     document.addEventListener('keydown', function(e) {
         if (e.key === '/' && document.activeElement !== document.getElementById('search-input')) {
             e.preventDefault();
@@ -376,13 +328,9 @@
     map.on('popupopen', function(e) {
         var marker = e.popup._source;
         if (marker && marker.dati) {
-            // Colore bordo popup
             let coloriArray = marker.dati.colori ? marker.dati.colori.split(',') : ['#333'];
             let wrapper = e.popup.getElement().querySelector('.leaflet-popup-content-wrapper');
             wrapper.style.border = `4px solid ${coloriArray[0]}`;
-            
-            // Avvia fetch Wikipedia
-            fetchWikiData(marker);
         }
     });
 
@@ -436,7 +384,6 @@
                 document.getElementById('filter-nazione').appendChild(opt);
             });
 
-            // Carica filtri salvati
             const savedFilters = JSON.parse(localStorage.getItem('mapFilters') || '{}');
             Object.keys(savedFilters).forEach(id => {
                 const el = document.getElementById(id);
@@ -469,7 +416,6 @@
                 let flagHtml = s.codice_nazione ? `<img src="https://flagcdn.com/w40/${s.codice_nazione.toLowerCase()}.png" class="flag-icon">` : '';
                 let emojiSport = sportIcons[s.sport] || "🏆"; 
 
-                // Logica Precedenti
                 let precedentiHTML = '';
                 [s.club_precedente_1, s.club_precedente_2, s.club_precedente_3].forEach(cp => {
                     if(cp && cp.trim() !== "") {
@@ -487,14 +433,14 @@
                     }
                 });
 
-                // Logica Loghi Storici
+                // --- LOGICA LOGHI STORICI (Azzurrino) ---
                 let loghiItems = [];
                 for(let i=1; i<=10; i++) {
                     let url = s[`logo_storia_${i}_url`];
                     if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img" onerror="this.src='${placeholderLogo}';"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
-                // NUOVA LOGICA: Loghi Anniversario
+                // --- LOGICA LOGHI ANNIVERSARIO (Oro) ---
                 let annivItems = [];
                 for(let i=1; i<=5; i++) {
                     let url = s[`logo_anniversario_${i}_url`];
@@ -502,12 +448,6 @@
                     if(url) annivItems.push(`<div class="anniversario-item"><img src="${url}" class="anniversario-img" onerror="this.src='${placeholderLogo}';"><b>${dataA || ''}</b></div>`);
                 }
 
-                let wikiBtn = "";
-                if (s.wiki && s.wiki.toLowerCase() === "si") {
-                    const wikiNome = s.nome.replace(/\s+/g, '_');
-                    wikiBtn = `<a href="https://en.wikipedia.org/wiki/${wikiNome}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
-                }
-                
                 marker.descrizione = `
                     <div class="popup-card">
                         <div class="popup-header"><h2 class="popup-title">${emojiSport} ${s.nome}</h2></div>
@@ -517,16 +457,27 @@
                             Sport: <b>${s.sport}</b> | Stadio: <b>${s.stadio_nome || 'N.D.'}</b>
                         </div>
 
-                        <div id="wiki-box-${marker._leaflet_id}" class="wiki-data-box">Caricamento dati lega e trofei...</div>
-
-                        ${wikiBtn}
-                        
                         ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
                         
-                        ${annivItems.length > 0 ? `<div class="anniversario-box"><span class="box-label">Loghi Anniversario</span><div class="anniversario-grid">${annivItems.join('')}</div></div>` : ''}
+                        ${annivItems.length > 0 ? `
+                            <div class="anniversario-box">
+                                <span class="box-label">✨ Loghi Anniversario</span>
+                                <div class="anniversario-grid">${annivItems.slice(0,3).join('')}</div>
+                                ${annivItems.length > 3 ? `
+                                    <div class="anniversario-grid hidden-logos" style="margin-top:8px;">${annivItems.slice(3).join('')}</div>
+                                    <button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>
+                                ` : ''}
+                            </div>` : ''}
 
-                        ${loghiItems.length > 0 ? `<div class="storici-container"><span class="box-label">Loghi Storici</span><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
-                        ${loghiItems.length > 3 ? `<div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div><button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
+                        ${loghiItems.length > 0 ? `
+                            <div class="storici-container">
+                                <span class="box-label">📜 Loghi Storici</span>
+                                <div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
+                                ${loghiItems.length > 3 ? `
+                                    <div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div>
+                                    <button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>
+                                ` : ''}
+                            </div>` : ''}
                         
                         <a href="${linkCrowdsourcingBase}${encodeURIComponent(s.nome)}" target="_blank" class="btn-update">Segnala aggiornamento/errore ✏️</a>
                     </div>`;
@@ -545,7 +496,6 @@
                 const tVal = parseInt(document.getElementById('timeline-slider').value);
                 const isClusterEnabled = document.getElementById('cluster-toggle').checked;
                 
-                // Salva filtri
                 localStorage.setItem('mapFilters', JSON.stringify({
                     'filter-nazione': nVal, 'filter-stato': stVal, 'filter-sport': spVal,
                     'filter-epoca': eVal, 'filter-genere': gVal, 'timeline-slider': tVal
@@ -614,7 +564,6 @@
         }
     });
 
-    // --- CONTROLLI POSIZIONE ---
     var LocateControl = L.Control.extend({
         options: { position: 'bottomright' },
         onAdd: function (map) {
