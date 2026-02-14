@@ -164,6 +164,13 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: none; animation: slideIn 0.5s ease;
         }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .btn-wiki {
+            display: inline-block; margin: 8px 0; padding: 6px 14px;
+            background: #ffffff; color: #3366cc; text-decoration: none;
+            border: 2px solid #3366cc; border-radius: 20px; font-size: 11px; 
+            font-weight: bold; transition: all 0.2s;
+        }
+        .btn-wiki:hover { background: #3366cc; color: #ffffff; }
     </style>
 </head>
 <body>
@@ -451,9 +458,8 @@
                 // --- LOGICA TASTO WIKIPEDIA ---
                 let wikiBtn = "";
                     if (s.wiki && s.wiki.toLowerCase() === "si") {
-                // Sostituisce gli spazi con underscore per il link Wikipedia
                     const wikiNome = s.nome.replace(/\s+/g, '_');
-                    wikiBtn = `<a href="https://en.wikipedia.org/wiki/${wikiNome}" target="_blank" class="btn-wiki" style="display: block; text-align: center; background: #f8f9fa; border: 1px solid #ddd; padding: 5px; margin-top: 10px; border-radius: 6px; text-decoration: none; color: #333; font-size: 12px; font-weight: bold;">Wikipedia 📖</a>`;
+                    wikiBtn = `<a href="https://en.wikipedia.org/wiki/${wikiNome}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
                 }
 
                 marker.descrizione = `
@@ -615,4 +621,5 @@
 </script>
 </body>
 </html>
+
 
