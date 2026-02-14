@@ -363,19 +363,13 @@
     }
 
     function clubCasuale() {
-    map.closePopup();
-    if (visibiliAttualmente.length === 0) return;
-    const randomMarker = visibiliAttualmente[Math.floor(Math.random() * visibiliAttualmente.length)];
-    
-    // flyTo uniforme: durata 1.5 secondi
-    map.flyTo(randomMarker.getLatLng(), 16, {
-        animate: true,
-        duration: 1.5 
-    }); 
-
-    map.once('moveend', () => { 
-        popup.setContent(randomMarker.descrizione).setLatLng(randomMarker.getLatLng()).openOn(map); 
-    });
+        map.closePopup();
+        if (visibiliAttualmente.length === 0) return;
+        const randomMarker = visibiliAttualmente[Math.floor(Math.random() * visibiliAttualmente.length)];
+        map.flyTo(randomMarker.getLatLng(), 16); 
+        map.once('moveend', () => { 
+            popup.setContent(randomMarker.descrizione).setLatLng(randomMarker.getLatLng()).openOn(map); 
+        });
     }
 
     window.toggleLoghi = function(btn) {
@@ -400,8 +394,7 @@
             const savedFilters = JSON.parse(localStorage.getItem('mapFilters') || '{}');
             Object.keys(savedFilters).forEach(id => {
                 const el = document.getElementById(id);
-                if (savedFilters['cluster-enabled'] !== undefined) {
-                document.getElementById('cluster-toggle').checked = savedFilters['cluster-enabled'];
+                if(el) el.value = savedFilters[id];
             });
 
             data.forEach((s, index) => {
@@ -519,8 +512,7 @@
                 
                 localStorage.setItem('mapFilters', JSON.stringify({
                     'filter-nazione': nVal, 'filter-stato': stVal, 'filter-sport': spVal,
-                    'filter-epoca': eVal, 'filter-genere': gVal, 'timeline-slider': tVal,
-                    'cluster-enabled': isClusterEnabled
+                    'filter-epoca': eVal, 'filter-genere': gVal, 'timeline-slider': tVal
                 }));
 
                 document.getElementById('year-display').innerText = tVal === 2026 ? "Tutti i tempi" : "Fino al " + tVal;
@@ -553,13 +545,6 @@
                         sportCounts[m.dati.sport] = (sportCounts[m.dati.sport] || 0) + 1;
                     }
                     return ok;
-
-                    if (sVal.length >= 3 && visibiliAttualmente.length === 1) {
-                    const target = visibiliAttualmente[0];
-                    if (!map.getBounds().contains(target.getLatLng())) { // Vola solo se non è già a schermo
-                    map.flyTo(target.getLatLng(), 16, {
-                    animate: true,
-                    duration: 1.5
                 });
 
                 if (isClusterEnabled) {
@@ -587,18 +572,6 @@
             }
 
             document.getElementById('search-input').oninput = applicaFiltri;
-                        document.getElementById('search-input').onkeydown = function(e) {
-    if (e.key === 'Enter' && visibiliAttualmente.length > 0) {
-        if (visibiliAttualmente.length === 1) {
-            // Se c'è un solo risultato, vola vicino
-            map.flyTo(visibiliAttualmente[0].getLatLng(), 16, { animate: true, duration: 1.5 });
-        } else {
-            // Se ce ne sono diversi, inquadrali tutti
-            const group = new L.featureGroup(visibiliAttualmente);
-            map.flyToBounds(group.getBounds(), { padding: [50, 50], duration: 1.5 });
-        }
-    }
-};
             document.getElementById('timeline-slider').oninput = applicaFiltri; 
             document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
             applicaFiltri();
