@@ -510,11 +510,9 @@
                 const tVal = parseInt(document.getElementById('timeline-slider').value);
                 const isClusterEnabled = document.getElementById('cluster-toggle').checked;
                 
-                // --- AGGIUNTA: SALVATAGGIO STATO CLUSTER ---
                 localStorage.setItem('mapFilters', JSON.stringify({
                     'filter-nazione': nVal, 'filter-stato': stVal, 'filter-sport': spVal,
-                    'filter-epoca': eVal, 'filter-genere': gVal, 'timeline-slider': tVal,
-                    'cluster-enabled': isClusterEnabled
+                    'filter-epoca': eVal, 'filter-genere': gVal, 'timeline-slider': tVal
                 }));
 
                 document.getElementById('year-display').innerText = tVal === 2026 ? "Tutti i tempi" : "Fino al " + tVal;
@@ -567,14 +565,7 @@
                     .map(([name, count]) => `${sportIcons[name] || ''} ${count}`).join(' • ');
                 document.getElementById('stats-breakdown').innerHTML = statsText;
                 
-                // --- AGGIUNTA: FLYTO OMOGENEO PER RICERCA ---
-                if (sVal.length > 2 && visibiliAttualmente.length === 1) {
-                    const target = visibiliAttualmente[0];
-                    map.flyTo(target.getLatLng(), 16);
-                    map.once('moveend', function() {
-                        popup.setContent(target.descrizione).setLatLng(target.getLatLng()).openOn(map);
-                    });
-                } else if (nVal !== "Tutti" && visibiliAttualmente.length > 0 && sVal === "") {
+                if (nVal !== "Tutti" && visibiliAttualmente.length > 0 && sVal === "") {
                     const group = new L.featureGroup(visibiliAttualmente);
                     map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 7 });
                 }
@@ -583,13 +574,6 @@
             document.getElementById('search-input').oninput = applicaFiltri;
             document.getElementById('timeline-slider').oninput = applicaFiltri; 
             document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
-
-            // --- AGGIUNTA: RIPRISTINO STATO CHECKBOX AL CARICAMENTO ---
-            const savedFilters = JSON.parse(localStorage.getItem('mapFilters') || '{}');
-            if (savedFilters['cluster-enabled'] !== undefined) {
-                document.getElementById('cluster-toggle').checked = savedFilters['cluster-enabled'];
-            }
-
             applicaFiltri();
         }
     });
@@ -637,4 +621,3 @@
 </script>
 </body>
 </html>
-
