@@ -93,33 +93,9 @@
         .popup-info { font-size: 13px; color: #555; line-height: 1.4; }
 
         /* Stile Wikipedia e Lega */
-        .wiki-data-box {
-    font-size: 12px;
-    background: #f8f9fa;
-    padding: 10px;
-    border-radius: 10px;
-    margin: 10px 0;
-    border-left: 4px solid #3366cc; /* Blu Wikipedia */
-    text-align: left;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
-}
-
-.league-label {
-    color: #3366cc;
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    font-size: 10px;
-    letter-spacing: 0.5px;
-}
-
-.trofei-wiki {
-    font-size: 11px;
-    color: #444;
-    line-height: 1.4;
-    font-style: italic;
-}
+        .wiki-data-box { font-size: 12px; background: #f9f9f9; padding: 8px; border-radius: 8px; margin: 8px 0; border: 1px solid #ddd; text-align: left; }
+        .league-label { color: #d32f2f; font-weight: bold; display: block; margin-bottom: 4px; border-bottom: 1px solid #ffcdd2; padding-bottom: 2px; }
+        .trofei-wiki { font-size: 11px; color: #333; }
 
         .btn-wiki {
             display: inline-block; margin: 8px 0; padding: 6px 14px;
@@ -351,68 +327,43 @@
 
     // --- FUNZIONE INTEGRAZIONE WIKIPEDIA ---
     async function fetchWikiData(marker) {
-    const clubName = marker.dati.wiki_id || marker.dati.nome; // Usa wiki_id se esiste
-    const wikiId = `wiki-box-${marker._leaflet_id}`;
-    const box = document.getElementById(wikiId);
-    if (!box || box.dataset.loaded === "true") return;
+        const clubName = marker.dati.nome;
+        const wikiId = `wiki-box-${marker._leaflet_id}`;
+        const box = document.getElementById(wikiId);
+        if (!box || box.dataset.loaded === "true") return;
 
-    // Controllo Cache Locale: se lo abbiamo già scaricato, caricalo subito
-    const cachedData = localStorage.getItem(`wiki_${clubName}`);
-    if (cachedData) {
-        renderWikiData(box, JSON.parse(cachedData));
-        return;
-    }
-
-    try {
-        // API per ottenere il testo dell'Infobox
-        const response = await fetch(`https://en.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(clubName)}&prop=text&section=0&format=json&origin=*`);
-        const data = await response.json();
-        
-        if (data.parse) {
-            const html = data.parse.text["*"];
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const infobox = doc.querySelector('.infobox');
-
-            if (infobox) {
-                // Estrazione Lega/Campionato
-                let league = "N.D.";
-                const rows = Array.from(infobox.querySelectorAll('tr'));
-                const leagueRow = rows.find(tr => tr.innerText.includes('League') || tr.innerText.includes('Division'));
-                if (leagueRow) league = leagueRow.querySelector('td').innerText.replace(/\[.*?\]/g, '');
-
-                // Estrazione Trofei (Logica multi-sport)
-                // Cerchiamo parole chiave comuni a molti sport (Championships, Titles, Cups)
-                let titles = [];
-                rows.forEach(tr => {
-                    const text = tr.innerText.toLowerCase();
-                    if (text.includes('titles') || text.includes('championships') || text.includes('cups')) {
-                        let val = tr.querySelector('td')?.innerText.replace(/\[.*?\]/g, '');
-                        if (val) titles.push(val.trim());
-                    }
-                });
-
-                const finalData = { league, titles: titles.slice(0, 3) }; // Prendiamo i primi 3 dati rilevanti
+        try {
+            // Cerchiamo l'infobox nella wikipedia inglese
+            const response = await fetch(`https://en.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(clubName)}&prop=text&section=0&format=json&origin=*`);
+            const data = await response.json();
+            if (data.parse) {
+                const html = data.parse.text["*"];
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
                 
-                // Salva in Cache
-                localStorage.setItem(`wiki_${clubName}`, JSON.stringify(finalData));
-                renderWikiData(box, finalData);
-            }
-        }
-    } catch (e) {
-        box.innerHTML = "Dati live non disponibili.";
-    }
-}
+                // Estrazione Lega
+                let league = "N.D.";
+                const leagueRow = Array.from(doc.querySelectorAll('tr')).find(tr => tr.innerText.includes('League'));
+                if (leagueRow) league = leagueRow.querySelector('td')?.innerText.replace(/\[.*?\]/g, '') || "N.D.";
 
-function renderWikiData(box, data) {
-    box.innerHTML = `
-        <span class="league-label">🏆 ${data.league}</span>
-        <div class="trofei-wiki">
-            ${data.titles.length > 0 ? data.titles.map(t => `• ${t}`).join('<br>') : 'Dettagli trofei su Wikipedia'}
-        </div>
-    `;
-    box.dataset.loaded = "true";
-}
+                // Estrazione Trofei (Semplificata: cerca la sezione Honours o conta le occorrenze di titoli comuni)
+                // Nota: In un'app reale servirebbe un parsing più complesso, qui estraiamo una sintesi
+                let honours = "Dati trofei non rilevati automaticamente.";
+                const rows = Array.from(doc.querySelectorAll('tr'));
+                const honoursRows = rows.filter(r => r.innerText.match(/winners|titles|champions/i));
+                if(honoursRows.length > 0) {
+                    honours = "Controlla sezione 'Honours' su Wikipedia per i dettagli.";
+                }
+
+                box.innerHTML = `
+                    <span class="league-label">🏆 ${league}</span>
+                    <div class="trofei-wiki"><i>Dati Wikipedia:</i><br>${honours}</div>
+                `;
+                box.dataset.loaded = "true";
+            }
+        } catch (e) {
+            box.innerHTML = "Impossibile caricare dati live.";
+        }
     }
 
     document.addEventListener('keydown', function(e) {
@@ -707,4 +658,3 @@ function renderWikiData(box, data) {
 </script>
 </body>
 </html>
-
