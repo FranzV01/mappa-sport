@@ -46,7 +46,6 @@
             width: 44px; height: 44px; position: relative;
         }
 
-        /* NUOVO: Sistema Highlight (Pulsazione) */
         .highlight-active {
             animation: pulse-gold 2s infinite;
             box-shadow: 0 0 0 4px #ffd700, 0 0 15px #ffd700 !important;
@@ -93,8 +92,10 @@
         .popup-title { margin: 5px 0; color: #222; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; }
         .popup-info { font-size: 13px; color: #555; line-height: 1.4; }
 
-        .trofei-box { margin: 8px 0; font-size: 14px; }
-        .trofeo-item { display: inline-block; margin: 0 4px; }
+        /* Stile Wikipedia e Lega */
+        .wiki-data-box { font-size: 12px; background: #f9f9f9; padding: 8px; border-radius: 8px; margin: 8px 0; border: 1px solid #ddd; text-align: left; }
+        .league-label { color: #d32f2f; font-weight: bold; display: block; margin-bottom: 4px; border-bottom: 1px solid #ffcdd2; padding-bottom: 2px; }
+        .trofei-wiki { font-size: 11px; color: #333; }
 
         .btn-wiki {
             display: inline-block; margin: 8px 0; padding: 6px 14px;
@@ -103,13 +104,6 @@
             font-weight: bold; transition: all 0.2s;
         }
         .btn-wiki:hover { background: #3366cc; color: #ffffff; }
-
-        /* AGGIUNTO: Stile Pulsante Condividi */
-        .btn-share {
-            background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7;
-            padding: 4px 10px; border-radius: 15px; font-size: 10px; cursor: pointer;
-            margin-top: 5px; display: inline-flex; align-items: center; gap: 4px;
-        }
 
         .btn-update {
             display: block; margin-top: 10px; font-size: 10px; color: #999; 
@@ -133,13 +127,12 @@
             font-size: 10px; padding: 4px; border-radius: 4px; cursor: pointer;
         }
 
-        .centenario-box, .storici-container { margin: 10px 0; padding: 8px; border-radius: 8px; }
-        .centenario-box { background: #fff9c4; border: 1px solid #fbc02d; }
-        .storici-container { background: #f8f9fa; border: 1px solid #ddd; }
+        /* Sfondo oro per anniversario e storici */
+        .anniversario-box, .storici-container { margin: 10px 0; padding: 8px; border-radius: 8px; background: #fff9c4; border: 1px solid #fbc02d; }
         .box-label { font-size: 9px; font-weight: bold; display: block; margin-bottom: 5px; text-transform: uppercase; color: #666; }
-        .centenario-img, .storico-img { width: 45px; height: 45px; object-fit: contain; background: white; border: 1px solid #eee; border-radius: 4px; }
-        .storico-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-        .storico-item { flex: 0 0 45px; text-align: center; font-size: 9px; color: #777; }
+        .anniversario-img, .storico-img { width: 45px; height: 45px; object-fit: contain; background: white; border: 1px solid #eee; border-radius: 4px; }
+        .storico-grid, .anniversario-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+        .storico-item, .anniversario-item { flex: 0 0 45px; text-align: center; font-size: 9px; color: #777; }
         .btn-espandi { background: none; border: none; color: #007bff; font-size: 10px; cursor: pointer; text-decoration: underline; margin-top: 5px; display: block; width: 100%; }
         .hidden-logos { display: none; }
 
@@ -212,14 +205,6 @@
         </label>
     </div>
 
-    <div class="stat-item" style="background: #fff9e6; padding: 8px; border-radius: 8px; border: 1px solid #ffeeba; margin-top:5px;">
-        Solo con titoli: 
-        <label class="switch">
-            <input type="checkbox" id="filter-titoli" onchange="applicaFiltri()">
-            <span class="slider" style="background-color: #ffd700 !important;"></span>
-        </label>
-    </div>
-
     <hr>
     
     <label class="stat-item">Nazione:</label>
@@ -276,7 +261,7 @@
     const linkCrowdsourcingBase = "https://docs.google.com/forms/d/e/1FAIpQLScnl0Qz7286ghO6Rkb2UxugFHGaCU_gGVAljUdkbp95zqhr2g/viewform?usp=pp_url&entry.1326851473=";
 
     const sportIcons = { "Calcio": "⚽", "Pallacanestro": "🏀", "Pallavolo": "🏐", "Rugby": "🏉", "Pallamano": "🤾", "Pallanuoto": "🤽", "Hockey su ghiaccio": "🏒", "Football americano": "🏈", "Baseball": "⚾" };
-    const placeholderLogo = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjY2MiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCB dPSJNMTIgMmwtMTAgOWgxNHoiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjEzIiByPSI5Ij48L2NpcmNsZT48L3N2Zz4=";
+    const placeholderLogo = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjY2MiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgMmwtMTAgOWgxNHoiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjEzIiByPSI5Ij48L2NpcmNsZT48L3N2Zz4=";
 
     var osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
     var dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' });
@@ -289,7 +274,6 @@
 
     var map = L.map('map', { layers: [osm], zoomControl: false, dragging: !L.Browser.mobile, tap: !L.Browser.mobile }).setView(startCenter, startZoom);
     
-    // AGGIUNTO: Auto-Night Mode (Cambia in Dark Mode se dopo le 20:00)
     const oraAttuale = new Date().getHours();
     if (oraAttuale >= 20 || oraAttuale < 7) {
         map.removeLayer(osm);
@@ -299,6 +283,7 @@
     map.on('moveend', function() {
         var center = map.getCenter();
         window.history.replaceState(null, null, `#${map.getZoom()}/${center.lat.toFixed(4)}/${center.lng.toFixed(4)}`);
+        localStorage.setItem('lastPos', JSON.stringify({lat: center.lat, lng: center.lng, zoom: map.getZoom()}));
     });
 
     var baseMaps = { "Standard": osm, "Dark Mode 🌙": dark, "Satellite 🛰️": satellite };
@@ -340,16 +325,46 @@
         setTimeout(() => { box.style.display = 'none'; }, 5000);
     }
 
-    // AGGIUNTO: Funzione Condividi
-    window.condividiClub = function(nome) {
-        const text = `Guarda il club ${nome} sulla Mappa Mondiale Club! 🌍⚽`;
-        const url = window.location.href;
-        if (navigator.share) {
-            navigator.share({ title: nome, text: text, url: url });
-        } else {
-            window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`);
+    // --- FUNZIONE INTEGRAZIONE WIKIPEDIA ---
+    async function fetchWikiData(marker) {
+        const clubName = marker.dati.nome;
+        const wikiId = `wiki-box-${marker._leaflet_id}`;
+        const box = document.getElementById(wikiId);
+        if (!box || box.dataset.loaded === "true") return;
+
+        try {
+            // Cerchiamo l'infobox nella wikipedia inglese
+            const response = await fetch(`https://en.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(clubName)}&prop=text&section=0&format=json&origin=*`);
+            const data = await response.json();
+            if (data.parse) {
+                const html = data.parse.text["*"];
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Estrazione Lega
+                let league = "N.D.";
+                const leagueRow = Array.from(doc.querySelectorAll('tr')).find(tr => tr.innerText.includes('League'));
+                if (leagueRow) league = leagueRow.querySelector('td')?.innerText.replace(/\[.*?\]/g, '') || "N.D.";
+
+                // Estrazione Trofei (Semplificata: cerca la sezione Honours o conta le occorrenze di titoli comuni)
+                // Nota: In un'app reale servirebbe un parsing più complesso, qui estraiamo una sintesi
+                let honours = "Dati trofei non rilevati automaticamente.";
+                const rows = Array.from(doc.querySelectorAll('tr'));
+                const honoursRows = rows.filter(r => r.innerText.match(/winners|titles|champions/i));
+                if(honoursRows.length > 0) {
+                    honours = "Controlla sezione 'Honours' su Wikipedia per i dettagli.";
+                }
+
+                box.innerHTML = `
+                    <span class="league-label">🏆 ${league}</span>
+                    <div class="trofei-wiki"><i>Dati Wikipedia:</i><br>${honours}</div>
+                `;
+                box.dataset.loaded = "true";
+            }
+        } catch (e) {
+            box.innerHTML = "Impossibile caricare dati live.";
         }
-    };
+    }
 
     document.addEventListener('keydown', function(e) {
         if (e.key === '/' && document.activeElement !== document.getElementById('search-input')) {
@@ -360,10 +375,14 @@
 
     map.on('popupopen', function(e) {
         var marker = e.popup._source;
-        if (marker && marker.dati && marker.dati.colori) {
-            let cols = marker.dati.colori.split(',');
+        if (marker && marker.dati) {
+            // Colore bordo popup
+            let coloriArray = marker.dati.colori ? marker.dati.colori.split(',') : ['#333'];
             let wrapper = e.popup.getElement().querySelector('.leaflet-popup-content-wrapper');
-            wrapper.style.border = `4px solid ${cols[0]}`;
+            wrapper.style.border = `4px solid ${coloriArray[0]}`;
+            
+            // Avvia fetch Wikipedia
+            fetchWikiData(marker);
         }
     });
 
@@ -384,7 +403,6 @@
         document.getElementById('search-input').value = '';
         document.getElementById('timeline-slider').value = 2026;
         document.getElementById('year-display').innerText = "Fino al 2026";
-        document.getElementById('filter-titoli').checked = false; // AGGIUNTO
         document.querySelectorAll('select').forEach(s => s.value = 'Tutti');
         applicaFiltri();
     }
@@ -418,6 +436,13 @@
                 document.getElementById('filter-nazione').appendChild(opt);
             });
 
+            // Carica filtri salvati
+            const savedFilters = JSON.parse(localStorage.getItem('mapFilters') || '{}');
+            Object.keys(savedFilters).forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = savedFilters[id];
+            });
+
             data.forEach((s, index) => {
                 if(!s.lat || !s.lng) return;
                 document.getElementById('loader-progress').style.width = (index / data.length * 100) + '%';
@@ -426,16 +451,15 @@
                 let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
                 let classeScomparso = s.stato === "scomparso" ? "club-scomparso" : "";
                 let badgeFemminile = (s.genere && s.genere.toLowerCase() === 'f') ? '<div class="gender-badge">♀</div>' : '';
-                
                 let highlightClass = (s.highlight && s.highlight.toUpperCase() === 'SI') ? 'highlight-active' : '';
 
                 var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
                     icon: L.divIcon({
                         className: 'custom-div-icon',
                         html: `<div class="logo-container ${classeScomparso} ${highlightClass}" style="background: ${borderStyle};">
-                                 ${badgeFemminile}
-                                 <img src="${s.logo_attuale}" class="logo-img-inner" onerror="this.src='${placeholderLogo}';">
-                               </div>`,
+                                     ${badgeFemminile}
+                                     <img src="${s.logo_attuale}" class="logo-img-inner" onerror="this.src='${placeholderLogo}';">
+                                   </div>`,
                         iconSize: [44, 44], iconAnchor: [22, 22]
                     })
                 });
@@ -445,15 +469,11 @@
                 let flagHtml = s.codice_nazione ? `<img src="https://flagcdn.com/w40/${s.codice_nazione.toLowerCase()}.png" class="flag-icon">` : '';
                 let emojiSport = sportIcons[s.sport] || "🏆"; 
 
-                let bacheca = '';
-                if(s.scudetti > 0) bacheca += `<span class="trofeo-item">⭐ ${s.scudetti}</span>`;
-                if(s.coppe_nazionali > 0) bacheca += `<span class="trofeo-item">🏆 ${s.coppe_nazionali}</span>`;
-                if(s.coppe_internazionali > 0) bacheca += `<span class="trofeo-item">🌍 ${s.coppe_internazionali}</span>`;
-
+                // Logica Precedenti
                 let precedentiHTML = '';
                 [s.club_precedente_1, s.club_precedente_2, s.club_precedente_3].forEach(cp => {
                     if(cp && cp.trim() !== "") {
-                        let clubTrovato = data.find(item => item.nome.trim() === cp.trim());
+                        let clubTrovato = data.find(item => item.nome && item.nome.trim() === cp.trim());
                         let nomeEscaped = cp.replace(/'/g, "\\'");
                         if (clubTrovato && clubTrovato.logo_attuale) {
                             precedentiHTML += `
@@ -467,17 +487,25 @@
                     }
                 });
 
+                // Logica Loghi Storici
                 let loghiItems = [];
                 for(let i=1; i<=10; i++) {
                     let url = s[`logo_storia_${i}_url`];
                     if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img" onerror="this.src='${placeholderLogo}';"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
+                // NUOVA LOGICA: Loghi Anniversario
+                let annivItems = [];
+                for(let i=1; i<=5; i++) {
+                    let url = s[`logo_anniversario_${i}_url`];
+                    let dataA = s[`logo_anniversario_${i}_data`];
+                    if(url) annivItems.push(`<div class="anniversario-item"><img src="${url}" class="anniversario-img" onerror="this.src='${placeholderLogo}';"><b>${dataA || ''}</b></div>`);
+                }
+
                 let wikiBtn = "";
                 if (s.wiki && s.wiki.toLowerCase() === "si") {
                     const wikiNome = s.nome.replace(/\s+/g, '_');
-                    const wikiUrl = `https://en.wikipedia.org/wiki/${wikiNome}`;
-                    wikiBtn = `<a href="${wikiUrl}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
+                    wikiBtn = `<a href="https://en.wikipedia.org/wiki/${wikiNome}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
                 }
                 
                 marker.descrizione = `
@@ -488,13 +516,18 @@
                             Fondazione: <b>${s.fondazione}</b> ${s.scioglimento ? `| Sciolta: <b>${s.scioglimento}</b>` : ''}<br>
                             Sport: <b>${s.sport}</b> | Stadio: <b>${s.stadio_nome || 'N.D.'}</b>
                         </div>
-                        <div class="trofei-box">${bacheca}</div>
+
+                        <div id="wiki-box-${marker._leaflet_id}" class="wiki-data-box">Caricamento dati lega e trofei...</div>
+
                         ${wikiBtn}
-                        <div onclick="condividiClub('${s.nome.replace(/'/g, "\\'")}')" class="btn-share">🔗 Condividi</div>
+                        
                         ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
-                        ${s.logo_centenario ? `<div class="centenario-box"><span class="box-label">Logo Centenario</span><img src="${s.logo_centenario}" class="centenario-img" onerror="this.src='${placeholderLogo}';"></div>` : ''}
+                        
+                        ${annivItems.length > 0 ? `<div class="anniversario-box"><span class="box-label">Loghi Anniversario</span><div class="anniversario-grid">${annivItems.join('')}</div></div>` : ''}
+
                         ${loghiItems.length > 0 ? `<div class="storici-container"><span class="box-label">Loghi Storici</span><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>
                         ${loghiItems.length > 3 ? `<div class="storico-grid hidden-logos" style="margin-top:8px;">${loghiItems.slice(3).join('')}</div><button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
+                        
                         <a href="${linkCrowdsourcingBase}${encodeURIComponent(s.nome)}" target="_blank" class="btn-update">Segnala aggiornamento/errore ✏️</a>
                     </div>`;
 
@@ -509,10 +542,15 @@
                 const spVal = document.getElementById('filter-sport').value;
                 const eVal = document.getElementById('filter-epoca').value;
                 const gVal = document.getElementById('filter-genere').value;
-                const onlyTitoli = document.getElementById('filter-titoli').checked; // AGGIUNTO
                 const tVal = parseInt(document.getElementById('timeline-slider').value);
                 const isClusterEnabled = document.getElementById('cluster-toggle').checked;
                 
+                // Salva filtri
+                localStorage.setItem('mapFilters', JSON.stringify({
+                    'filter-nazione': nVal, 'filter-stato': stVal, 'filter-sport': spVal,
+                    'filter-epoca': eVal, 'filter-genere': gVal, 'timeline-slider': tVal
+                }));
+
                 document.getElementById('year-display').innerText = tVal === 2026 ? "Tutti i tempi" : "Fino al " + tVal;
 
                 markers.clearLayers();
@@ -524,7 +562,6 @@
                     let ok = true;
                     const stadioNorm = normalizeText(m.dati.stadio_nome);
                     const anno = parseInt(m.dati.fondazione);
-                    const haTitoli = (parseInt(m.dati.scudetti) || 0) + (parseInt(m.dati.coppe_nazionali) || 0) + (parseInt(m.dati.coppe_internazionali) || 0) > 0;
 
                     if (sVal && !m.nomeNormalizzato.includes(sVal) && !stadioNorm.includes(sVal)) ok = false;
                     if (nVal !== "Tutti" && m.dati.nazione !== nVal) ok = false;
@@ -532,8 +569,6 @@
                     if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
                     if (gVal === "f" && (!m.dati.genere || m.dati.genere.toLowerCase() !== 'f')) ok = false;
                     if (gVal === "m" && m.dati.genere && m.dati.genere.toLowerCase() === 'f') ok = false;
-                    
-                    if (onlyTitoli && !haTitoli) ok = false; // AGGIUNTO: Logica titoli
                     if (anno > tVal) ok = false;
 
                     if (eVal === "Antiche" && anno >= 1900) ok = false;
@@ -566,17 +601,9 @@
                     .map(([name, count]) => `${sportIcons[name] || ''} ${count}`).join(' • ');
                 document.getElementById('stats-breakdown').innerHTML = statsText;
                 
-                // AGGIUNTO: Zoom automatico se si filtra per nazione
                 if (nVal !== "Tutti" && visibiliAttualmente.length > 0 && sVal === "") {
                     const group = new L.featureGroup(visibiliAttualmente);
                     map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 7 });
-                }
-
-                if (sVal.length >= 2 && visibiliAttualmente.length === 1) {
-                    map.flyTo(visibiliAttualmente[0].getLatLng(), 15, { animate: true });
-                    map.once('moveend', () => {
-                        popup.setContent(visibiliAttualmente[0].descrizione).setLatLng(visibiliAttualmente[0].getLatLng()).openOn(map);
-                    });
                 }
             }
 
@@ -587,6 +614,7 @@
         }
     });
 
+    // --- CONTROLLI POSIZIONE ---
     var LocateControl = L.Control.extend({
         options: { position: 'bottomright' },
         onAdd: function (map) {
