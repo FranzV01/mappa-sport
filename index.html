@@ -448,6 +448,14 @@
                     if(url) annivItems.push(`<div class="anniversario-item"><img src="${url}" class="anniversario-img" onerror="this.src='${placeholderLogo}';"><b>${dataA || ''}</b></div>`);
                 }
 
+                // --- LOGICA TASTO WIKIPEDIA ---
+                let wikiBtn = "";
+                    if (s.wiki && s.wiki.toLowerCase() === "si") {
+                // Sostituisce gli spazi con underscore per il link Wikipedia
+                    const wikiNome = s.nome.replace(/\s+/g, '_');
+                    wikiBtn = `<a href="https://en.wikipedia.org/wiki/${wikiNome}" target="_blank" class="btn-wiki" style="display: block; text-align: center; background: #f8f9fa; border: 1px solid #ddd; padding: 5px; margin-top: 10px; border-radius: 6px; text-decoration: none; color: #333; font-size: 12px; font-weight: bold;">Wikipedia 📖</a>`;
+                }
+
                 marker.descrizione = `
                     <div class="popup-card">
                         <div class="popup-header"><h2 class="popup-title">${emojiSport} ${s.nome}</h2></div>
@@ -457,7 +465,7 @@
                             Sport: <b>${s.sport}</b> | Stadio: <b>${s.stadio_nome || 'N.D.'}</b>
                         </div>
 
-                        ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
+                        ${wikiBtn} ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
                         
                         ${annivItems.length > 0 ? `
                             <div class="anniversario-box">
@@ -607,3 +615,4 @@
 </script>
 </body>
 </html>
+
