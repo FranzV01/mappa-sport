@@ -116,8 +116,6 @@
 
         /* Tabelle Loghi Uniformate */
         .anniversario-box, .storici-container { margin: 10px 0; padding: 8px; border-radius: 8px; }
-        
-        /* Colori specifici */
         .anniversario-box { background: #fff9c4; border: 1px solid #fbc02d; } /* ORO */
         .storici-container { background: #e3f2fd; border: 1px solid #90caf9; } /* AZZURRINO */
 
@@ -274,11 +272,7 @@
 
     var map = L.map('map', { layers: [osm], zoomControl: false, dragging: !L.Browser.mobile, tap: !L.Browser.mobile }).setView(startCenter, startZoom);
     
-    const oraAttuale = new Date().getHours();
-    if (oraAttuale >= 20 || oraAttuale < 7) {
-        map.removeLayer(osm);
-        map.addLayer(dark);
-    }
+    // RIMOSSA DARK MODE AUTOMATICA DALLE 20
 
     map.on('moveend', function() {
         var center = map.getCenter();
@@ -391,11 +385,15 @@
                 document.getElementById('filter-nazione').appendChild(opt);
             });
 
+            // RIPRISTINO STATO FILTRI E RAGGRUPPAMENTO
             const savedFilters = JSON.parse(localStorage.getItem('mapFilters') || '{}');
             Object.keys(savedFilters).forEach(id => {
                 const el = document.getElementById(id);
-                if(el) el.value = savedFilters[id];
+                if(el && id !== 'cluster-enabled') el.value = savedFilters[id];
             });
+            if (savedFilters['cluster-enabled'] !== undefined) {
+                document.getElementById('cluster-toggle').checked = savedFilters['cluster-enabled'];
+            }
 
             data.forEach((s, index) => {
                 if(!s.lat || !s.lng) return;
@@ -440,14 +438,12 @@
                     }
                 });
 
-                // --- LOGICA LOGHI STORICI (Azzurrino) ---
                 let loghiItems = [];
                 for(let i=1; i<=10; i++) {
                     let url = s[`logo_storia_${i}_url`];
                     if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img" onerror="this.src='${placeholderLogo}';"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
-                // --- LOGICA LOGHI ANNIVERSARIO (Oro) ---
                 let annivItems = [];
                 for(let i=1; i<=5; i++) {
                     let url = s[`logo_anniversario_${i}_url`];
@@ -455,9 +451,8 @@
                     if(url) annivItems.push(`<div class="anniversario-item"><img src="${url}" class="anniversario-img" onerror="this.src='${placeholderLogo}';"><b>${dataA || ''}</b></div>`);
                 }
 
-                // --- LOGICA TASTO WIKIPEDIA ---
                 let wikiBtn = "";
-                    if (s.wiki && s.wiki.toLowerCase() === "si") {
+                if (s.wiki && s.wiki.toLowerCase() === "si") {
                     const wikiNome = s.nome.replace(/\s+/g, '_');
                     wikiBtn = `<a href="https://en.wikipedia.org/wiki/${wikiNome}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
                 }
@@ -510,9 +505,11 @@
                 const tVal = parseInt(document.getElementById('timeline-slider').value);
                 const isClusterEnabled = document.getElementById('cluster-toggle').checked;
                 
+                // SALVATAGGIO STATO (INCLUSO CLUSTER)
                 localStorage.setItem('mapFilters', JSON.stringify({
                     'filter-nazione': nVal, 'filter-stato': stVal, 'filter-sport': spVal,
-                    'filter-epoca': eVal, 'filter-genere': gVal, 'timeline-slider': tVal
+                    'filter-epoca': eVal, 'filter-genere': gVal, 'timeline-slider': tVal,
+                    'cluster-enabled': isClusterEnabled
                 }));
 
                 document.getElementById('year-display').innerText = tVal === 2026 ? "Tutti i tempi" : "Fino al " + tVal;
@@ -565,7 +562,14 @@
                     .map(([name, count]) => `${sportIcons[name] || ''} ${count}`).join(' • ');
                 document.getElementById('stats-breakdown').innerHTML = statsText;
                 
-                if (nVal !== "Tutti" && visibiliAttualmente.length > 0 && sVal === "") {
+                // FLYTO RICERCA (OMOGENEO A CLUB CASUALE)
+                if (sVal.length > 2 && visibiliAttualmente.length === 1) {
+                    const target = visibiliAttualmente[0];
+                    map.flyTo(target.getLatLng(), 16);
+                    map.once('moveend', () => {
+                        popup.setContent(target.descrizione).setLatLng(target.getLatLng()).openOn(map);
+                    });
+                } else if (nVal !== "Tutti" && visibiliAttualmente.length > 0 && sVal === "") {
                     const group = new L.featureGroup(visibiliAttualmente);
                     map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 7 });
                 }
