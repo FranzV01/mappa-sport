@@ -152,9 +152,11 @@
             z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px 20px;
             border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             display: flex; align-items: center; gap: 15px; width: 80%; max-width: 600px;
+            transition: all 0.2s;
         }
         #timeline-slider { flex-grow: 1; cursor: pointer; }
-        #year-display { font-weight: bold; color: #007bff; min-width: 80px; text-align: center; }
+        #year-display { font-weight: bold; color: #007bff; min-width: 90px; text-align: center; transition: transform 0.1s; }
+        .year-active { transform: scale(1.2); color: #ff6b6b !important; }
 
         .notification-toast {
             position: fixed; top: 20px; right: 20px; z-index: 10000;
@@ -272,8 +274,6 @@
 
     var map = L.map('map', { layers: [osm], zoomControl: false, dragging: !L.Browser.mobile, tap: !L.Browser.mobile }).setView(startCenter, startZoom);
     
-    // RIMOSSA DARK MODE AUTOMATICA DALLE 20
-
     map.on('moveend', function() {
         var center = map.getCenter();
         window.history.replaceState(null, null, `#${map.getZoom()}/${center.lat.toFixed(4)}/${center.lng.toFixed(4)}`);
@@ -298,6 +298,7 @@
     var allMarkers = [];
     var visibiliAttualmente = [];
     var popup = L.popup({ className: 'custom-popup' });
+    var precisionCircle = null; // Per la geolocalizzazione
 
     const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
 
@@ -385,7 +386,6 @@
                 document.getElementById('filter-nazione').appendChild(opt);
             });
 
-            // RIPRISTINO STATO FILTRI E RAGGRUPPAMENTO
             const savedFilters = JSON.parse(localStorage.getItem('mapFilters') || '{}');
             Object.keys(savedFilters).forEach(id => {
                 const el = document.getElementById(id);
@@ -429,7 +429,7 @@
                         if (clubTrovato && clubTrovato.logo_attuale) {
                             precedentiHTML += `
                                 <div class="origin-wrapper" onclick="vaiAClub('${nomeEscaped}')" title="Vai a ${cp}">
-                                    <img src="${clubTrovato.logo_attuale}" class="origin-logo" onerror="this.src='${placeholderLogo}';">
+                                    <img src="${clubTrovato.logo_attuale}" class="origin-logo" loading="lazy" onerror="this.src='${placeholderLogo}';">
                                     <span class="origin-name">${cp}</span>
                                 </div>`;
                         } else {
@@ -441,14 +441,14 @@
                 let loghiItems = [];
                 for(let i=1; i<=10; i++) {
                     let url = s[`logo_storia_${i}_url`];
-                    if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img" onerror="this.src='${placeholderLogo}';"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
+                    if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img" loading="lazy" onerror="this.src='${placeholderLogo}';"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
                 }
 
                 let annivItems = [];
                 for(let i=1; i<=5; i++) {
                     let url = s[`logo_anniversario_${i}_url`];
                     let dataA = s[`logo_anniversario_${i}_data`];
-                    if(url) annivItems.push(`<div class="anniversario-item"><img src="${url}" class="anniversario-img" onerror="this.src='${placeholderLogo}';"><b>${dataA || ''}</b></div>`);
+                    if(url) annivItems.push(`<div class="anniversario-item"><img src="${url}" class="anniversario-img" loading="lazy" onerror="this.src='${placeholderLogo}';"><b>${dataA || ''}</b></div>`);
                 }
 
                 let wikiBtn = "";
@@ -505,7 +505,6 @@
                 const tVal = parseInt(document.getElementById('timeline-slider').value);
                 const isClusterEnabled = document.getElementById('cluster-toggle').checked;
                 
-                // SALVATAGGIO STATO (INCLUSO CLUSTER)
                 localStorage.setItem('mapFilters', JSON.stringify({
                     'filter-nazione': nVal, 'filter-stato': stVal, 'filter-sport': spVal,
                     'filter-epoca': eVal, 'filter-genere': gVal, 'timeline-slider': tVal,
@@ -522,7 +521,8 @@
                 visibiliAttualmente = allMarkers.filter(m => {
                     let ok = true;
                     const stadioNorm = normalizeText(m.dati.stadio_nome);
-                    const anno = parseInt(m.dati.fondazione);
+                    // Pulizia anno fondazione
+                    const anno = parseInt(String(m.dati.fondazione).replace(/\D/g, '')) || 0;
 
                     if (sVal && !m.nomeNormalizzato.includes(sVal) && !stadioNorm.includes(sVal)) ok = false;
                     if (nVal !== "Tutti" && m.dati.nazione !== nVal) ok = false;
@@ -530,7 +530,7 @@
                     if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
                     if (gVal === "f" && (!m.dati.genere || m.dati.genere.toLowerCase() !== 'f')) ok = false;
                     if (gVal === "m" && m.dati.genere && m.dati.genere.toLowerCase() === 'f') ok = false;
-                    if (anno > tVal) ok = false;
+                    if (tVal < 2026 && anno > tVal) ok = false;
 
                     if (eVal === "Antiche" && anno >= 1900) ok = false;
                     if (eVal === "PrimoNovecento" && (anno < 1900 || anno >= 1950)) ok = false;
@@ -562,7 +562,6 @@
                     .map(([name, count]) => `${sportIcons[name] || ''} ${count}`).join(' • ');
                 document.getElementById('stats-breakdown').innerHTML = statsText;
                 
-                // FLYTO RICERCA (OMOGENEO A CLUB CASUALE)
                 if (sVal.length > 2 && visibiliAttualmente.length === 1) {
                     const target = visibiliAttualmente[0];
                     map.flyTo(target.getLatLng(), 16);
@@ -575,8 +574,25 @@
                 }
             }
 
-            document.getElementById('search-input').oninput = applicaFiltri;
-            document.getElementById('timeline-slider').oninput = applicaFiltri; 
+            // --- DEBOUNCING PER LA RICERCA ---
+            let searchTimeout;
+            document.getElementById('search-input').oninput = () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(applicaFiltri, 300);
+            };
+
+            // --- FEEDBACK VISIVO TIMELINE ---
+            const timelineSlider = document.getElementById('timeline-slider');
+            const yearDisplay = document.getElementById('year-display');
+            
+            timelineSlider.oninput = () => {
+                yearDisplay.classList.add('year-active');
+                applicaFiltri();
+            };
+            timelineSlider.onchange = () => {
+                yearDisplay.classList.remove('year-active');
+            };
+
             document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
             applicaFiltri();
         }
@@ -597,6 +613,16 @@
     map.addControl(new LocateControl());
 
     map.on('locationfound', function(e) {
+        // --- CERCHIO DI PRECISIONE GPS ---
+        if (precisionCircle) map.removeLayer(precisionCircle);
+        precisionCircle = L.circle(e.latlng, {
+            radius: e.accuracy,
+            color: '#007bff',
+            fillColor: '#007bff',
+            fillOpacity: 0.15,
+            weight: 2
+        }).addTo(map);
+
         let nearby = null;
         let minDist = 500; 
 
