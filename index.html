@@ -345,16 +345,16 @@
 
     <label class="stat-item">Livello Lega:</label>
     <select id="filter-lega">
-        <option value="Tutti">Tutti i livelli</option>
-        <option value="1">1° Livello</option>
-        <option value="2">2° Livello</option>
-        <option value="3">3° Livello</option>
-        <option value="4">4° Livello</option>
-        <option value="5">5° Livello</option>
-        <option value="6">6° Livello</option>
-        <option value="7">7° Livello</option>
-        <option value="8">8° Livello</option>
-    </select>
+    <option value="Tutti">Tutte le Divisioni</option>
+    <option value="1">1ª Divisione</option>
+    <option value="2">2ª Divisione</option>
+    <option value="3">3ª Divisione</option>
+    <option value="4">4ª Divisione</option>
+    <option value="5">5ª Divisione</option>
+    <option value="6">6ª Divisione</option>
+    <option value="7">7ª Divisione</option>
+    <option value="8">8ª Divisione</option>
+</select>
     
     <label class="stat-item">Genere:</label>
     <select id="filter-genere">
@@ -654,7 +654,7 @@
             btn.innerText = "⏹ Stop"; btn.style.background = "#ffcccc";
             let i = 0;
             tourInterval = setInterval(() => {
-                const target = visibiliAttualmente[i % visibiliAttualmente.length];
+                const target = visibiliAttualmente[Math.floor(Math.random() * visibiliAttualmente.length)];
                 map.flyTo(target.getLatLng(), 16);
                 setTimeout(() => { popup.setContent(target.descrizione).setLatLng(target.getLatLng()).openOn(map); }, 1000);
                 i++;
@@ -808,14 +808,11 @@
                             <h2 class="popup-title">${emojiSport} ${s.nome}</h2>
                             ${s.soprannome ? `<span class="popup-nickname">"${s.soprannome}"</span>` : ''}
                         </div>
-                        <div id="${weatherId}" class="weather-box">Caricamento meteo...</div>
                         <div class="popup-info">
                             ${flagHtml} <b>${s.nazione}</b><br>
                             Fondazione: <b>${s.fondazione}</b><br>
-                            Sport: <b>${s.sport}</b> | Stadio: <b>${s.stadio_nome || 'N.D.'}</b><br>
-                            ${s.capacita_stadio ? `Posti: <b>${parseInt(s.capacita_stadio).toLocaleString()}</b>` : ''} 
-                            ${s.altitudine ? ` | Alt: <b>${s.altitudine}m</b>` : ''}<br>
-                            <span style="font-size:11px; color:#666;">🕒 Allo stadio del ${s.nome} sono le <b>${localTimeStr}</b></span>
+                            Stadio: <b>${s.stadio_nome || 'N.D.'}</b><br>
+                            ${s.capacita_stadio ? `Posti: <b>${parseInt(s.capacita_stadio).toLocaleString()}</b>` : ''}
                         </div>
                         ${wikiBtn} ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
                         ${annivItems.length > 0 ? `
@@ -846,7 +843,6 @@
                 const gVal = document.getElementById('filter-genere').value;
                 const cVal = document.getElementById('filter-capacita').value;
                 const lVal = document.getElementById('filter-lega').value;
-                const altVal = document.getElementById('filter-altitudine').value;
                 const tVal = parseInt(document.getElementById('timeline-slider').value);
                 const isClusterEnabled = document.getElementById('cluster-toggle').checked;
                 
@@ -881,7 +877,6 @@
                     if (cVal === "large" && (cap < 30000 || cap >= 50000)) ok = false;
                     if (cVal === "giant" && cap < 50000) ok = false;
                     if (lVal !== "Tutti" && parseInt(m.dati.livello_lega) !== parseInt(lVal)) ok = false;
-                    if (altVal !== "Tutti" && alt < parseInt(altVal)) ok = false;
                     if (!checkColorMatch(m.dati.colori || "", filtroColoreSociale)) ok = false;
 
                     if(ok) {
@@ -958,3 +953,4 @@
 </script>
 </body>
 </html>
+
