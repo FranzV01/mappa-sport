@@ -306,15 +306,22 @@
     <label class="stat-item">Filtro Colore Sociale:</label>
     <div class="color-picker" id="color-picker-container">
         <div class="color-circle" style="background:#FF0000;" title="Rosso" onclick="setFiltroColore('red', this)"></div>
-        <div class="color-circle" style="background:blue;" onclick="setFiltroColore('blue', this)"></div>
-        <div class="color-circle" style="background:yellow;" onclick="setFiltroColore('yellow', this)"></div>
-        <div class="color-circle" style="background:green;" onclick="setFiltroColore('green', this)"></div>
-        <div class="color-circle" style="background:purple;" onclick="setFiltroColore('purple', this)"></div>
-        <div class="color-circle" style="background:lightblue;" onclick="setFiltroColore('lightblue', this)"></div>
-        <div class="color-circle" style="background:orange;" onclick="setFiltroColore('orange', this)"></div>
-        <div class="color-circle" style="background:black;" onclick="setFiltroColore('black', this)"></div>
-        <div class="color-circle" style="background:white; border:1px solid #ddd;" onclick="setFiltroColore('white', this)"></div>
-        <div class="color-circle active" style="background:linear-gradient(45deg, red, blue, green);" title="Reset" onclick="setFiltroColore('Tutti', this)"></div>
+        <div class="color-circle" style="background:#800000;" title="Granata/Amaranto" onclick="setFiltroColore('maroon', this)"></div>
+        <div class="color-circle" style="background:#FFA500;" title="Arancione" onclick="setFiltroColore('orange', this)"></div>
+        <div class="color-circle" style="background:#FFD700;" title="Oro" onclick="setFiltroColore('gold', this)"></div>
+        <div class="color-circle" style="background:#FFFF00;" title="Giallo" onclick="setFiltroColore('yellow', this)"></div>
+        <div class="color-circle" style="background:#ADFF2F;" title="Verde Chiaro/Lime" onclick="setFiltroColore('lime', this)"></div>
+        <div class="color-circle" style="background:#008000;" title="Verde" onclick="setFiltroColore('green', this)"></div>
+        <div class="color-circle" style="background:#87CEEB;" title="Azzurro/Celeste" onclick="setFiltroColore('lightblue', this)"></div>
+        <div class="color-circle" style="background:#0000FF;" title="Blu" onclick="setFiltroColore('blue', this)"></div>
+        <div class="color-circle" style="background:#000080;" title="Blu Navy/Scuro" onclick="setFiltroColore('navy', this)"></div>
+        <div class="color-circle" style="background:#800080;" title="Viola" onclick="setFiltroColore('purple', this)"></div>
+        <div class="color-circle" style="background:#FFC0CB;" title="Rosa" onclick="setFiltroColore('pink', this)"></div>
+        <div class="color-circle" style="background:#A52A2A;" title="Marrone" onclick="setFiltroColore('brown', this)"></div>
+        <div class="color-circle" style="background:#FFFFFF; border:1px solid #ddd;" title="Bianco" onclick="setFiltroColore('white', this)"></div>
+        <div class="color-circle" style="background:#808080;" title="Grigio" onclick="setFiltroColore('grey', this)"></div>
+        <div class="color-circle" style="background:#000000;" title="Nero" onclick="setFiltroColore('black', this)"></div>
+        <div class="color-circle active" style="background:linear-gradient(45deg, red, blue, green);" title="Tutti" onclick="setFiltroColore('Tutti', this)"></div>
     </div>
     
     <label class="stat-item">Sport:</label>
@@ -531,24 +538,35 @@
     };
 
     function checkColorMatch(hexString, targetColor) {
-        if (targetColor === "Tutti") return true;
-        const colors = hexString.toLowerCase().split(',');
-        return colors.some(hex => {
-            hex = hex.replace('#', '').trim();
-            if (hex.length === 3) hex = hex.split('').map(s => s+s).join('');
-            let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
-            if (targetColor === 'white') return (r > 200 && g > 200 && b > 200);
-            if (targetColor === 'black') return (r < 60 && g < 60 && b < 60);
-            if (targetColor === 'red') return (r > 150 && g < 100 && b < 100);
-            if (targetColor === 'blue') return (b > 150 && r < 120 && g < 150);
-            if (targetColor === 'yellow') return (r > 180 && g > 160 && b < 100);
-            if (targetColor === 'green') return (g > 120 && r < 120 && b < 120);
-            if (targetColor === 'purple') return (r > 80 && b > 80 && g < 80);
-            if (targetColor === 'lightblue') return (b > 150 && g > 150 && r < 150) || (b > 200 && g > 100);
-            if (targetColor === 'orange') return (r > 200 && g > 100 && g < 180 && b < 80);
-            return false;
-        });
-    }
+    if (targetColor === "Tutti") return true;
+    const colors = hexString.toLowerCase().split(',');
+    return colors.some(hex => {
+        hex = hex.replace('#', '').trim();
+        if (hex.length === 3) hex = hex.split('').map(s => s+s).join('');
+        let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+        
+        switch(targetColor) {
+            case 'red':       return (r > 150 && g < 80 && b < 80);
+            case 'maroon':    return (r > 80 && r < 160 && g < 50 && b < 60);
+            case 'orange':    return (r > 200 && g > 100 && g < 190 && b < 80);
+            case 'gold':      return (r > 170 && g > 140 && b < 100 && b > 30);
+            case 'yellow':    return (r > 180 && g > 150 && b < 100);
+            case 'lime':      return (g > 180 && r > 100 && b < 120);
+            case 'green':     return (g > 100 && g < 190 && r < 120 && b < 120);
+            case 'lightblue': return (b > 180 && g > 120 && r < 200);
+            case 'blue':      return (b > 150 && r < 120 && g < 150);
+            case 'navy':      return (b > 60 && b < 150 && r < 60 && g < 80);
+            case 'purple':    return (r > 90 && b > 120 && g < 80);
+            case 'pink':      return (r > 200 && g > 100 && b > 140);
+            case 'brown':     return (r > 80 && r < 165 && g > 50 && g < 120 && b < 80);
+            case 'white':     return (r > 215 && g > 215 && b > 215);
+            case 'grey':      return (Math.abs(r-g) < 20 && Math.abs(r-b) < 20 && r > 70 && r < 190);
+            case 'black':     return (r < 50 && g < 50 && b < 50);
+            
+            default: return false;
+        }
+    });
+}
 
     window.toggleRanking = function(tipo) {
         const sidebar = document.getElementById('ranking-sidebar');
@@ -949,6 +967,7 @@
 </script>
 </body>
 </html>
+
 
 
 
