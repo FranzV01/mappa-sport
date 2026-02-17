@@ -23,7 +23,6 @@
         }
         #ui-panel.collapsed { transform: translateX(-310px); }
 
-        /* --- STILI NUOVI: RANKING SIDEBAR --- */
         #ranking-sidebar {
             position: absolute; top: 15px; right: 15px; z-index: 1001;
             background: rgba(255, 255, 255, 0.95); padding: 15px; border-radius: 15px;
@@ -40,7 +39,6 @@
         .rank-pos { font-weight: bold; color: #007bff; min-width: 20px; }
         .rank-val { margin-left: auto; font-size: 11px; font-weight: bold; color: #666; }
         
-        /* --- STILI NUOVI: FILTRO CROMATICO --- */
         .color-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
         .color-circle { 
             width: 22px; height: 22px; border-radius: 50%; border: 2px solid white; 
@@ -95,20 +93,46 @@
 
         .logo-container:hover { transform: scale(1.4); z-index: 9999 !important; }
         .logo-container:active { transform: scale(0.9); }
-        
         .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
         
-        .gender-badge, .rarity-badge {
+        /* SISTEMA BADGE UNIFORMI - NIENTE SOVRAPPOSIZIONI */
+        .badge-icon {
             position: absolute; width: 16px; height: 16px; 
             color: white; border-radius: 50%; border: 2px solid white;
             display: flex; align-items: center; justify-content: center;
             font-size: 9px; font-weight: bold; z-index: 100;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        .gender-badge { top: -2px; right: -2px; background: #ff69b4; }
-        .rarity-badge { bottom: -2px; right: -2px; background: #5bc0de; }
-        .new-club-badge { bottom: -2px; left: -2px; background: #f0ad4e; }
-        .defunct-badge { top: -2px; left: -2px; background: #777; }
+        /* Posizioni negli 8 punti cardinali del logo */
+        .badge-tr { top: -4px; right: -4px; } /* Alto a destra */
+        .badge-br { bottom: -4px; right: -4px; } /* Basso a destra */
+        .badge-bl { bottom: -4px; left: -4px; } /* Basso a sinistra */
+        .badge-tl { top: -4px; left: -4px; } /* Alto a sinistra */
+        .badge-tc { top: -8px; left: 14px; } /* In alto al centro */
+        .badge-bc { bottom: -8px; left: 14px; } /* In basso al centro */
+        .badge-rc { top: 14px; right: -8px; } /* Al centro a destra */
+        .badge-lc { top: 14px; left: -8px; } /* Al centro a sinistra */
+
+        /* Colori Badge Base */
+        .badge-female { background: #ff69b4; }
+        .badge-rarity { background: #5bc0de; }
+        .badge-new { background: #f0ad4e; }
+        .badge-defunct { background: #777; }
+
+        /* Colori Badge Automatici */
+        .badge-pluri { background: #704214; } /* Seppia */
+        .badge-cattedrale { background: #800020; } /* Rosso Scuro / Viola Reale */
+        .badge-elite { background: #ffd700; color: black; animation: shimmer 2s infinite; } /* Oro */
+        .badge-tetto { background: #f0f8ff; color: black; border-color:#ccc; } /* Bianco Ghiaccio */
+
+        @keyframes shimmer {
+            0% { box-shadow: 0 0 2px #ffd700; }
+            50% { box-shadow: 0 0 8px #ffd700; }
+            100% { box-shadow: 0 0 2px #ffd700; }
+        }
+
+        /* Classe per nascondere i badge automatici dal Toggle */
+        #map.hide-auto-badges .auto-badge { display: none !important; }
 
         .cluster-modern {
             background: #007bff; border: 2px solid #ffffff;
@@ -266,6 +290,14 @@
         </label>
     </div>
 
+    <div class="stat-item" style="background: #fff3cd; padding: 8px; border-radius: 8px; border: 1px solid #ffeeba; margin-top:10px;">
+        Mostra Badge Automatici: 
+        <label class="switch">
+            <input type="checkbox" id="auto-badge-toggle" checked onchange="toggleAutoBadges()">
+            <span class="slider"></span>
+        </label>
+    </div>
+
     <hr>
     
     <label class="stat-item">Nazione:</label>
@@ -277,7 +309,7 @@
         <div class="color-circle" style="background:blue;" onclick="setFiltroColore('blue', this)"></div>
         <div class="color-circle" style="background:yellow;" onclick="setFiltroColore('yellow', this)"></div>
         <div class="color-circle" style="background:green;" onclick="setFiltroColore('green', this)"></div>
-        <div class="color-circle" style="background:black;" onclick="setFiltroColore('black', this)"></div>
+        <div class="color-circle" style="background:purple;" onclick="setFiltroColore('purple', this)"></div> <div class="color-circle" style="background:lightblue;" onclick="setFiltroColore('lightblue', this)"></div> <div class="color-circle" style="background:orange;" onclick="setFiltroColore('orange', this)"></div> <div class="color-circle" style="background:black;" onclick="setFiltroColore('black', this)"></div>
         <div class="color-circle" style="background:white; border:1px solid #ddd;" onclick="setFiltroColore('white', this)"></div>
         <div class="color-circle active" style="background:linear-gradient(45deg, red, blue, green);" title="Reset" onclick="setFiltroColore('Tutti', this)"></div>
     </div>
@@ -321,6 +353,7 @@
         <option value="5">5° Livello</option>
         <option value="6">6° Livello</option>
         <option value="7">7° Livello</option>
+        <option value="8">8° Livello</option>
     </select>
     
     <label class="stat-item">Genere:</label>
@@ -352,6 +385,12 @@
         <div class="legend-item"><div class="legend-icon" style="background:#5bc0de"></div> Più antico della nazione 💎</div>
         <div class="legend-item"><div class="legend-icon" style="background:#f0ad4e"></div> Club dell'anno corrente (2026) ✨</div>
         <div class="legend-item"><div class="legend-icon" style="background:#777"></div> Club Scomparso ⚰️</div>
+        <hr style="margin: 5px 0;">
+        <span class="box-label" style="font-size: 8px; margin-top:5px;">Badge Automatici</span>
+        <div class="legend-item"><div class="legend-icon" style="background:#704214"></div> Pluricentenario (&lt; 1900) 📜</div>
+        <div class="legend-item"><div class="legend-icon" style="background:#800020"></div> Cattedrale (&gt; 50k) 🏟️</div>
+        <div class="legend-item"><div class="legend-icon" style="background:#ffd700"></div> Élite (1° Livello) ⭐</div>
+        <div class="legend-item"><div class="legend-icon" style="background:#f0f8ff; border:1px solid #ccc;"></div> Tetto del mondo (&gt; 2000m) 🏔️</div>
     </div>
 </div>
 
@@ -392,7 +431,16 @@
         return osm;
     }
 
-    var map = L.map('map', { layers: [checkNightShift()], zoomControl: false, dragging: !L.Browser.mobile, tap: !L.Browser.mobile }).setView(startCenter, startZoom);
+    // LIMITI MAPPA AGGIUNTI (maxBounds)
+    var map = L.map('map', { 
+        layers: [checkNightShift()], 
+        zoomControl: false, 
+        dragging: !L.Browser.mobile, 
+        tap: !L.Browser.mobile,
+        maxBounds: [[-90, -180], [90, 180]],
+        maxBoundsViscosity: 1.0,
+        minZoom: 2
+    }).setView(startCenter, startZoom);
     
     map.on('moveend', function() {
         var center = map.getCenter();
@@ -467,7 +515,17 @@
         } catch (e) { console.log("Errore meteo"); }
     }
 
-    // --- FUNZIONI NUOVE: FILTRO CROMATICO LOGIC ---
+    // Toggle logico dei badge automatici
+    window.toggleAutoBadges = function() {
+        const mapEl = document.getElementById('map');
+        if (document.getElementById('auto-badge-toggle').checked) {
+            mapEl.classList.remove('hide-auto-badges');
+        } else {
+            mapEl.classList.add('hide-auto-badges');
+        }
+    };
+
+    // --- FILTRO CROMATICO AGGIORNATO CON VIOLA, CELESTE, ARANCIONE ---
     window.setFiltroColore = function(colore, el) {
         filtroColoreSociale = colore;
         document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('active'));
@@ -488,11 +546,13 @@
             if (targetColor === 'blue') return (b > 150 && r < 120 && g < 150);
             if (targetColor === 'yellow') return (r > 180 && g > 160 && b < 100);
             if (targetColor === 'green') return (g > 120 && r < 120 && b < 120);
+            if (targetColor === 'purple') return (r > 80 && b > 80 && g < 80);
+            if (targetColor === 'lightblue') return (b > 150 && g > 150 && r < 150) || (b > 200 && g > 100);
+            if (targetColor === 'orange') return (r > 200 && g > 100 && g < 180 && b < 80);
             return false;
         });
     }
 
-    // --- FUNZIONI NUOVE: RANKING SIDEBAR LOGIC ---
     window.toggleRanking = function(tipo) {
         const sidebar = document.getElementById('ranking-sidebar');
         const content = document.getElementById('ranking-content');
@@ -640,6 +700,17 @@
                 document.getElementById('filter-nazione').appendChild(opt);
             });
 
+            // Centramento automatico sulla Nazione selezionata
+            document.getElementById('filter-nazione').addEventListener('change', function() {
+                const nVal = this.value;
+                setTimeout(() => {
+                    if (nVal !== "Tutti" && visibiliAttualmente.length > 0) {
+                        let bounds = L.latLngBounds(visibiliAttualmente.map(m => m.getLatLng()));
+                        map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
+                    }
+                }, 50);
+            });
+
             const savedFilters = JSON.parse(localStorage.getItem('mapFilters') || '{}');
             Object.keys(savedFilters).forEach(id => {
                 const el = document.getElementById(id);
@@ -656,20 +727,35 @@
                 let coloriArray = s.colori ? s.colori.split(',') : ['#333'];
                 let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
                 
-                let badgeFemminile = (s.genere && s.genere.toLowerCase() === 'f') ? '<div class="gender-badge">♀</div>' : '';
+                // Variabili Logiche per i Badge
                 let isOldest = oldestByNation[s.nazione] && oldestByNation[s.nazione].nome === s.nome;
-                let badgeRarità = isOldest ? '<div class="rarity-badge">💎</div>' : '';
-                let isNew2026 = parseInt(String(s.fondazione).replace(/\D/g, '')) === 2026;
-                let badgeNuovo = isNew2026 ? '<div class="new-club-badge">✨</div>' : '';
+                let annoFondazione = parseInt(String(s.fondazione).replace(/\D/g, '')) || 9999;
+                let isNew2026 = annoFondazione === 2026;
                 let isScomparso = s.stato === "scomparso";
-                let badgeScomparso = isScomparso ? '<div class="defunct-badge">⚰️</div>' : '';
+                let capStadio = parseInt(s.capacita_stadio) || 0;
+                let altitudine = parseInt(s.altitudine) || 0;
+                let livLega = parseInt(s.livello_lega) || 0;
+
+                // Creazione Stringa Badge
+                let badgesHTML = '';
+                if (s.genere && s.genere.toLowerCase() === 'f') badgesHTML += '<div class="badge-icon badge-tr badge-female">♀</div>';
+                if (isOldest) badgesHTML += '<div class="badge-icon badge-br badge-rarity">💎</div>';
+                if (isNew2026) badgesHTML += '<div class="badge-icon badge-bl badge-new">✨</div>';
+                if (isScomparso) badgesHTML += '<div class="badge-icon badge-tl badge-defunct">⚰️</div>';
+
+                // Badge Automatici (con classe auto-badge per poterli nascondere con il toggle)
+                if (annoFondazione < 1900) badgesHTML += '<div class="badge-icon badge-tc badge-pluri auto-badge" title="Pluricentenario">📜</div>';
+                if (capStadio > 50000) badgesHTML += '<div class="badge-icon badge-bc badge-cattedrale auto-badge" title="Cattedrale">🏟️</div>';
+                if (livLega === 1) badgesHTML += '<div class="badge-icon badge-rc badge-elite auto-badge" title="Élite">⭐</div>';
+                if (altitudine > 2000) badgesHTML += '<div class="badge-icon badge-lc badge-tetto auto-badge" title="Tetto del Mondo">🏔️</div>';
+
                 let highlightClass = (s.highlight && s.highlight.toUpperCase() === 'SI') ? 'highlight-active' : '';
 
                 var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
                     icon: L.divIcon({
                         className: 'custom-div-icon',
                         html: `<div class="logo-container ${highlightClass}" style="background: ${borderStyle};">
-                                     ${badgeFemminile}${badgeRarità}${badgeNuovo}${badgeScomparso}
+                                     ${badgesHTML}
                                      <img src="${s.logo_attuale}" class="logo-img-inner" onerror="this.src='${placeholderLogo}';">
                                    </div>`,
                         iconSize: [44, 44], iconAnchor: [22, 22]
@@ -713,7 +799,6 @@
                     wikiBtn = `<a href="https://en.wikipedia.org/wiki/${wikiNome}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
                 }
 
-                // --- AGGIUNTA FUSO ORARIO NEL POPUP ---
                 const localTimeStr = s.timezone ? new Intl.DateTimeFormat('it-IT', { timeZone: s.timezone, hour: '2-digit', minute: '2-digit' }).format(new Date()) : 'N.D.';
                 const weatherId = `weather-${s.nome.replace(/\s/g, '')}`;
 
