@@ -244,12 +244,16 @@
     </select>
 
     <label class="stat-item">Livello Lega:</label>
-    <select id="filter-lega">
-        <option value="Tutti">Tutti i livelli</option>
-        <option value="1">Serie A / Top 1</option>
-        <option value="2">Serie B / Liv. 2</option>
-        <option value="3">Livello 3 o inferiore</option>
-    </select>
+<select id="filter-lega">
+    <option value="Tutti">Tutti i livelli</option>
+    <option value="1">1° Livello</option>
+    <option value="2">2° Livello</option>
+    <option value="3">3° Livello</option>
+    <option value="4">4° Livello</option>
+    <option value="5">5° Livello</option>
+    <option value="6">6° Livello</option>
+    <option value="7">7° Livello</option>
+</select>
     
     <label class="stat-item">Genere:</label>
     <select id="filter-genere">
@@ -625,10 +629,9 @@
                     if (cVal === "large" && (cap < 30000 || cap >= 50000)) ok = false;
                     if (cVal === "giant" && cap < 50000) ok = false;
 
-                    // FILTRO LEGA
-                    if (lVal === "1" && lega !== 1) ok = false;
-                    if (lVal === "2" && lega !== 2) ok = false;
-                    if (lVal === "3" && (lega < 3 || lega === 0)) ok = false;
+                    // NUOVA LOGICA FILTRO LEGA FINO A 7
+                    if (lVal !== "Tutti")
+                    if (lega !== parseInt(lVal)) ok = false;
 
                     if (eVal === "Antiche" && anno >= 1900) ok = false;
                     if (eVal === "PrimoNovecento" && (anno < 1900 || anno >= 1950)) ok = false;
@@ -715,3 +718,4 @@
 </script>
 </body>
 </html>
+
