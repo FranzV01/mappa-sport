@@ -114,12 +114,15 @@ async function updateWeather(lat, lng, elementId) {
 window.toggleAutoBadges = function() {
     const mapEl = document.getElementById('map');
     const isChecked = document.getElementById('auto-badge-toggle').checked;
+    
+    // Ora usa la classe generica 'hide-badges' che controlla TUTTI i badge
     if (isChecked) {
-        mapEl.classList.remove('hide-auto-badges');
+        mapEl.classList.remove('hide-badges');
     } else {
-        mapEl.classList.add('hide-auto-badges');
+        mapEl.classList.add('hide-badges');
     }
-    // NUOVO: Salva preferenza
+    
+    // Salva la preferenza così al refresh non si resetta
     localStorage.setItem('autoBadgeStatus', isChecked);
 };
 
@@ -345,8 +348,6 @@ Papa.parse(urlFoglio, {
             if (isOldest) badgesHTML += '<div class="badge-icon badge-br badge-rarity">💎</div>';
             if (isNew2026) badgesHTML += '<div class="badge-icon badge-bl badge-new">✨</div>';
             if (isScomparso) badgesHTML += '<div class="badge-icon badge-tl badge-defunct">⚰️</div>';
-
-            // --- NUOVO: BADGE INTERNAZIONALE E AUTOMATICI ---
             if (trofeiInt > 0) badgesHTML += '<div class="badge-icon badge-lc badge-intl auto-badge" title="Campione Internazionale">🏆</div>';
             if (annoFondazione < 1900) badgesHTML += '<div class="badge-icon badge-tc badge-pluri auto-badge" title="Pluricentenario">📜</div>';
             if (capStadio > 50000) badgesHTML += '<div class="badge-icon badge-bc badge-cattedrale auto-badge" title="Cattedrale">🏟️</div>';
