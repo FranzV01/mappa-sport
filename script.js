@@ -151,51 +151,31 @@ window.setFiltroColore = function(colore, el) {
     applicaFiltri();
 };
 
-// Funzione di conversione per evitare il freeze
-function universalToHex(colorStr) {
-    if (!colorStr || colorStr === 'N.D.') return null;
-    colorStr = colorStr.trim();
-    // Se è già HEX (inizia con #)
-    if (colorStr.startsWith('#')) return colorStr.toUpperCase();
-    // Se è RGB (es. 255,0,0)
-    if (colorStr.includes(',')) {
-        const rgb = colorStr.split(',').map(v => parseInt(v.trim()));
-        return "#" + rgb.map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
-    }
-    return null;
-}
-
-function colorDistance(hex1, hex2) {
-    const h1 = universalToHex(hex1);
-    const h2 = universalToHex(hex2);
-    if (!h1 || !h2) return 999;
-
-    const r1 = parseInt(h1.slice(1, 3), 16), g1 = parseInt(h1.slice(3, 5), 16), b1 = parseInt(h1.slice(5, 7), 16);
-    const r2 = parseInt(h2.slice(1, 3), 16), g2 = parseInt(h2.slice(3, 5), 16), b2 = parseInt(h2.slice(5, 7), 16);
-    
-    return Math.sqrt(Math.pow((r2 - r1) * 0.3, 2) + Math.pow((g2 - g1) * 0.59, 2) + Math.pow((b2 - b1) * 0.11, 2));
-}
-
-function checkColorMatch(logoColor, targetColor) {
-    const colorMap = {
-        'red': '#FF0000', 'maroon': '#800000', 'orange': '#FFA500', 'gold': '#FFD700',
-        'yellow': '#FFFF00', 'lime': '#00FF00', 'green': '#008000', 'lightblue': '#ADD8E6',
-        'blue': '#0000FF', 'navy': '#000080', 'purple': '#800080', 'pink': '#FFC0CB',
-        'brown': '#A52A2A', 'white': '#FFFFFF', 'grey': '#808080', 'black': '#000000'
-    };
-
-    const targetHex = colorMap[targetColor];
-    const logoHex = universalToHex(logoColor);
-    
-    if (!logoHex || !targetHex) return false;
-
-    const distance = colorDistance(logoHex, targetHex);
-
-    // Rafforzamento Rosa e Lime per evitare confusioni
-    if (targetColor === 'pink') return distance < 25 && parseInt(logoHex.slice(1,3), 16) > parseInt(logoHex.slice(3,5), 16);
-    if (targetColor === 'lime') return distance < 35 && parseInt(logoHex.slice(3,5), 16) > parseInt(logoHex.slice(1,3), 16);
-
-    return distance < 38; 
+function checkColorMatch(hexString, targetColor) {
+    if (targetColor === "Tutti") return true;
+    const colors = hexString.toLowerCase().split(',');
+    return colors.some(hex => {
+        hex = hex.replace('#', '').trim();
+        if (hex.length === 3) hex = hex.split('').map(s => s+s).join('');
+        let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+        switch(targetColor) {
+    case 'red':       return (r > g && r > b);
+    case 'maroon':    return (r > g && r > b && r < 160);
+    case 'orange':    return (r > g && g > b && r > 200);
+    case 'gold':      return (r > 150 && g > 130 && b < 120);
+    case 'yellow':    return (r > 150 && g > 150 && b < 150);
+    case 'lime':      return (g > r && g > 150 && b < 150);
+    case 'green':     return (g > r && g > b && g <= 180);
+    case 'lightblue': return (b > r && b > g && (g > 100 || r > 100));
+    case 'blue':      return (b > r && b > g && b > 100);
+    case 'navy':      return (b > r && b > g && b < 130);
+    case 'purple':    return (r > g && b > g && Math.abs(r - b) < 70);
+    case 'pink':      return (r > g && r > 180 && b > 100);
+    case 'brown':     return (r > g && g > b && r < 180 && r > 70);
+    case 'white':     return (r > 230 && g > 230 && b > 230);
+    case 'grey':      return (Math.abs(r-g) < 20 && Math.abs(r-b) < 20 && r > 70 && r < 200);
+    case 'black':     return (r < 60 && g < 60 && b < 60);
+    default: return false;
 }
     });
 }
