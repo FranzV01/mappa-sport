@@ -151,31 +151,53 @@ window.setFiltroColore = function(colore, el) {
     applicaFiltri();
 };
 
-function checkColorMatch(hexString, targetColor) {
-    if (targetColor === "Tutti") return true;
-    const colors = hexString.toLowerCase().split(',');
-    return colors.some(hex => {
-        hex = hex.replace('#', '').trim();
-        if (hex.length === 3) hex = hex.split('').map(s => s+s).join('');
-        let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
-        switch(targetColor) {
-    case 'red':       return (r > g && r > b);
-    case 'maroon':    return (r > g && r > b && r < 160);
-    case 'orange':    return (r > g && g > b && r > 200);
-    case 'gold':      return (r > 150 && g > 130 && b < 120);
-    case 'yellow':    return (r > 150 && g > 150 && b < 150);
-    case 'lime':      return (g > r && g > 150 && b < 150);
-    case 'green':     return (g > r && g > b && g <= 180);
-    case 'lightblue': return (b > r && b > g && (g > 100 || r > 100));
-    case 'blue':      return (b > r && b > g && b > 100);
-    case 'navy':      return (b > r && b > g && b < 130);
-    case 'purple':    return (r > g && b > g && Math.abs(r - b) < 70);
-    case 'pink':      return (r > g && r > 180 && b > 100);
-    case 'brown':     return (r > g && g > b && r < 180 && r > 70);
-    case 'white':     return (r > 230 && g > 230 && b > 230);
-    case 'grey':      return (Math.abs(r-g) < 20 && Math.abs(r-b) < 20 && r > 70 && r < 200);
-    case 'black':     return (r < 60 && g < 60 && b < 60);
-    default: return false;
+function colorDistance(hex1, hex2) {
+    const r1 = parseInt(hex1.slice(1, 3), 16);
+    const g1 = parseInt(hex1.slice(3, 5), 16);
+    const b1 = parseInt(hex1.slice(5, 7), 16);
+    const r2 = parseInt(hex2.slice(1, 3), 16);
+    const g2 = parseInt(hex2.slice(3, 5), 16);
+    const b2 = parseInt(hex2.slice(5, 7), 16);
+    
+    // Formula della distanza euclidea pesata per la percezione umana
+    return Math.sqrt(
+        Math.pow((r2 - r1) * 0.3, 2) + 
+        Math.pow((g2 - g1) * 0.59, 2) + 
+        Math.pow((b2 - b1) * 0.11, 2)
+    );
+}
+
+function checkColorMatch(logoHex, targetColor) {
+    if (!logoHex || logoHex === 'N.D.') return false;
+    
+    // Definizione dei centri colore HEX perfetti
+    const colorMap = {
+        'red': '#FF0000',
+        'maroon': '#800000',
+        'orange': '#FFA500',
+        'gold': '#FFD700',
+        'yellow': '#FFFF00',
+        'lime': '#00FF00',
+        'green': '#008000',
+        'lightblue': '#ADD8E6',
+        'blue': '#0000FF',
+        'navy': '#000080',
+        'purple': '#800080',
+        'pink': '#FFC0CB',
+        'brown': '#A52A2A',
+        'white': '#FFFFFF',
+        'grey': '#808080',
+        'black': '#000000'
+    };
+
+    const targetHex = colorMap[targetColor];
+    if (!targetHex) return false;
+
+    // Calcola quanto il logo è vicino al colore ideale
+    const distance = colorDistance(logoHex.toUpperCase(), targetHex);
+    
+    // Più basso è il numero, più è preciso. 35-40 è un ottimo compromesso.
+    return distance < 38; 
 }
     });
 }
