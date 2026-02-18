@@ -29,12 +29,16 @@ var map = L.map('map', {
     minZoom: 2
 }).setView(startCenter, startZoom);
 
-// --- NUOVO: RIPRISTINO STATO BADGE AL CARICAMENTO ---
+// --- FIX RIPRISTINO STATO BADGE AL CARICAMENTO ---
 const savedBadgeStatus = localStorage.getItem('autoBadgeStatus');
+const mapEl = document.getElementById('map');
+const toggleEl = document.getElementById('auto-badge-toggle');
+
 if (savedBadgeStatus !== null) {
     const isVisible = savedBadgeStatus === 'true';
-    document.getElementById('auto-badge-toggle').checked = isVisible;
-    if (!isVisible) document.getElementById('map').classList.add('hide-auto-badges');
+    if (toggleEl) toggleEl.checked = isVisible;
+    // Se è falso, aggiungiamo subito la classe per nasconderli
+    if (!isVisible) mapEl.classList.add('hide-badges');
 }
 
 map.on('moveend', function() {
