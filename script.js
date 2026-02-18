@@ -252,40 +252,66 @@ window.vaiAClub = function(nomeClub) {
 };
 
 function resetFiltri() {
-    // 1. Svuota la barra di ricerca
+    // 1. Pulisci fisicamente il localStorage prima di ogni altra cosa
+    localStorage.removeItem('mapFilters');
+    localStorage.removeItem('mapSavedColor');
+    localStorage.removeItem('selectedColorFilter');
+
+    // 2. Ripristina le variabili globali di controllo ai valori di default
+    filtroColoreSociale = "Tutti";
+    
+    // 3. Reset manuale degli elementi UI
     const searchInput = document.getElementById('search-input');
     if (searchInput) searchInput.value = '';
 
-    // 2. Riporta tutti i menu a tendina su "Tutti"
-    document.querySelectorAll('#ui-panel select').forEach(select => {
-        select.value = 'Tutti';
+    const timelineSlider = document.getElementById('timeline-slider');
+    const yearDisplay = document.getElementById('year-display');
+    if (timelineSlider) timelineSlider.value = 2026;
+    if (yearDisplay) yearDisplay.innerText = "Tutti i tempi";
+
+    // Forza tutti i select a "Tutti"
+    document.querySelectorAll('#ui-panel select').forEach(sel => {
+        sel.value = 'Tutti';
     });
 
-    // 3. Resetta lo slider temporale al massimo (2026)
-    const slider = document.getElementById('timeline-slider');
-    const display = document.getElementById('year-display');
-    if (slider) slider.value = 2026;
-    if (display) display.innerText = "Tutti i tempi";
-
-    // 4. Reset Colori Sociali
-    filtroColoreSociale = "Tutti";
+    // 4. Reset visivo dei cerchietti colore
     document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('active'));
-    const resetCircle = document.querySelector('.color-circle[title="Reset"]') || document.querySelector('.color-circle:first-child');
+    const resetCircle = document.querySelector('.color-circle[title="Reset"]') || 
+                        document.querySelector('.color-circle[onclick*="Tutti"]');
     if (resetCircle) resetCircle.classList.add('active');
 
-    // 5. Pulisci la memoria del browser
-    localStorage.removeItem('mapSavedColor');
-    localStorage.removeItem('mapFilters');
-    localStorage.removeItem('autoBadgeStatus'); // Se vuoi resettare anche i badge al reset
+    // 5. LA PARTE CRUCIALE: Forza i markers a riapparire
+    // Svuotiamo i layer attuali
+    markers.clearLayers();
+    markersLayer.clearLayers();
 
-    // 6. FORZA IL RICALCOLO
-    // Chiamiamo applicaFiltri() che ora troverà tutti i valori su "Tutti" o vuoti
-    if (typeof applicaFiltri === "function") {
-        applicaFiltri();
+    // Ripopoliamo visibiliAttualmente con TUTTI i marker caricati all'inizio
+    visibiliAttualmente = [...allMarkers];
+
+    // Aggiungiamo di nuovo tutto alla mappa (rispettando il cluster se attivo)
+    const isClusterEnabled = document.getElementById('cluster-toggle').checked;
+    if (isClusterEnabled) {
+        visibiliAttualmente.forEach(m => markers.addLayer(m));
+        map.addLayer(markers);
+    } else {
+        visibiliAttualmente.forEach(m => markersLayer.addLayer(m));
+        map.addLayer(markersLayer);
     }
 
-    // 7. Feedback visivo
-    showNotification("Mappa ripristinata: mostrati tutti i club");
+    // 6. Reset Heatmap e statistiche
+    if (typeof heatLayer !== 'undefined') {
+        const heatPoints = visibiliAttualmente.map(m => [m.getLatLng().lat, m.getLatLng().lng, 0.5]);
+        heatLayer.setLatLngs(heatPoints);
+    }
+
+    // Aggiorna i contatori UI
+    document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibiliAttualmente.length}</b>`;
+    
+    // Notifica di successo
+    showNotification("Reset completato: tutti i club sono visibili");
+    
+    // Chiudi eventuali popup aperti che potrebbero dare fastidio
+    map.closePopup();
 }
 
 function clubCasuale() {
