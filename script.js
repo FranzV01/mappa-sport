@@ -162,13 +162,13 @@ function checkColorMatch(hexString, targetColor) {
     case 'orange':    return (r > 200 && g > 100 && g < 190 && b < 100);
     case 'gold':      return (r > 170 && g > 140 && b < 100 && b > 30);
     case 'yellow':    return (r > 190 && g > 180 && b < 120);
-    case 'lime':      return (g > 180 && r > 120 && b < 120);
-    case 'green':     return (g > 100 && g < 180 && r < 120 && b < 120);
+    case 'lime':      return (g > 200 && r > 100 && b < 100 && g > r);
+    case 'green':     return (g > 100 && g <= 200 && r < 100 && b < 110);
     case 'lightblue': return (b > 200 && g > 150 && r < 180);
     case 'blue':      return (b > 160 && r < 130 && g < 160);
     case 'navy':      return (b > 60 && b < 150 && r < 70 && g < 90);
-    case 'purple':    return (r > 110 && b > 140 && g < 100);
-    case 'pink':      return (r > 210 && b > 140 && g > 100 && g < 200 && (r-g) > 40); 
+    case 'purple':    return (r > 100 && b > 120 && g < 90 && Math.abs(r - b) < 60);
+    case 'pink':      return (r > 200 && b > 120 && g > 80 && g < 180 && (r - g) > 50); 
     case 'brown':     return (r > 80 && r < 165 && g > 50 && g < 120 && b < 80);
     case 'white':     return (r > 240 && g > 240 && b > 240);
     case 'grey':      return (Math.abs(r-g) < 15 && Math.abs(r-b) < 15 && r > 100 && r < 200);
