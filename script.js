@@ -157,22 +157,22 @@ function checkColorMatch(hexString, targetColor) {
         if (hex.length === 3) hex = hex.split('').map(s => s+s).join('');
         let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
         switch(targetColor) {
-    case 'red':       return (r > 150 && g < 100 && b < 100);
-    case 'maroon':    return (r > 80 && r < 160 && g < 50 && b < 60);
-    case 'orange':    return (r > 200 && g > 100 && g < 190 && b < 100);
-    case 'gold':      return (r > 170 && g > 140 && b < 100 && b > 30);
-    case 'yellow':    return (r > 190 && g > 180 && b < 120);
-    case 'lime':      return (g > 150 && r > 100 && b < 150);
-    case 'green':     return (g > 90 && g > r && g > b);
-    case 'lightblue': return (b > 200 && g > 150 && r < 180);
-    case 'blue':      return (b > 160 && r < 130 && g < 160);
-    case 'navy':      return (b > 60 && b < 150 && r < 70 && g < 90);
-    case 'purple':    return (r > 80 && b > 80 && g < (r + b) / 3);
-    case 'pink':      return (r > 160 && b > 100 && r > g && (r - g) > 20); 
-    case 'brown':     return (r > 80 && r < 165 && g > 50 && g < 120 && b < 80);
-    case 'white':     return (r > 240 && g > 240 && b > 240);
-    case 'grey':      return (Math.abs(r-g) < 15 && Math.abs(r-b) < 15 && r > 100 && r < 200);
-    case 'black':     return (r < 45 && g < 45 && b < 45);
+    case 'red':       return (r > g && r > b);
+    case 'maroon':    return (r > g && r > b && r < 160);
+    case 'orange':    return (r > g && g > b && r > 200);
+    case 'gold':      return (r > 150 && g > 130 && b < 120);
+    case 'yellow':    return (r > 150 && g > 150 && b < 150);
+    case 'lime':      return (g > r && g > 150 && b < 150);
+    case 'green':     return (g > r && g > b && g <= 180);
+    case 'lightblue': return (b > r && b > g && (g > 100 || r > 100));
+    case 'blue':      return (b > r && b > g && b > 100);
+    case 'navy':      return (b > r && b > g && b < 130);
+    case 'purple':    return (r > g && b > g && Math.abs(r - b) < 70);
+    case 'pink':      return (r > g && r > 180 && b > 100);
+    case 'brown':     return (r > g && g > b && r < 180 && r > 70);
+    case 'white':     return (r > 230 && g > 230 && b > 230);
+    case 'grey':      return (Math.abs(r-g) < 20 && Math.abs(r-b) < 20 && r > 70 && r < 200);
+    case 'black':     return (r < 60 && g < 60 && b < 60);
     default: return false;
 }
     });
