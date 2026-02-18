@@ -221,3 +221,4 @@ input:checked + .slider:before { transform: translateX(20px); }
     font-weight: bold; transition: all 0.2s;
 }
 .btn-wiki:hover { background: #3366cc; color: #ffffff; }
+#map.hide-badges .badge-icon { display: none !important; }
