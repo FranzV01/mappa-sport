@@ -151,32 +151,48 @@ window.setFiltroColore = function(colore, el) {
     applicaFiltri();
 };
 
-function checkColorMatch(hexString, targetColor) {
+function checkColorMatch(cellaColori, targetColor) {
     if (targetColor === "Tutti") return true;
-    const colors = hexString.toLowerCase().split(',');
-    return colors.some(hex => {
-        hex = hex.replace('#', '').trim();
-        if (hex.length === 3) hex = hex.split('').map(s => s+s).join('');
-        let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
-        switch(targetColor) {
-    case 'red':       return (r > g && r > b);
-    case 'maroon':    return (r > g && r > b && r < 160);
-    case 'orange':    return (r > g && g > b && r > 200);
-    case 'gold':      return (r > 150 && g > 130 && b < 120);
-    case 'yellow':    return (r > 150 && g > 150 && b < 150);
-    case 'lime':      return (g > r && g > 150 && b < 150);
-    case 'green':     return (g > r && g > b && g <= 180);
-    case 'lightblue': return (b > r && b > g && (g > 100 || r > 100));
-    case 'blue':      return (b > r && b > g && b > 100);
-    case 'navy':      return (b > r && b > g && b < 130);
-    case 'purple':    return (r > g && b > g && Math.abs(r - b) < 70);
-    case 'pink':      return (r > g && r > 180 && b > 100);
-    case 'brown':     return (r > g && g > b && r < 180 && r > 70);
-    case 'white':     return (r > 230 && g > 230 && b > 230);
-    case 'grey':      return (Math.abs(r-g) < 20 && Math.abs(r-b) < 20 && r > 70 && r < 200);
-    case 'black':     return (r < 60 && g < 60 && b < 60);
-    default: return false;
-}
+    if (!cellaColori || cellaColori === 'N.D.' || cellaColori === '') return false;
+    
+    // Centri colore target (HEX ideali)
+    const targetMap = {
+        'red': '#FF0000', 'maroon': '#800000', 'orange': '#FFA500',
+        'gold': '#FFD700', 'yellow': '#FFFF00', 'lime': '#00FF00',
+        'green': '#008000', 'lightblue': '#ADD8E6', 'blue': '#0000FF',
+        'navy': '#000080', 'purple': '#800080', 'pink': '#FFC0CB',
+        'brown': '#A52A2A', 'white': '#FFFFFF', 'grey': '#808080', 'black': '#000000'
+    };
+
+    const targetHex = targetMap[targetColor];
+    if (!targetHex) return false;
+
+    // Trasforma la cella in array (es: ["#FFFFFF", "#000000"])
+    const listaColori = cellaColori.split(',').map(c => c.trim().toUpperCase());
+
+    // Funzione interna velocissima per la distanza cromatica
+    const getDistance = (h1, h2) => {
+        const r1 = parseInt(h1.substring(1,3), 16), g1 = parseInt(h1.substring(3,5), 16), b1 = parseInt(h1.substring(5,7), 16);
+        const r2 = parseInt(h2.substring(1,3), 16), g2 = parseInt(h2.substring(3,5), 16), b2 = parseInt(h2.substring(5,7), 16);
+        return Math.sqrt(Math.pow((r1-r2)*0.30, 2) + Math.pow((g1-g2)*0.59, 2) + Math.pow((b1-b2)*0.11, 2));
+    };
+
+    // Controlla se almeno uno dei colori della squadra corrisponde al target
+    return listaColori.some(coloreLogo => {
+        const hexVal = coloreLogo.startsWith('#') ? coloreLogo : '#' + coloreLogo;
+        if (hexVal.length !== 7) return false; // Salta codici malformati
+
+        const d = getDistance(hexVal, targetHex);
+        
+        // Soglie di precisione specifiche
+        if (targetColor === 'pink') return d < 25;  // Molto stretto per evitare bianchi
+        if (targetColor === 'white') return d < 15; // Solo bianco quasi puro
+        if (targetColor === 'lime') {
+            const r = parseInt(hexVal.substring(1,3), 16), g = parseInt(hexVal.substring(3,5), 16);
+            return d < 35 && g > r; // Il verde deve dominare
+        }
+        
+        return d < 35; // Soglia standard
     });
 }
 
