@@ -209,7 +209,7 @@ window.toggleRanking = function(tipo) {
                 <span class="rank-pos">${i+1}</span>
                 <img src="${d.logo_attuale}" width="20" height="20" style="object-fit:contain" onerror="this.src='${placeholderLogo}';">
                 <span>${d.nome}</span>
-                <span class="rank-val">${tipo==='nuvole' ? d.altitudine+'m' : (tipo==='pionieri' ? d.fondazione : (tipo==='re' ? d.trofei_internazionali : d.capacita_stadio))}</span>
+                <span class="rank-val">${tipo==='nuvole' ? d.altitudine+'m' : (tipo==='pionieri' ? d.fondazione : (tipo==='re' ? d.trofei_internazionali : new Intl.NumberFormat('it-IT').format(parseInt(d.capacita_stadio)||0)))}</span>
             </div>
         `).join('');
     };
@@ -430,7 +430,7 @@ Papa.parse(urlFoglio, {
                         ${flagHtml} <b>${s.nazione}</b><br>
                         Fondazione: <b>${s.fondazione}</b><br>
                         Stadio: <b>${s.stadio_nome || 'N.D.'}</b><br>
-                        ${s.capacita_stadio ? `Posti: <b>${parseInt(s.capacita_stadio).toLocaleString()}</b>` : ''}
+                        ${s.capacita_stadio ? `Posti: <b>${new Intl.NumberFormat('it-IT').format(parseInt(s.capacita_stadio))}</b>` : ''}
                     </div>
                     ${wikiBtn} ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
                     ${annivItems.length > 0 ? `<div class="anniversario-box"><span class="box-label">Loghi Anniversario</span><div class="anniversario-grid">${annivItems.slice(0,3).join('')}</div>${annivItems.length > 3 ? `<div class="anniversario-grid hidden-logos">${annivItems.slice(3).join('')}</div><button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
