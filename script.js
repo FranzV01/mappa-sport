@@ -521,6 +521,17 @@ Papa.parse(urlFoglio, {
             markers.clearLayers(); markersLayer.clearLayers();
             let heatPoints = [];
             let sportCounts = {};
+            visibiliAttualmente.forEach(m => {
+        const s = m.dati.sport;
+        sportCounts[s] = (sportCounts[s] || 0) + 1;
+    });
+
+    const statsHTML = Object.entries(sportCounts)
+        .sort((a, b) => b[1] - a[1]) // Ordina per chi ne ha di più
+        .map(([n, c]) => `${sportIcons[n] || ''} ${c}`)
+        .join(' • ');
+
+    document.getElementById('stats-breakdown').innerHTML = statsHTML;
             
             visibiliAttualmente = allMarkers.filter(m => {
                 let ok = true;
