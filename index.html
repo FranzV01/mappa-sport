@@ -118,12 +118,14 @@
         .badge-rarity { background: #5bc0de; }
         .badge-new { background: #f0ad4e; }
         .badge-defunct { background: #777; }
+        .badge-intl { background: #ffd700; color: black; border-color: #b8860b; } /* Oro per trofei internazionali */
 
         /* Colori Badge Automatici */
         .badge-pluri { background: #704214; } /* Seppia */
         .badge-cattedrale { background: #800020; } /* Rosso Scuro / Viola Reale */
         .badge-elite { background: #ffd700; color: black; animation: shimmer 2s infinite; } /* Oro */
         .badge-tetto { background: #f0f8ff; color: black; border-color:#ccc; } /* Bianco Ghiaccio */
+        .badge-intl { background: #ffd700; border-color: #b8860b; color: black; }
 
         @keyframes shimmer {
             0% { box-shadow: 0 0 2px #ffd700; }
@@ -132,7 +134,7 @@
         }
 
         /* Classe per nascondere i badge automatici dal Toggle */
-        #map.hide-auto-badges .auto-badge { display: none !important; }
+        #map.hide-auto-badges .badge-icon { display: none !important; }
 
         .cluster-modern {
             background: #007bff; border: 2px solid #ffffff;
@@ -389,8 +391,7 @@
         <div class="legend-item"><div class="legend-icon" style="background:#5bc0de"></div> Più antico della nazione 💎</div>
         <div class="legend-item"><div class="legend-icon" style="background:#f0ad4e"></div> Club dell'anno corrente (2026) ✨</div>
         <div class="legend-item"><div class="legend-icon" style="background:#777"></div> Club Scomparso ⚰️</div>
-        <hr style="margin: 5px 0;">
-        <span class="box-label" style="font-size: 8px; margin-top:5px;">Badge Automatici</span>
+        <div class="legend-item"><div class="legend-icon" style="background:#ffd700; border:1px solid #b8860b;"></div> Titoli Internazionali 🏆</div>
         <div class="legend-item"><div class="legend-icon" style="background:#704214"></div> Pluricentenario (&lt; 1900) 📜</div>
         <div class="legend-item"><div class="legend-icon" style="background:#800020"></div> Cattedrale (&gt; 50k) 🏟️</div>
         <div class="legend-item"><div class="legend-icon" style="background:#ffd700"></div> Élite (1° Livello) ⭐</div>
@@ -519,14 +520,15 @@
         } catch (e) { console.log("Errore meteo"); }
     }
 
-    // Toggle logico dei badge automatici
-    window.toggleAutoBadges = function() {
-        const mapEl = document.getElementById('map');
-        if (document.getElementById('auto-badge-toggle').checked) {
-            mapEl.classList.remove('hide-auto-badges');
-        } else {
-            mapEl.classList.add('hide-auto-badges');
-        }
+    function toggleBadges() {
+    const mapEl = document.getElementById('map');
+    // Se il checkbox è attivo, mostriamo (togliamo la classe hide)
+    // Se è spento, nascondiamo (aggiungiamo la classe hide)
+    if (document.getElementById('badge-toggle').checked) {
+        mapEl.classList.remove('hide-auto-badges');
+    } else {
+        mapEl.classList.add('hide-auto-badges');
+    }
     };
 
     // --- FILTRO CROMATICO AGGIORNATO CON VIOLA, CELESTE, ARANCIONE ---
@@ -747,22 +749,23 @@
                 let annoFondazione = parseInt(String(s.fondazione).replace(/\D/g, '')) || 9999;
                 let isNew2026 = annoFondazione === 2026;
                 let isScomparso = s.stato === "scomparso";
+                let coppeIntl = parseInt(s.coppe_internazionali) || 0;
                 let capStadio = parseInt(s.capacita_stadio) || 0;
                 let altitudine = parseInt(s.altitudine) || 0;
                 let livLega = parseInt(s.livello_lega) || 0;
 
                 // Creazione Stringa Badge
                 let badgesHTML = '';
+                // Badge di Stato
                 if (s.genere && s.genere.toLowerCase() === 'f') badgesHTML += '<div class="badge-icon badge-tr badge-female">♀</div>';
                 if (isOldest) badgesHTML += '<div class="badge-icon badge-br badge-rarity">💎</div>';
                 if (isNew2026) badgesHTML += '<div class="badge-icon badge-bl badge-new">✨</div>';
                 if (isScomparso) badgesHTML += '<div class="badge-icon badge-tl badge-defunct">⚰️</div>';
-
-                // Badge Automatici (con classe auto-badge per poterli nascondere con il toggle)
-                if (annoFondazione < 1900) badgesHTML += '<div class="badge-icon badge-tc badge-pluri auto-badge" title="Pluricentenario">📜</div>';
-                if (capStadio > 50000) badgesHTML += '<div class="badge-icon badge-bc badge-cattedrale auto-badge" title="Cattedrale">🏟️</div>';
-                if (livLega === 1) badgesHTML += '<div class="badge-icon badge-rc badge-elite auto-badge" title="Élite">⭐</div>';
-                if (altitudine > 2000) badgesHTML += '<div class="badge-icon badge-lc badge-tetto auto-badge" title="Tetto del Mondo">🏔️</div>';
+                if (coppeIntl > 0) badgesHTML += '<div class="badge-icon badge-lc badge-intl" title="Vincitore Internazionale">🏆</div>';
+                if (annoFondazione < 1900) badgesHTML += '<div class="badge-icon badge-tc badge-pluri" title="Pluricentenario">📜</div>';
+                if (capStadio > 50000) badgesHTML += '<div class="badge-icon badge-bc badge-cattedrale" title="Cattedrale">🏟️</div>';
+                if (livLega === 1) badgesHTML += '<div class="badge-icon badge-rc badge-elite" title="Élite">⭐</div>';
+                if (altitudine > 2000) badgesHTML += '<div class="badge-icon badge-lc badge-tetto" title="Tetto del Mondo">🏔️</div>';
 
                 let highlightClass = (s.highlight && s.highlight.toUpperCase() === 'SI') ? 'highlight-active' : '';
 
@@ -967,6 +970,7 @@
 </script>
 </body>
 </html>
+
 
 
 
