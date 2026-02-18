@@ -58,7 +58,7 @@ body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
 .history-item:hover { transform: scale(1.1); border-color: #007bff; }
 .history-item img { width: 70%; height: 70%; object-fit: contain; }
 
-.btn-ui { background: #f0f0f0; border: 1px solid #ddd; border-radius: 8px; padding: 8px; cursor: pointer; font-size: 12px; font-weight: bold; font-family: inherit; margin-bottom: 5px; }
+.btn-ui { background: #f0f0f0; border: 1px solid #ddd; border-radius: 8px; padding: 10px; cursor: pointer; font-size: 12px; font-weight: bold; font-family: inherit; margin-bottom: 5px; }
 .btn-reset { background: #fee; color: #c33; border-color: #fcc; }
 .btn-explore { background: #e7f3ff; color: #007bff; border-color: #b3d7ff; }
 
