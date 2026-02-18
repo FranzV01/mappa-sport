@@ -252,26 +252,40 @@ window.vaiAClub = function(nomeClub) {
 };
 
 function resetFiltri() {
-    // 1. Reset Campi Input e Select
-    document.getElementById('search-input').value = '';
-    document.getElementById('timeline-slider').value = 2026;
-    document.getElementById('year-display').innerText = "Tutti i tempi";
-    document.querySelectorAll('select').forEach(s => s.value = 'Tutti');
+    // 1. Svuota la barra di ricerca
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) searchInput.value = '';
 
-    // 2. Reset Colori
+    // 2. Riporta tutti i menu a tendina su "Tutti"
+    document.querySelectorAll('#ui-panel select').forEach(select => {
+        select.value = 'Tutti';
+    });
+
+    // 3. Resetta lo slider temporale al massimo (2026)
+    const slider = document.getElementById('timeline-slider');
+    const display = document.getElementById('year-display');
+    if (slider) slider.value = 2026;
+    if (display) display.innerText = "Tutti i tempi";
+
+    // 4. Reset Colori Sociali
     filtroColoreSociale = "Tutti";
     document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('active'));
-    const resetCircle = document.querySelector('.color-circle[title="Reset"]');
+    const resetCircle = document.querySelector('.color-circle[title="Reset"]') || document.querySelector('.color-circle:first-child');
     if (resetCircle) resetCircle.classList.add('active');
-    
-    // 3. Pulisci la memoria del browser per i filtri
+
+    // 5. Pulisci la memoria del browser
     localStorage.removeItem('mapSavedColor');
     localStorage.removeItem('mapFilters');
+    localStorage.removeItem('autoBadgeStatus'); // Se vuoi resettare anche i badge al reset
 
-    // 4. Riesegui il filtraggio per aggiornare la mappa
-    applicaFiltri();
-    
-    showNotification("Filtri resettati correttamente");
+    // 6. FORZA IL RICALCOLO
+    // Chiamiamo applicaFiltri() che ora troverà tutti i valori su "Tutti" o vuoti
+    if (typeof applicaFiltri === "function") {
+        applicaFiltri();
+    }
+
+    // 7. Feedback visivo
+    showNotification("Mappa ripristinata: mostrati tutti i club");
 }
 
 function clubCasuale() {
