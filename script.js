@@ -180,7 +180,7 @@ window.toggleRanking = function(tipo) {
         label = "I Pionieri (Anzianità)";
         dati.sort((a,b) => (parseInt(String(a.fondazione).replace(/\D/g,''))||9999) - (parseInt(String(b.fondazione).replace(/\D/g,''))||9999));
     } else if(tipo === 'nuvole') {
-        label = "Giganti delle Nuvole (Altitudine)";
+        label = "Giganti delle Nuvole (Alt.)";
         dati.sort((a,b) => (parseInt(b.altitudine)||0) - (parseInt(a.altitudine)||0));
     } else if(tipo === 'cattedrali') {
         label = "Stadi Cattedrale (Capienza)";
