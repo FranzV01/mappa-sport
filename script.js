@@ -252,14 +252,26 @@ window.vaiAClub = function(nomeClub) {
 };
 
 function resetFiltri() {
+    // 1. Reset Campi Input e Select
     document.getElementById('search-input').value = '';
     document.getElementById('timeline-slider').value = 2026;
-    document.getElementById('year-display').innerText = "Fino al 2026";
+    document.getElementById('year-display').innerText = "Tutti i tempi";
     document.querySelectorAll('select').forEach(s => s.value = 'Tutti');
+
+    // 2. Reset Colori
     filtroColoreSociale = "Tutti";
     document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('active'));
-    document.querySelector('.color-circle[title="Reset"]').classList.add('active');
+    const resetCircle = document.querySelector('.color-circle[title="Reset"]');
+    if (resetCircle) resetCircle.classList.add('active');
+    
+    // 3. Pulisci la memoria del browser per i filtri
+    localStorage.removeItem('mapSavedColor');
+    localStorage.removeItem('mapFilters');
+
+    // 4. Riesegui il filtraggio per aggiornare la mappa
     applicaFiltri();
+    
+    showNotification("Filtri resettati correttamente");
 }
 
 function clubCasuale() {
