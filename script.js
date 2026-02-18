@@ -252,24 +252,26 @@ window.vaiAClub = function(nomeClub) {
 };
 
 function resetFiltri() {
-    // 1. Pulisci fisicamente il localStorage prima di ogni altra cosa
+    // 1. Pulizia Totale del LocalStorage (Elimina ogni "ricordo" di filtri passati)
     localStorage.removeItem('mapFilters');
     localStorage.removeItem('mapSavedColor');
     localStorage.removeItem('selectedColorFilter');
 
-    // 2. Ripristina le variabili globali di controllo ai valori di default
+    // 2. Reset variabili globali
     filtroColoreSociale = "Tutti";
-    
-    // 3. Reset manuale degli elementi UI
+
+    // 3. Reset fisico degli elementi UI nel pannello
     const searchInput = document.getElementById('search-input');
     if (searchInput) searchInput.value = '';
 
     const timelineSlider = document.getElementById('timeline-slider');
     const yearDisplay = document.getElementById('year-display');
-    if (timelineSlider) timelineSlider.value = 2026;
-    if (yearDisplay) yearDisplay.innerText = "Tutti i tempi";
+    if (timelineSlider) {
+        timelineSlider.value = 2026;
+        if (yearDisplay) yearDisplay.innerText = "Tutti i tempi";
+    }
 
-    // Forza tutti i select a "Tutti"
+    // Riporta tutti i menu a tendina su "Tutti"
     document.querySelectorAll('#ui-panel select').forEach(sel => {
         sel.value = 'Tutti';
     });
@@ -280,38 +282,15 @@ function resetFiltri() {
                         document.querySelector('.color-circle[onclick*="Tutti"]');
     if (resetCircle) resetCircle.classList.add('active');
 
-    // 5. LA PARTE CRUCIALE: Forza i markers a riapparire
-    // Svuotiamo i layer attuali
-    markers.clearLayers();
-    markersLayer.clearLayers();
-
-    // Ripopoliamo visibiliAttualmente con TUTTI i marker caricati all'inizio
-    visibiliAttualmente = [...allMarkers];
-
-    // Aggiungiamo di nuovo tutto alla mappa (rispettando il cluster se attivo)
-    const isClusterEnabled = document.getElementById('cluster-toggle').checked;
-    if (isClusterEnabled) {
-        visibiliAttualmente.forEach(m => markers.addLayer(m));
-        map.addLayer(markers);
-    } else {
-        visibiliAttualmente.forEach(m => markersLayer.addLayer(m));
-        map.addLayer(markersLayer);
-    }
-
-    // 6. Reset Heatmap e statistiche
-    if (typeof heatLayer !== 'undefined') {
-        const heatPoints = visibiliAttualmente.map(m => [m.getLatLng().lat, m.getLatLng().lng, 0.5]);
-        heatLayer.setLatLngs(heatPoints);
-    }
-
-    // Aggiorna i contatori UI
-    document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibiliAttualmente.length}</b>`;
-    
-    // Notifica di successo
-    showNotification("Reset completato: tutti i club sono visibili");
-    
-    // Chiudi eventuali popup aperti che potrebbero dare fastidio
+    // 5. Chiudi i popup aperti
     map.closePopup();
+
+    // 6. IL TOCCO FINALE: Chiamiamo l'unica funzione che conta e filtra
+    // Essendo i campi sopra tutti svuotati, mostrerà TUTTO ricalcolando i numeri correttamente
+    applicaFiltri();
+
+    // 7. Notifica
+    showNotification("Mappa ripristinata correttamente");
 }
 
 function clubCasuale() {
@@ -521,17 +500,6 @@ Papa.parse(urlFoglio, {
             markers.clearLayers(); markersLayer.clearLayers();
             let heatPoints = [];
             let sportCounts = {};
-            visibiliAttualmente.forEach(m => {
-        const s = m.dati.sport;
-        sportCounts[s] = (sportCounts[s] || 0) + 1;
-    });
-
-    const statsHTML = Object.entries(sportCounts)
-        .sort((a, b) => b[1] - a[1]) // Ordina per chi ne ha di più
-        .map(([n, c]) => `${sportIcons[n] || ''} ${c}`)
-        .join(' • ');
-
-    document.getElementById('stats-breakdown').innerHTML = statsHTML;
             
             visibiliAttualmente = allMarkers.filter(m => {
                 let ok = true;
