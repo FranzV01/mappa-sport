@@ -209,7 +209,11 @@ window.toggleRanking = function(tipo) {
                 <span class="rank-pos">${i+1}</span>
                 <img src="${d.logo_attuale}" width="20" height="20" style="object-fit:contain" onerror="this.src='${placeholderLogo}';">
                 <span>${d.nome}</span>
-                <span class="rank-val">${tipo==='nuvole' ? d.altitudine+'m' : (tipo==='pionieri' ? d.fondazione : (tipo==='re' ? d.trofei_internazionali : new Intl.NumberFormat('it-IT').format(parseInt(d.capacita_stadio)||0)))}</span>
+                <span class="rank-val">
+                ${tipo==='nuvole' ? new Intl.NumberFormat('it-IT').format(parseInt(d.altitudine)||0) + 'm' : 
+                (tipo==='cattedrali' ? new Intl.NumberFormat('it-IT').format(parseInt(d.capacita_stadio)||0) : 
+                (tipo==='pionieri' ? d.fondazione : d.trofei_internazionali))}
+                </span>
             </div>
         `).join('');
     };
