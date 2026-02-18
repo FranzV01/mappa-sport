@@ -1,5 +1,4 @@
-<style>
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
         #map { height: 100vh; width: 100%; background: #aad3df; }
         
         #loader { position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: #eee; z-index: 9999; display: block; }
@@ -232,4 +231,3 @@
             font-weight: bold; transition: all 0.2s;
         }
         .btn-wiki:hover { background: #3366cc; color: #ffffff; }
-    </style>
