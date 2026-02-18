@@ -24,9 +24,11 @@ var map = L.map('map', {
     zoomControl: false, 
     dragging: !L.Browser.mobile, 
     tap: !L.Browser.mobile,
-    maxBounds: [[-90, -180], [90, 180]],
-    maxBoundsViscosity: 1.0,
-    minZoom: 2
+    // --- MODIFICHE PER MAPPA INFINITA ---
+    worldCopyJump: true,      // Fa sì che i marker appaiano anche "dall'altra parte" quando scorri
+    minZoom: 2,               // Impedisce di rimpicciolire troppo e vedere troppi mondi
+    maxBounds: [[-85, -500], [85, 500]], // Blocca solo Nord/Sud, ma lascia spazio infinito a Est/Ovest
+    maxBoundsViscosity: 0.8
 }).setView(startCenter, startZoom);
 
 // --- FIX RIPRISTINO STATO BADGE AL CARICAMENTO ---
