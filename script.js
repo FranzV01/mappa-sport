@@ -156,36 +156,38 @@ window.setFiltroColore = function(colore, el) {
 function checkColorMatch(cellaColoriNomi, targetColor) {
     if (targetColor === "Tutti") return true;
     
-    // Se la cella è vuota o N.D.
     if (!cellaColoriNomi || cellaColoriNomi === 'N.D.' || cellaColoriNomi === '') return false;
 
-    // Trasformiamo tutto in minuscolo per evitare errori di battitura (es. "Rosso" vs "rosso")
     const listaColoriPuri = cellaColoriNomi.toLowerCase().split(',').map(c => c.trim());
     const coloreCercato = targetColor.toLowerCase();
 
-    // Mapping per gestire i nomi delle categorie (se i tuoi tasti hanno nomi inglesi)
-    // Es: se premi il tasto "maroon" ma nel foglio scrivi "granata"
-    const mapping = {
-        'red': 'rosso',
-        'amaranto': 'amaranto',
-        'maroon': 'granata',
-        'orange': 'arancione',
-        'gold': 'oro',
-        'yellow': 'giallo',
-        'lime': 'verde chiaro',
-        'green': 'verde',
-        'darkgreen': 'verde scuro',
-        'skyblue': 'celeste',
-        'lightblue': 'azzurro',
-        'blue': 'blu',
-        'navy': 'blu navy',
-        'purple': 'viola',
-        'pink': 'rosa',
-        'brown': 'marrone',
-        'grey': 'grigio',
-        'white': 'bianco',
-        'black': 'nero'
-    };
+   const mapping = {
+    'red': 'rosso',
+    'amaranto': 'amaranto',
+    'maroon': 'granata',
+    'bordeaux': 'bordeaux',
+    'porpora': 'porpora',
+    'orange': 'arancione',
+    'amber': 'ambra',
+    'gold': 'oro',
+    'yellow': 'giallo',
+    'lime': 'verde chiaro',
+    'green': 'verde',
+    'darkgreen': 'verde scuro',
+    'skyblue': 'celeste',
+    'lightblue': 'azzurro',
+    'blue': 'blu',
+    'royal-blue': 'blu reale',
+    'navy': 'blu navy',
+    'purple': 'viola',
+    'violetto': 'violetto',
+    'fuchsia': 'fucsia',
+    'pink': 'rosa',
+    'brown': 'marrone',
+    'white': 'bianco',
+    'grey': 'grigio',
+    'black': 'nero'
+};
 
     const nomeTradotto = mapping[coloreCercato] || coloreCercato;
 
