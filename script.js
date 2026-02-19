@@ -188,6 +188,8 @@ function checkColorMatch(cellaColoriNomi, targetColor) {
 
     // Verifica se il colore cercato (o la sua traduzione) è nella lista
     return listaColoriPuri.includes(nomeTradotto) || listaColoriPuri.includes(coloreCercato);
+
+    const matchColore = checkColorMatch(m.dati.colori_nomi, filtroColoreAttivo);
 }
 
 window.toggleRanking = function(tipo) {
