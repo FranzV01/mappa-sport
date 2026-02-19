@@ -157,52 +157,54 @@ function checkColorMatch(cellaColori, targetColor) {
     if (targetColor === "Tutti") return true;
     if (!cellaColori || cellaColori === 'N.D.' || cellaColori === '') return false;
 
-    // Converte HEX in HSL (Più preciso per i filtri umani)
-    const hexToHsl = (hex) => {
-        hex = hex.replace('#', '');
-        let r = parseInt(hex.substring(0,2), 16) / 255;
-        let g = parseInt(hex.substring(2,4), 16) / 255;
-        let b = parseInt(hex.substring(4,6), 16) / 255;
-        let max = Math.max(r, g, b), min = Math.min(r, g, b);
-        let h, s, l = (max + min) / 2;
-        if (max === min) { h = s = 0; } else {
-            let d = max - min;
-            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-            switch (max) {
-                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-                case g: h = (b - r) / d + 2; break;
-                case b: h = (r - g) / d + 4; break;
-            }
-            h /= 6;
-        }
-        return { h: h * 360, s: s * 100, l: l * 100 };
-    };
+    const listaColori = cellaColori.split(',').map(c => c.trim().toUpperCase());
 
-    const listaColori = cellaColori.split(',').map(c => c.trim());
+    return listaColori.some(hex => {
+        if (!hex.startsWith('#')) hex = '#' + hex;
+        
+        // Convertiamo HEX in RGB
+        const r = parseInt(hex.substring(1, 3), 16);
+        const g = parseInt(hex.substring(3, 5), 16);
+        const b = parseInt(hex.substring(5, 7), 16);
 
-    return listaColori.some(coloreHex => {
-        if (!coloreHex.startsWith('#')) coloreHex = '#' + coloreHex;
-        const hsl = hexToHsl(coloreHex);
-        const { h, s, l } = hsl;
+        // Calcoliamo i valori per la logica comparativa
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const diff = max - min;
 
-        // --- FILTRI INTELLIGENTI PER TONALITÀ ---
         switch (targetColor) {
-            case 'white':     return l > 85 && s < 15; // Molto chiaro, poca saturazione
-            case 'black':     return l < 15;           // Molto scuro
-            case 'grey':      return s < 15 && l >= 15 && l <= 85;
-            case 'red':       return (h <= 10 || h >= 345) && s > 20 && l > 10;
-            case 'maroon':    return (h <= 15 || h >= 330) && s > 20 && l <= 45;
-            case 'orange':    return h > 10 && h <= 40 && s > 40;
-            case 'gold':      return h >= 40 && h <= 55 && s > 30 && l < 70;
-            case 'yellow':    return h >= 45 && h <= 65 && s > 40 && l >= 50;
-            case 'lime':      return h > 65 && h <= 100 && s > 40;
-            case 'green':     return h > 100 && h <= 155 && s > 20;
-            case 'lightblue': return h > 175 && h <= 210 && s > 20;
-            case 'blue':      return h > 210 && h <= 250 && s > 20 && l > 15;
-            case 'navy':      return h > 210 && h <= 250 && s > 20 && l <= 35;
-            case 'purple':    return h > 250 && h <= 300 && s > 20;
-            case 'pink':      return h > 300 && h <= 345 && s > 20;
-            case 'brown':     return h > 10 && h <= 45 && s > 15 && l < 40;
+            case 'white': 
+                return r > 200 && g > 200 && b > 200;
+            case 'black': 
+                return r < 60 && g < 60 && b < 60;
+            case 'grey': 
+                return diff < 30 && r > 60 && r < 200;
+            case 'red': 
+                return r > g * 1.5 && r > b * 1.5; // Il rosso domina nettamente
+            case 'maroon': 
+                return r > g && r > b && r < 150; // Rosso scuro
+            case 'orange': 
+                return r > g && g > b && r > 200 && g > 100;
+            case 'yellow': 
+                return r > 150 && g > 150 && b < 100;
+            case 'gold': 
+                return r > 150 && g > 120 && b < 80 && g > b;
+            case 'green': 
+                return g > r && g > b;
+            case 'lime': 
+                return g > 200 && r > 150 && b < 100;
+            case 'blue': 
+                return b > r && b > g && b > 100;
+            case 'navy': 
+                return b > r && b > g && b <= 100;
+            case 'lightblue': 
+                return b > 180 && r > 100 && g > 150;
+            case 'purple': 
+                return r > b * 0.6 && b > r * 0.6 && r > 80 && b > 80 && g < (r+b)/2;
+            case 'pink': 
+                return r > 200 && b > 150 && g < 200;
+            case 'brown': 
+                return r > g && g > b && r < 180 && r > 50;
             default: return false;
         }
     });
