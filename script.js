@@ -156,65 +156,55 @@ window.setFiltroColore = function(colore, el) {
 function checkColorMatch(cellaColori, targetColor) {
     if (targetColor === "Tutti") return true;
     if (!cellaColori || cellaColori === 'N.D.' || cellaColori === '') return false;
-    
-    // 1. Definiamo i centri colore ufficiali (Standard Web/Wikipedia)
-    const targetMap = {
-        'red': '#FF0000',       // Rosso puro
-        'maroon': '#800000',    // Amaranto / Granata
-        'orange': '#FF8000',    // Arancione vivo
-        'gold': '#FFD700',      // Oro
-        'yellow': '#FFFF00',    // Giallo
-        'lime': '#00FF00',      // Verde lime
-        'green': '#008000',     // Verde bosco
-        'lightblue': '#87CEEB', // Celeste / Azzurro
-        'blue': '#0000FF',      // Blu reale
-        'navy': '#000080',      // Blu notte
-        'purple': '#800080',    // Viola
-        'pink': '#FFC0CB',      // Rosa
-        'brown': '#8B4513',     // Marrone sella
-        'white': '#FFFFFF',     // Bianco
-        'grey': '#808080',      // Grigio
-        'black': '#000000'      // Nero
-    };
 
-    const targetHex = targetMap[targetColor];
-    const listaColori = cellaColori.split(',').map(c => c.trim().toUpperCase());
-
-    const getRGB = (hex) => {
+    // Converte HEX in HSL (Più preciso per i filtri umani)
+    const hexToHsl = (hex) => {
         hex = hex.replace('#', '');
-        return {
-            r: parseInt(hex.substring(0,2), 16),
-            g: parseInt(hex.substring(2,4), 16),
-            b: parseInt(hex.substring(4,6), 16)
-        };
+        let r = parseInt(hex.substring(0,2), 16) / 255;
+        let g = parseInt(hex.substring(2,4), 16) / 255;
+        let b = parseInt(hex.substring(4,6), 16) / 255;
+        let max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h, s, l = (max + min) / 2;
+        if (max === min) { h = s = 0; } else {
+            let d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: h = (b - r) / d + 2; break;
+                case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+        }
+        return { h: h * 360, s: s * 100, l: l * 100 };
     };
 
-    const t = getRGB(targetHex);
+    const listaColori = cellaColori.split(',').map(c => c.trim());
 
-    return listaColori.some(coloreLogo => {
-        if (!coloreLogo.startsWith('#')) coloreLogo = '#' + coloreLogo;
-        if (coloreLogo.length !== 7) return false;
+    return listaColori.some(coloreHex => {
+        if (!coloreHex.startsWith('#')) coloreHex = '#' + coloreHex;
+        const hsl = hexToHsl(coloreHex);
+        const { h, s, l } = hsl;
 
-        const c = getRGB(coloreLogo);
-
-        // Calcolo della distanza cromatica pesata (percezione umana)
-        const rmean = (t.r + c.r) / 2;
-        const dr = t.r - c.r;
-        const dg = t.g - c.g;
-        const db = t.b - c.b;
-        const distance = Math.sqrt(((2 + rmean/256) * dr*dr) + (4 * dg*dg) + ((2 + (255-rmean)/256) * db*db));
-
-        // SOGLIE DI TOLLERANZA CALIBRATE (Più piccole = più selettivo)
-        let soglia = 60; // Standard per colori netti (Rosso, Blu, Verde)
-
-        // Casi speciali per evitare sovrapposizioni "famose"
-        if (targetColor === 'white') soglia = 30;  // Molto severo (evita grigio chiaro e rosa)
-        if (targetColor === 'black') soglia = 40;  // Evita grigio scuro
-        if (targetColor === 'pink') soglia = 45;   // Evita che il bianco "scivoli" nel rosa
-        if (targetColor === 'yellow' || targetColor === 'gold') soglia = 40; // Separa nettamente Giallo da Oro
-        if (targetColor === 'navy' || targetColor === 'blue') soglia = 45;   // Separa Blu scuro da Blu normale
-        
-        return distance < soglia;
+        // --- FILTRI INTELLIGENTI PER TONALITÀ ---
+        switch (targetColor) {
+            case 'white':     return l > 85 && s < 15; // Molto chiaro, poca saturazione
+            case 'black':     return l < 15;           // Molto scuro
+            case 'grey':      return s < 15 && l >= 15 && l <= 85;
+            case 'red':       return (h <= 10 || h >= 345) && s > 20 && l > 10;
+            case 'maroon':    return (h <= 15 || h >= 330) && s > 20 && l <= 45;
+            case 'orange':    return h > 10 && h <= 40 && s > 40;
+            case 'gold':      return h >= 40 && h <= 55 && s > 30 && l < 70;
+            case 'yellow':    return h >= 45 && h <= 65 && s > 40 && l >= 50;
+            case 'lime':      return h > 65 && h <= 100 && s > 40;
+            case 'green':     return h > 100 && h <= 155 && s > 20;
+            case 'lightblue': return h > 175 && h <= 210 && s > 20;
+            case 'blue':      return h > 210 && h <= 250 && s > 20 && l > 15;
+            case 'navy':      return h > 210 && h <= 250 && s > 20 && l <= 35;
+            case 'purple':    return h > 250 && h <= 300 && s > 20;
+            case 'pink':      return h > 300 && h <= 345 && s > 20;
+            case 'brown':     return h > 10 && h <= 45 && s > 15 && l < 40;
+            default: return false;
+        }
     });
 }
 
