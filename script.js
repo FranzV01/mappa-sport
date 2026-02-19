@@ -161,50 +161,56 @@ function checkColorMatch(cellaColori, targetColor) {
 
     return listaColori.some(hex => {
         if (!hex.startsWith('#')) hex = '#' + hex;
-        
-        // Convertiamo HEX in RGB
         const r = parseInt(hex.substring(1, 3), 16);
         const g = parseInt(hex.substring(3, 5), 16);
         const b = parseInt(hex.substring(5, 7), 16);
-
-        // Calcoliamo i valori per la logica comparativa
         const max = Math.max(r, g, b);
         const min = Math.min(r, g, b);
         const diff = max - min;
 
         switch (targetColor) {
-            case 'white': 
-                return r > 200 && g > 200 && b > 200;
-            case 'black': 
-                return r < 60 && g < 60 && b < 60;
-            case 'grey': 
-                return diff < 30 && r > 60 && r < 200;
             case 'red': 
-                return r > g * 1.5 && r > b * 1.5; // Il rosso domina nettamente
+                // Rosso vivo: R alto, ma G e B non troppo bassi (altrimenti è granata)
+                return r > 160 && g < 80 && b < 80 && r > g * 2;
             case 'maroon': 
-                return r > g && r > b && r < 150; // Rosso scuro
+                // Granata/Amaranto: R più cupo (Torino, Metz), meno saturo del rosso
+                return r >= 100 && r <= 160 && g < 60 && b < 60;
             case 'orange': 
-                return r > g && g > b && r > 200 && g > 100;
-            case 'yellow': 
-                return r > 150 && g > 150 && b < 100;
+                // Arancione: R alto, G medio, B quasi zero. Esclude Oro perché Oro ha più Blu/Verde
+                return r > 200 && g > 100 && g < 180 && b < 50;
             case 'gold': 
-                return r > 150 && g > 120 && b < 80 && g > b;
-            case 'green': 
-                return g > r && g > b;
+                // Oro (LAFC): Meno "giallo limone", più sporco/scuro
+                return r > 150 && g > 130 && b > 40 && b < 100 && r > g;
+            case 'yellow': 
+                // Giallo: R e G altissimi, B bassissimo
+                return r > 180 && g > 180 && b < 80;
             case 'lime': 
-                return g > 200 && r > 150 && b < 100;
-            case 'blue': 
-                return b > r && b > g && b > 100;
-            case 'navy': 
-                return b > r && b > g && b <= 100;
+                // Lime (Wolfsburg/Cercle Brugge): G dominante, R presente, B basso
+                return g > 160 && r > 100 && b < 100 && g > r;
+            case 'green': 
+                // Verde scuro: G domina nettamente su R e B
+                return g > 80 && g > r && g > b && r < 100;
             case 'lightblue': 
-                return b > 180 && r > 100 && g > 150;
+                // Celeste: B e G alti, R medio (Esclude PSG perché il PSG è troppo scuro)
+                return b > 200 && g > 150 && r > 100;
+            case 'blue': 
+                // Blu (Strasburgo/Alaves): B alto, ma ancora luminoso
+                return b > 120 && b > g && b > r && b <= 210 && r < 100;
+            case 'navy': 
+                // Navy (PSG, Bologna, Osasuna): B molto cupo
+                return b > 40 && b <= 120 && r < 70 && g < 70;
             case 'purple': 
-                return r > b * 0.6 && b > r * 0.6 && r > 80 && b > 80 && g < (r+b)/2;
+                return r > 100 && b > 100 && g < 80;
             case 'pink': 
-                return r > 200 && b > 150 && g < 200;
+                // Rosa (Inter Miami): R altissimo, B e G alti (molto luminoso, non è rosso!)
+                return r > 200 && g > 120 && b > 150;
             case 'brown': 
-                return r > g && g > b && r < 180 && r > 50;
+                return r > 50 && r < 150 && g < r && b < g;
+            case 'grey': 
+                // Grigio (Cremonese): R, G, B quasi identici. Atlanta United esclusa perché ha Oro/Nero
+                return diff < 15 && r > 70 && r < 180;
+            case 'white': return r > 220 && g > 220 && b > 220;
+            case 'black': return r < 40 && g < 40 && b < 40;
             default: return false;
         }
     });
