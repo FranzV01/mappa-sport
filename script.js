@@ -243,11 +243,27 @@ window.toggleRanking = function(tipo) {
 };
 
 document.addEventListener('keydown', function(e) {
-    if (e.key === '/' && document.activeElement !== document.getElementById('search-input')) {
-        e.preventDefault(); document.getElementById('search-input').focus();
+    // Scorciatoia Alt + /
+    if (e.altKey && e.key === '/') { 
+        e.preventDefault(); 
+        
+        const panel = document.getElementById('ui-panel');
+        const searchInput = document.getElementById('search-input');
+        
+        // 1. Se il pannello è chiuso, lo apriamo
+        if (panel.classList.contains('collapsed')) {
+            togglePanel();
+        }
+
+        // 2. Portiamo il cursore nella barra di ricerca
+        // Usiamo un brevissimo timeout per assicurarci che il pannello sia visibile
+        setTimeout(() => {
+            searchInput.focus();
+        }, 300); 
+        
+        showNotification("Ricerca attivata 🔍");
     }
 });
-
 map.on('popupopen', function(e) {
     var marker = e.popup._source;
     if (marker && marker.dati) {
