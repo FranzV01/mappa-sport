@@ -249,21 +249,25 @@ document.addEventListener('keydown', function(e) {
         
         const panel = document.getElementById('ui-panel');
         const searchInput = document.getElementById('search-input');
+        const btn = document.getElementById('toggle-panel-btn');
         
-        // 1. Se il pannello è chiuso, lo apriamo
+        // FORZA APERTURA se il pannello è chiuso
         if (panel.classList.contains('collapsed')) {
-            togglePanel();
+            panel.classList.remove('collapsed');
+            if (btn) btn.style.display = 'none'; // Nasconde il bottoncino d'apertura
+            localStorage.setItem('panelCollapsed', 'false'); // Salva lo stato aperto
         }
 
-        // 2. Portiamo il cursore nella barra di ricerca
-        // Usiamo un brevissimo timeout per assicurarci che il pannello sia visibile
+        // Porta il cursore nella barra e pulisci se necessario
         setTimeout(() => {
             searchInput.focus();
-        }, 300); 
+            // Opzionale: searchInput.select(); // Seleziona tutto il testo esistente per sovrascriverlo
+        }, 100); 
         
         showNotification("Ricerca attivata 🔍");
     }
 });
+
 map.on('popupopen', function(e) {
     var marker = e.popup._source;
     if (marker && marker.dati) {
