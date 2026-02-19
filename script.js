@@ -243,8 +243,8 @@ window.toggleRanking = function(tipo) {
 };
 
 document.addEventListener('keydown', function(e) {
-    // Scorciatoia Alt + /
-    if (e.altKey && e.key === '/') { 
+    // Scorciatoia Shift + / (Nota: il tasto '/' con lo shift viene visto spesso come '?' o '/')
+    if (e.shiftKey && (e.key === '/' || e.key === '?')) { 
         e.preventDefault(); 
         
         const panel = document.getElementById('ui-panel');
@@ -254,14 +254,13 @@ document.addEventListener('keydown', function(e) {
         // FORZA APERTURA se il pannello è chiuso
         if (panel.classList.contains('collapsed')) {
             panel.classList.remove('collapsed');
-            if (btn) btn.style.display = 'none'; // Nasconde il bottoncino d'apertura
-            localStorage.setItem('panelCollapsed', 'false'); // Salva lo stato aperto
+            if (btn) btn.style.display = 'none'; 
+            localStorage.setItem('panelCollapsed', 'false'); 
         }
 
-        // Porta il cursore nella barra e pulisci se necessario
+        // Focus sulla barra di ricerca
         setTimeout(() => {
             searchInput.focus();
-            // Opzionale: searchInput.select(); // Seleziona tutto il testo esistente per sovrascriverlo
         }, 100); 
         
         showNotification("Ricerca attivata 🔍");
