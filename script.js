@@ -167,13 +167,16 @@ function checkColorMatch(cellaColoriNomi, targetColor) {
     // Es: se premi il tasto "maroon" ma nel foglio scrivi "granata"
     const mapping = {
         'red': 'rosso',
-        'maroon': 'granata', // o 'amaranto'
+        'amaranto': 'amaranto',
+        'maroon': 'granata',
         'orange': 'arancione',
         'gold': 'oro',
         'yellow': 'giallo',
         'lime': 'verde chiaro',
         'green': 'verde',
-        'lightblue': 'azzurro', // o 'celeste'
+        'darkgreen': 'verde scuro',
+        'skyblue': 'celeste',
+        'lightblue': 'azzurro',
         'blue': 'blu',
         'navy': 'blu navy',
         'purple': 'viola',
