@@ -70,28 +70,40 @@
     <select id="filter-nazione"><option value="Tutti">Tutte le nazioni</option></select>
 
     <label class="stat-item">Filtro Colore Sociale:</label>
-    <div class="color-picker" id="color-picker-container">
-        <div class="color-circle" style="background:#FF0000;" title="Rosso" onclick="setFiltroColore('red', this)"></div>
-        <div class="color-circle" style="background:#9F2B68;" title="Amaranto" onclick="setFiltroColore('amaranto', this)"></div>
-        <div class="color-circle" style="background:#800000;" title="Granata" onclick="setFiltroColore('maroon', this)"></div>
-        <div class="color-circle" style="background:#FFA500;" title="Arancione" onclick="setFiltroColore('orange', this)"></div>
-        <div class="color-circle" style="background:#FFD700;" title="Oro" onclick="setFiltroColore('gold', this)"></div>
-        <div class="color-circle" style="background:#FFFF00;" title="Giallo" onclick="setFiltroColore('yellow', this)"></div>
-        <div class="color-circle" style="background:#ADFF2F;" title="Verde Chiaro/Lime" onclick="setFiltroColore('lime', this)"></div>
-        <div class="color-circle" style="background:#008000;" title="Verde" onclick="setFiltroColore('green', this)"></div>
-        <div class="color-circle" style="background:#004d00;" title="Verde Scuro" onclick="setFiltroColore('darkgreen', this)"></div>
-        <div class="color-circle" style="background:#B2FFFF;" title="Celeste" onclick="setFiltroColore('skyblue', this)"></div>
-        <div class="color-circle" style="background:#87CEEB;" title="Azzurro" onclick="setFiltroColore('lightblue', this)"></div>
-        <div class="color-circle" style="background:#0000FF;" title="Blu" onclick="setFiltroColore('blue', this)"></div>
-        <div class="color-circle" style="background:#000080;" title="Blu Navy/Scuro" onclick="setFiltroColore('navy', this)"></div>
-        <div class="color-circle" style="background:#800080;" title="Viola" onclick="setFiltroColore('purple', this)"></div>
-        <div class="color-circle" style="background:#FFC0CB;" title="Rosa" onclick="setFiltroColore('pink', this)"></div>
-        <div class="color-circle" style="background:#A52A2A;" title="Marrone" onclick="setFiltroColore('brown', this)"></div>
-        <div class="color-circle" style="background:#FFFFFF;" title="Bianco" onclick="setFiltroColore('white', this)"></div>
-        <div class="color-circle" style="background:#808080;" title="Grigio" onclick="setFiltroColore('grey', this)"></div>
-        <div class="color-circle" style="background:#000000;" title="Nero" onclick="setFiltroColore('black', this)"></div>
-        <div class="color-circle active" style="background:linear-gradient(45deg, red, blue, green);" title="Tutti" onclick="setFiltroColore('Tutti', this)"></div>
-    </div>
+<div class="color-picker" id="color-picker-container">
+    <div class="color-circle" style="background:#FF0000;" title="Rosso" onclick="setFiltroColore('red', this)"></div>
+    <div class="color-circle" style="background:#9F2B68;" title="Amaranto" onclick="setFiltroColore('amaranto', this)"></div>
+    <div class="color-circle" style="background:#800000;" title="Granata" onclick="setFiltroColore('maroon', this)"></div>
+    <div class="color-circle" style="background:#6D1A22;" title="Bordeaux" onclick="setFiltroColore('bordeaux', this)"></div>
+    <div class="color-circle" style="background:#B20000;" title="Porpora" onclick="setFiltroColore('porpora', this)"></div>
+
+    <div class="color-circle" style="background:#F75E25;" title="Arancione" onclick="setFiltroColore('orange', this)"></div>
+    <div class="color-circle" style="background:#FFBF00;" title="Ambra" onclick="setFiltroColore('amber', this)"></div>
+    <div class="color-circle" style="background:#DAA520;" title="Oro" onclick="setFiltroColore('gold', this)"></div>
+    <div class="color-circle" style="background:#FFFF00;" title="Giallo" onclick="setFiltroColore('yellow', this)"></div>
+
+    <div class="color-circle" style="background:#ADFF2F;" title="Verde Chiaro/Lime" onclick="setFiltroColore('lime', this)"></div>
+    <div class="color-circle" style="background:#008000;" title="Verde" onclick="setFiltroColore('green', this)"></div>
+    <div class="color-circle" style="background:#004d00;" title="Verde Scuro" onclick="setFiltroColore('darkgreen', this)"></div>
+
+    <div class="color-circle" style="background:#87CEEB;" title="Celeste" onclick="setFiltroColore('skyblue', this)"></div>
+    <div class="color-circle" style="background:#007FFF;" title="Azzurro" onclick="setFiltroColore('lightblue', this)"></div>
+    <div class="color-circle" style="background:#0000FF;" title="Blu" onclick="setFiltroColore('blue', this)"></div>
+    <div class="color-circle" style="background:#002366;" title="Blu Reale" onclick="setFiltroColore('royal-blue', this)"></div>
+    <div class="color-circle" style="background:#000080;" title="Blu Navy/Scuro" onclick="setFiltroColore('navy', this)"></div>
+
+    <div class="color-circle" style="background:#8F00FF;" title="Viola" onclick="setFiltroColore('purple', this)"></div>
+    <div class="color-circle" style="background:#423189;" title="Violetto" onclick="setFiltroColore('violetto', this)"></div>
+    <div class="color-circle" style="background:#FF00FF;" title="Fucsia" onclick="setFiltroColore('fuchsia', this)"></div>
+    <div class="color-circle" style="background:#FF69B4;" title="Rosa" onclick="setFiltroColore('pink', this)"></div>
+
+    <div class="color-circle" style="background:#654321;" title="Marrone" onclick="setFiltroColore('brown', this)"></div>
+    <div class="color-circle" style="background:#FFFFFF;" title="Bianco" onclick="setFiltroColore('white', this)"></div>
+    <div class="color-circle" style="background:#808080;" title="Grigio" onclick="setFiltroColore('grey', this)"></div>
+    <div class="color-circle" style="background:#000000;" title="Nero" onclick="setFiltroColore('black', this)"></div>
+    
+    <div class="color-circle active" style="background:linear-gradient(45deg, red, blue, green);" title="Tutti" onclick="setFiltroColore('Tutti', this)"></div>
+</div>
     
     <label class="stat-item">Sport:</label>
     <select id="filter-sport">
@@ -183,6 +195,7 @@
     
 </body>
 </html>
+
 
 
 
