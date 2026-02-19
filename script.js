@@ -130,50 +130,44 @@ window.toggleAutoBadges = function() {
         mapEl.classList.add('hide-badges');
     }
     
-    // Salva la preferenza così al refresh non si resetta
     localStorage.setItem('autoBadgeStatus', isChecked);
 };
 
 window.setFiltroColore = function(colore, el) {
     filtroColoreSociale = colore;
     
-    // Gestione visiva dei cerchietti
     document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('active'));
     if (el) {
         el.classList.add('active');
     } else {
-        // Se stiamo ripristinando al caricamento, cerchiamo il cerchietto tramite title o attributo
+        
         const target = document.querySelector(`.color-circle[onclick*="'${colore}'"]`);
         if (target) target.classList.add('active');
     }
 
-    // NUOVO: Salva la scelta del colore
     localStorage.setItem('selectedColorFilter', colore);
     
     applicaFiltri();
 };
 
 function checkColorMatch(cellaColoriNomi, targetColor) {
-    if (targetColor === "Tutti") return true;
-    
-    // Se la cella è vuota o N.D.
-    if (!cellaColoriNomi || cellaColoriNomi === 'N.D.' || cellaColoriNomi === '') return false;
+    if (!targetColor || targetColor === "Tutti") return true;
+    if (!cellaColoriNomi || cellaColoriNomi === 'N.D.') return false;
 
-    // Trasformiamo tutto in minuscolo per evitare errori di battitura (es. "Rosso" vs "rosso")
-    const listaColoriPuri = cellaColoriNomi.toLowerCase().split(',').map(c => c.trim());
+    // Pulizia: tutto minuscolo e toglie spazi bianchi
+    const coloriNelFoglio = cellaColoriNomi.toLowerCase().split(',').map(c => c.trim());
     const coloreCercato = targetColor.toLowerCase();
 
-    // Mapping per gestire i nomi delle categorie (se i tuoi tasti hanno nomi inglesi)
-    // Es: se premi il tasto "maroon" ma nel foglio scrivi "granata"
+    // Mapping per collegare l'ID del tasto (es. 'maroon') al nome che scriverai nel foglio ('granata')
     const mapping = {
         'red': 'rosso',
-        'maroon': 'granata', // o 'amaranto'
+        'maroon': 'granata',
         'orange': 'arancione',
         'gold': 'oro',
         'yellow': 'giallo',
         'lime': 'verde chiaro',
         'green': 'verde',
-        'lightblue': 'azzurro', // o 'celeste'
+        'lightblue': 'azzurro',
         'blue': 'blu',
         'navy': 'blu navy',
         'purple': 'viola',
@@ -184,12 +178,10 @@ function checkColorMatch(cellaColoriNomi, targetColor) {
         'black': 'nero'
     };
 
-    const nomeTradotto = mapping[coloreCercato] || coloreCercato;
+    const coloreTradotto = mapping[coloreCercato] || coloreCercato;
 
-    // Verifica se il colore cercato (o la sua traduzione) è nella lista
-    return listaColoriPuri.includes(nomeTradotto) || listaColoriPuri.includes(coloreCercato);
-
-    const matchColore = checkColorMatch(m.dati.colori_nomi, filtroColoreAttivo);
+    // Restituisce true se la parola è presente nella lista del foglio
+    return coloriNelFoglio.includes(coloreTradotto);
 }
 
 window.toggleRanking = function(tipo) {
@@ -237,7 +229,7 @@ window.toggleRanking = function(tipo) {
 };
 
 document.addEventListener('keydown', function(e) {
-    // Scorciatoia Shift + / (Nota: il tasto '/' con lo shift viene visto spesso come '?' o '/')
+   
     if (e.shiftKey && (e.key === '/' || e.key === '?')) { 
         e.preventDefault(); 
         
@@ -245,14 +237,12 @@ document.addEventListener('keydown', function(e) {
         const searchInput = document.getElementById('search-input');
         const btn = document.getElementById('toggle-panel-btn');
         
-        // FORZA APERTURA se il pannello è chiuso
         if (panel.classList.contains('collapsed')) {
             panel.classList.remove('collapsed');
             if (btn) btn.style.display = 'none'; 
             localStorage.setItem('panelCollapsed', 'false'); 
         }
 
-        // Focus sulla barra di ricerca
         setTimeout(() => {
             searchInput.focus();
         }, 100); 
@@ -285,44 +275,27 @@ window.vaiAClub = function(nomeClub) {
 };
 
 function resetFiltri() {
-    // 1. Pulizia Totale del LocalStorage (Elimina ogni "ricordo" di filtri passati)
     localStorage.removeItem('mapFilters');
     localStorage.removeItem('mapSavedColor');
     localStorage.removeItem('selectedColorFilter');
-
-    // 2. Reset variabili globali
     filtroColoreSociale = "Tutti";
-
-    // 3. Reset fisico degli elementi UI nel pannello
     const searchInput = document.getElementById('search-input');
     if (searchInput) searchInput.value = '';
-
     const timelineSlider = document.getElementById('timeline-slider');
     const yearDisplay = document.getElementById('year-display');
     if (timelineSlider) {
         timelineSlider.value = 2026;
         if (yearDisplay) yearDisplay.innerText = "Tutti i tempi";
     }
-
-    // Riporta tutti i menu a tendina su "Tutti"
     document.querySelectorAll('#ui-panel select').forEach(sel => {
         sel.value = 'Tutti';
     });
-
-    // 4. Reset visivo dei cerchietti colore
     document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('active'));
     const resetCircle = document.querySelector('.color-circle[title="Reset"]') || 
                         document.querySelector('.color-circle[onclick*="Tutti"]');
     if (resetCircle) resetCircle.classList.add('active');
-
-    // 5. Chiudi i popup aperti
     map.closePopup();
-
-    // 6. IL TOCCO FINALE: Chiamiamo l'unica funzione che conta e filtra
-    // Essendo i campi sopra tutti svuotati, mostrerà TUTTO ricalcolando i numeri correttamente
     applicaFiltri();
-
-    // 7. Notifica
     showNotification("Mappa ripristinata correttamente");
 }
 
@@ -552,7 +525,8 @@ Papa.parse(urlFoglio, {
                 if (cVal === "giant" && cap < 50000) ok = false;
                 if (lVal !== "Tutti" && parseInt(m.dati.livello_lega) !== parseInt(lVal)) ok = false;
                 if (!checkColorMatch(m.dati.colori || "", filtroColoreSociale)) ok = false;
-
+                if (!checkColorMatch(m.dati.colori_nomi, filtroColoreSociale)) ok = false;
+                
                 if(ok) {
                     heatPoints.push([m.getLatLng().lat, m.getLatLng().lng, 0.5]);
                     sportCounts[m.dati.sport] = (sportCounts[m.dati.sport] || 0) + 1;
@@ -640,7 +614,6 @@ if (savedColor) {
     }, 100);
 }
 
-// --- RIPRISTINO STATO PANNELLO AL CARICAMENTO ---
 const savedPanelStatus = localStorage.getItem('panelCollapsed');
 if (savedPanelStatus === 'true') {
     const panel = document.getElementById('ui-panel');
