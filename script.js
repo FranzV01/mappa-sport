@@ -157,44 +157,64 @@ function checkColorMatch(cellaColori, targetColor) {
     if (targetColor === "Tutti") return true;
     if (!cellaColori || cellaColori === 'N.D.' || cellaColori === '') return false;
     
-    // Centri colore target (HEX ideali)
+    // 1. Definiamo i centri colore ufficiali (Standard Web/Wikipedia)
     const targetMap = {
-        'red': '#FF0000', 'maroon': '#800000', 'orange': '#FFA500',
-        'gold': '#FFD700', 'yellow': '#FFFF00', 'lime': '#00FF00',
-        'green': '#008000', 'lightblue': '#ADD8E6', 'blue': '#0000FF',
-        'navy': '#000080', 'purple': '#800080', 'pink': '#FFC0CB',
-        'brown': '#A52A2A', 'white': '#FFFFFF', 'grey': '#808080', 'black': '#000000'
+        'red': '#FF0000',       // Rosso puro
+        'maroon': '#800000',    // Amaranto / Granata
+        'orange': '#FF8000',    // Arancione vivo
+        'gold': '#FFD700',      // Oro
+        'yellow': '#FFFF00',    // Giallo
+        'lime': '#00FF00',      // Verde lime
+        'green': '#008000',     // Verde bosco
+        'lightblue': '#87CEEB', // Celeste / Azzurro
+        'blue': '#0000FF',      // Blu reale
+        'navy': '#000080',      // Blu notte
+        'purple': '#800080',    // Viola
+        'pink': '#FFC0CB',      // Rosa
+        'brown': '#8B4513',     // Marrone sella
+        'white': '#FFFFFF',     // Bianco
+        'grey': '#808080',      // Grigio
+        'black': '#000000'      // Nero
     };
 
     const targetHex = targetMap[targetColor];
-    if (!targetHex) return false;
-
-    // Trasforma la cella in array (es: ["#FFFFFF", "#000000"])
     const listaColori = cellaColori.split(',').map(c => c.trim().toUpperCase());
 
-    // Funzione interna velocissima per la distanza cromatica
-    const getDistance = (h1, h2) => {
-        const r1 = parseInt(h1.substring(1,3), 16), g1 = parseInt(h1.substring(3,5), 16), b1 = parseInt(h1.substring(5,7), 16);
-        const r2 = parseInt(h2.substring(1,3), 16), g2 = parseInt(h2.substring(3,5), 16), b2 = parseInt(h2.substring(5,7), 16);
-        return Math.sqrt(Math.pow((r1-r2)*0.30, 2) + Math.pow((g1-g2)*0.59, 2) + Math.pow((b1-b2)*0.11, 2));
+    const getRGB = (hex) => {
+        hex = hex.replace('#', '');
+        return {
+            r: parseInt(hex.substring(0,2), 16),
+            g: parseInt(hex.substring(2,4), 16),
+            b: parseInt(hex.substring(4,6), 16)
+        };
     };
 
-    // Controlla se almeno uno dei colori della squadra corrisponde al target
-    return listaColori.some(coloreLogo => {
-        const hexVal = coloreLogo.startsWith('#') ? coloreLogo : '#' + coloreLogo;
-        if (hexVal.length !== 7) return false; // Salta codici malformati
+    const t = getRGB(targetHex);
 
-        const d = getDistance(hexVal, targetHex);
+    return listaColori.some(coloreLogo => {
+        if (!coloreLogo.startsWith('#')) coloreLogo = '#' + coloreLogo;
+        if (coloreLogo.length !== 7) return false;
+
+        const c = getRGB(coloreLogo);
+
+        // Calcolo della distanza cromatica pesata (percezione umana)
+        const rmean = (t.r + c.r) / 2;
+        const dr = t.r - c.r;
+        const dg = t.g - c.g;
+        const db = t.b - c.b;
+        const distance = Math.sqrt(((2 + rmean/256) * dr*dr) + (4 * dg*dg) + ((2 + (255-rmean)/256) * db*db));
+
+        // SOGLIE DI TOLLERANZA CALIBRATE (Più piccole = più selettivo)
+        let soglia = 60; // Standard per colori netti (Rosso, Blu, Verde)
+
+        // Casi speciali per evitare sovrapposizioni "famose"
+        if (targetColor === 'white') soglia = 30;  // Molto severo (evita grigio chiaro e rosa)
+        if (targetColor === 'black') soglia = 40;  // Evita grigio scuro
+        if (targetColor === 'pink') soglia = 45;   // Evita che il bianco "scivoli" nel rosa
+        if (targetColor === 'yellow' || targetColor === 'gold') soglia = 40; // Separa nettamente Giallo da Oro
+        if (targetColor === 'navy' || targetColor === 'blue') soglia = 45;   // Separa Blu scuro da Blu normale
         
-        // Soglie di precisione specifiche
-        if (targetColor === 'pink') return d < 25;  // Molto stretto per evitare bianchi
-        if (targetColor === 'white') return d < 15; // Solo bianco quasi puro
-        if (targetColor === 'lime') {
-            const r = parseInt(hexVal.substring(1,3), 16), g = parseInt(hexVal.substring(3,5), 16);
-            return d < 35 && g > r; // Il verde deve dominare
-        }
-        
-        return d < 35; // Soglia standard
+        return distance < soglia;
     });
 }
 
