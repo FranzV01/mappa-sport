@@ -77,7 +77,9 @@ function togglePanel() {
     const panel = document.getElementById('ui-panel');
     const btn = document.getElementById('toggle-panel-btn');
     panel.classList.toggle('collapsed');
-    btn.style.display = panel.classList.contains('collapsed') ? 'flex' : 'none';
+    const isCollapsed = panel.classList.contains('collapsed');
+    btn.style.display = isCollapsed ? 'flex' : 'none';
+    localStorage.setItem('panelCollapsed', isCollapsed);
 }
 
 if (window.innerWidth < 768) setTimeout(togglePanel, 500);
@@ -623,6 +625,15 @@ if (savedColor) {
         }
         applicaFiltri();
     }, 100);
+}
+
+// --- RIPRISTINO STATO PANNELLO AL CARICAMENTO ---
+const savedPanelStatus = localStorage.getItem('panelCollapsed');
+if (savedPanelStatus === 'true') {
+    const panel = document.getElementById('ui-panel');
+    const btn = document.getElementById('toggle-panel-btn');
+    if (panel) panel.classList.add('collapsed');
+    if (btn) btn.style.display = 'flex';
 }
 
 window.onload = () => { renderHistory(); };
