@@ -153,67 +153,41 @@ window.setFiltroColore = function(colore, el) {
     applicaFiltri();
 };
 
-function checkColorMatch(cellaColori, targetColor) {
+function checkColorMatch(cellaColoriNomi, targetColor) {
     if (targetColor === "Tutti") return true;
-    if (!cellaColori || cellaColori === 'N.D.' || cellaColori === '') return false;
+    
+    // Se la cella è vuota o N.D.
+    if (!cellaColoriNomi || cellaColoriNomi === 'N.D.' || cellaColoriNomi === '') return false;
 
-    const listaColori = cellaColori.split(',').map(c => c.trim().toUpperCase());
+    // Trasformiamo tutto in minuscolo per evitare errori di battitura (es. "Rosso" vs "rosso")
+    const listaColoriPuri = cellaColoriNomi.toLowerCase().split(',').map(c => c.trim());
+    const coloreCercato = targetColor.toLowerCase();
 
-    return listaColori.some(hex => {
-        if (!hex.startsWith('#')) hex = '#' + hex;
-        const r = parseInt(hex.substring(1, 3), 16);
-        const g = parseInt(hex.substring(3, 5), 16);
-        const b = parseInt(hex.substring(5, 7), 16);
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        const diff = max - min;
+    // Mapping per gestire i nomi delle categorie (se i tuoi tasti hanno nomi inglesi)
+    // Es: se premi il tasto "maroon" ma nel foglio scrivi "granata"
+    const mapping = {
+        'red': 'rosso',
+        'maroon': 'granata', // o 'amaranto'
+        'orange': 'arancione',
+        'gold': 'oro',
+        'yellow': 'giallo',
+        'lime': 'verde chiaro',
+        'green': 'verde',
+        'lightblue': 'azzurro', // o 'celeste'
+        'blue': 'blu',
+        'navy': 'blu navy',
+        'purple': 'viola',
+        'pink': 'rosa',
+        'brown': 'marrone',
+        'grey': 'grigio',
+        'white': 'bianco',
+        'black': 'nero'
+    };
 
-        switch (targetColor) {
-            case 'red': 
-                // Rosso vivo: R alto, ma G e B non troppo bassi (altrimenti è granata)
-                return r > 160 && g < 80 && b < 80 && r > g * 2;
-            case 'maroon': 
-                // Granata/Amaranto: R più cupo (Torino, Metz), meno saturo del rosso
-                return r >= 100 && r <= 160 && g < 60 && b < 60;
-            case 'orange': 
-                // Arancione: R alto, G medio, B quasi zero. Esclude Oro perché Oro ha più Blu/Verde
-                return r > 200 && g > 100 && g < 180 && b < 50;
-            case 'gold': 
-                // Oro (LAFC): Meno "giallo limone", più sporco/scuro
-                return r > 150 && g > 130 && b > 40 && b < 100 && r > g;
-            case 'yellow': 
-                // Giallo: R e G altissimi, B bassissimo
-                return r > 180 && g > 180 && b < 80;
-            case 'lime': 
-                // Lime (Wolfsburg/Cercle Brugge): G dominante, R presente, B basso
-                return g > 160 && r > 100 && b < 100 && g > r;
-            case 'green': 
-                // Verde scuro: G domina nettamente su R e B
-                return g > 80 && g > r && g > b && r < 100;
-            case 'lightblue': 
-                // Celeste: B e G alti, R medio (Esclude PSG perché il PSG è troppo scuro)
-                return b > 200 && g > 150 && r > 100;
-            case 'blue': 
-                // Blu (Strasburgo/Alaves): B alto, ma ancora luminoso
-                return b > 120 && b > g && b > r && b <= 210 && r < 100;
-            case 'navy': 
-                // Navy (PSG, Bologna, Osasuna): B molto cupo
-                return b > 40 && b <= 120 && r < 70 && g < 70;
-            case 'purple': 
-                return r > 100 && b > 100 && g < 80;
-            case 'pink': 
-                // Rosa (Inter Miami): R altissimo, B e G alti (molto luminoso, non è rosso!)
-                return r > 200 && g > 120 && b > 150;
-            case 'brown': 
-                return r > 50 && r < 150 && g < r && b < g;
-            case 'grey': 
-                // Grigio (Cremonese): R, G, B quasi identici. Atlanta United esclusa perché ha Oro/Nero
-                return diff < 15 && r > 70 && r < 180;
-            case 'white': return r > 220 && g > 220 && b > 220;
-            case 'black': return r < 40 && g < 40 && b < 40;
-            default: return false;
-        }
-    });
+    const nomeTradotto = mapping[coloreCercato] || coloreCercato;
+
+    // Verifica se il colore cercato (o la sua traduzione) è nella lista
+    return listaColoriPuri.includes(nomeTradotto) || listaColoriPuri.includes(coloreCercato);
 }
 
 window.toggleRanking = function(tipo) {
