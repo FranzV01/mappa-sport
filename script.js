@@ -551,7 +551,6 @@ Papa.parse(urlFoglio, {
                 if (cVal === "large" && (cap < 30000 || cap >= 50000)) ok = false;
                 if (cVal === "giant" && cap < 50000) ok = false;
                 if (lVal !== "Tutti" && parseInt(m.dati.livello_lega) !== parseInt(lVal)) ok = false;
-                if (!checkColorMatch(m.dati.colori || "", filtroColoreSociale)) ok = false;
                 if (!checkColorMatch(m.dati.colori_nomi, filtroColoreSociale)) ok = false;
 
                 if(ok) {
