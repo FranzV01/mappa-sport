@@ -1,3 +1,4 @@
+const annoCorrente = new Date().getFullYear();
 const urlFoglio = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSB3hRuuuzUhGho2Wr_c0KBa8BYYMyASu6n0DrQ8q_o3GU3aw4_oC2vEvhuVbtmqR3Z3y0C5Zgh8Dji/pub?output=csv'; 
 const linkCrowdsourcingBase = "https://docs.google.com/forms/d/e/1FAIpQLScnl0Qz7286ghO6Rkb2UxugFHGaCU_gGVAljUdkbp95zqhr2g/viewform?usp=pp_url&entry.1326851473=";
 const apiKeyWeather = '866509f6df466a06900222f7a9562854'; 
@@ -307,7 +308,7 @@ function resetFiltri() {
     const timelineSlider = document.getElementById('timeline-slider');
     const yearDisplay = document.getElementById('year-display');
     if (timelineSlider) {
-        timelineSlider.value = 2026;
+        timelineSlider.value = annoCorrente;
         if (yearDisplay) yearDisplay.innerText = "Tutti i tempi";
     }
 
@@ -427,7 +428,7 @@ Papa.parse(urlFoglio, {
             
             let isOldest = oldestByNation[s.nazione] && oldestByNation[s.nazione].nome === s.nome;
             let annoFondazione = parseInt(String(s.fondazione).replace(/\D/g, '')) || 9999;
-            let isNew2026 = annoFondazione === 2026;
+            let isSquadraNuova = (annoFondazione === annoCorrente);
             let isScomparso = s.stato === "scomparso";
             let capStadio = parseInt(s.capacita_stadio) || 0;
             let altitudine = parseInt(s.altitudine) || 0;
@@ -437,7 +438,7 @@ Papa.parse(urlFoglio, {
             let badgesHTML = '';
             if (s.genere && s.genere.toLowerCase() === 'f') badgesHTML += '<div class="badge-icon badge-tr badge-female">♀</div>';
             if (isOldest) badgesHTML += '<div class="badge-icon badge-br badge-rarity">💎</div>';
-            if (isNew2026) badgesHTML += '<div class="badge-icon badge-bl badge-new">✨</div>';
+            if (isSquadraNuova) badgesHTML += '<div class="badge-icon badge-bl badge-new">✨</div>';
             if (isScomparso) badgesHTML += '<div class="badge-icon badge-tl badge-defunct">⚰️</div>';
             if (trofeiInt > 0) badgesHTML += '<div class="badge-icon badge-lc badge-intl auto-badge" title="Campione Internazionale">🏆</div>';
             if (annoFondazione < 1900) badgesHTML += '<div class="badge-icon badge-tc badge-pluri auto-badge" title="Pluricentenario">📜</div>';
@@ -470,7 +471,7 @@ for (let i = 1; i <= 10; i++) {
         marker.storicoLoghi.push({
             url: url,
             inizio: parseInt(parti[0].trim()) || 0,
-            fine: parseInt(parti[1].trim()) || 2026
+            fine: parseInt(parti[1].trim()) || annoCorrente
         });
     }
 }
@@ -550,7 +551,7 @@ for (let i = 1; i <= 10; i++) {
                 'cluster-enabled': isClusterEnabled, 'filter-capacita': cVal, 'filter-lega': lVal
             }));
 
-            document.getElementById('year-display').innerText = tVal === 2026 ? "Tutti i tempi" : "Fino al " + tVal;
+            document.getElementById('year-display').innerText = tVal >= annoCorrente ? "Tutti i tempi" : "Fino al " + tVal;
 
             markers.clearLayers(); markersLayer.clearLayers();
             let heatPoints = [];
@@ -567,7 +568,7 @@ for (let i = 1; i <= 10; i++) {
                 if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
                 if (gVal === "f" && (!m.dati.genere || m.dati.genere.toLowerCase() !== 'f')) ok = false;
                 if (gVal === "m" && m.dati.genere && m.dati.genere.toLowerCase() === 'f') ok = false;
-                if (tVal < 2026 && anno > tVal) ok = false;
+                if (tVal < annoCorrente && anno > tVal) ok = false;
                 if (cVal === "small" && cap >= 15000) ok = false;
                 if (cVal === "medium" && (cap < 15000 || cap >= 30000)) ok = false;
                 if (cVal === "large" && (cap < 30000 || cap >= 50000)) ok = false;
@@ -687,8 +688,8 @@ if (savedPanelStatus === 'true') {
 }
 
 function getLogoPerAnno(marker, annoSelezionato) {
-    // Se la timeline è su "Tutti i tempi" (2026) o l'anno è il futuro
-    if (annoSelezionato >= 2026) return marker.dati.logo_attuale;
+    // Se la timeline è su "Tutti i tempi" o l'anno è il futuro
+    if (annoSelezionato >= annoCorrente) return marker.dati.logo_attuale;
 
     // Cerca se esiste un logo storico per quell'anno specifico
     const logoTrovato = marker.storicoLoghi.find(l => 
