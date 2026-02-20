@@ -181,15 +181,7 @@ body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
 
 select { width: 100%; margin-top: 5px; padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; }
 hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
-.flag-icon-standard {
-    width: 20px;           /* Larghezza fissa */
-    height: 15px;          /* Altezza fissa (Rapporto 4:3) */
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 6px;
-    border-radius: 1px;    /* Leggerissimo arrotondamento */
-    border: 0.5px solid rgba(0,0,0,0.1); /* Bordino quasi invisibile per il bianco */
-}
+.flag-icon { width: 22px; border-radius: 3px; vertical-align: middle; margin-right: 6px; border: 1px solid #eee; }
 .locate-btn {
     background: white; width: 34px; height: 34px; display: flex;
     justify-content: center; align-items: center; border-radius: 4px;
