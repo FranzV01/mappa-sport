@@ -163,6 +163,7 @@ function checkColorMatch(cellaColoriNomi, targetColor) {
 
    const mapping = {
     'red': 'rosso',
+    'crimson': 'cremisi',
     'amaranto': 'amaranto',
     'maroon': 'granata',
     'bordeaux': 'bordeaux',
@@ -183,6 +184,7 @@ function checkColorMatch(cellaColoriNomi, targetColor) {
     'purple': 'viola',
     'fuchsia': 'fucsia',
     'pink': 'rosa',
+    'lilac': 'lilla',
     'brown': 'marrone',
     'white': 'bianco',
     'grey': 'grigio',
@@ -458,7 +460,7 @@ Papa.parse(urlFoglio, {
             marker.dati = s;
             marker.nomeNormalizzato = normalizeText(s.nome);
 
-            let flagHtml = s.codice_nazione ? `<img src="https://flagcdn.com/16x12/${s.codice_nazione.toLowerCase()}.png" class="flag-icon-standard">` : '';
+            let flagHtml = s.codice_nazione ? `<img src="https://flagcdn.com/w40/${s.codice_nazione.toLowerCase()}.png" class="flag-icon">` : '';
             let emojiSport = sportIcons[s.sport] || "🏆"; 
 
             let precedentiHTML = '';
