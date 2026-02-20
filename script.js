@@ -458,7 +458,7 @@ Papa.parse(urlFoglio, {
             marker.dati = s;
             marker.nomeNormalizzato = normalizeText(s.nome);
 
-            let flagHtml = s.codice_nazione ? `<img src="https://flagcdn.com/w80/${s.codice_nazione.toLowerCase()}.png" class="flag-icon-standard">` : '';
+            let flagHtml = s.codice_nazione ? `<img src="https://flagcdn.com/w40/${s.codice_nazione.toLowerCase()}.png" class="flag-icon-mini">` : '';
             let emojiSport = sportIcons[s.sport] || "🏆"; 
 
             let precedentiHTML = '';
