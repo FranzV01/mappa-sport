@@ -460,6 +460,21 @@ Papa.parse(urlFoglio, {
             marker.dati = s;
             marker.nomeNormalizzato = normalizeText(s.nome);
 
+            // --- LOGICA STORICO LOGHI PER TIMELINE ---
+marker.storicoLoghi = [];
+for (let i = 1; i <= 10; i++) {
+    let url = s[`logo_storia_${i}_url`];
+    let dateRange = s[`logo_storia_${i}_date`]; 
+    if (url && dateRange && dateRange.includes('-')) {
+        let parti = dateRange.split('-');
+        marker.storicoLoghi.push({
+            url: url,
+            inizio: parseInt(parti[0].trim()) || 0,
+            fine: parseInt(parti[1].trim()) || 2026
+        });
+    }
+}
+
             let flagHtml = s.codice_nazione ? `<img src="https://flagcdn.com/w40/${s.codice_nazione.toLowerCase()}.png" class="flag-icon">` : '';
             let emojiSport = sportIcons[s.sport] || "🏆"; 
 
@@ -573,6 +588,21 @@ Papa.parse(urlFoglio, {
                 map.removeLayer(markers); visibiliAttualmente.forEach(m => markersLayer.addLayer(m)); map.addLayer(markersLayer);
             }
 
+            // --- AGGIORNAMENTO DINAMICO LOGHI ---
+visibiliAttualmente.forEach(m => {
+    const iconEl = m.getElement();
+    if (iconEl) {
+        const img = iconEl.querySelector('.logo-img-inner');
+        if (img) {
+            const logoDaMostrare = getLogoPerAnno(m, tVal);
+            // Cambia l'immagine solo se è diversa da quella attuale
+            if (img.getAttribute('src') !== logoDaMostrare) {
+                img.src = logoDaMostrare;
+            }
+        }
+    }
+});
+
             heatLayer.setLatLngs(heatPoints);
             document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibiliAttualmente.length}</b>`;
             document.getElementById('stats-breakdown').innerHTML = Object.entries(sportCounts).sort((a,b) => b[1] - a[1]).map(([n, c]) => `${sportIcons[n] || ''} ${c}`).join(' • ');
@@ -654,6 +684,19 @@ if (savedPanelStatus === 'true') {
     const btn = document.getElementById('toggle-panel-btn');
     if (panel) panel.classList.add('collapsed');
     if (btn) btn.style.display = 'flex';
+}
+
+function getLogoPerAnno(marker, annoSelezionato) {
+    // Se la timeline è su "Tutti i tempi" (2026) o l'anno è il futuro
+    if (annoSelezionato >= 2026) return marker.dati.logo_attuale;
+
+    // Cerca se esiste un logo storico per quell'anno specifico
+    const logoTrovato = marker.storicoLoghi.find(l => 
+        annoSelezionato >= l.inizio && annoSelezionato <= l.fine
+    );
+
+    // Se lo trova restituisce quello, altrimenti il logo attuale
+    return logoTrovato ? logoTrovato.url : marker.dati.logo_attuale;
 }
 
 window.onload = () => { renderHistory(); };
