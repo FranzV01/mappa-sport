@@ -446,7 +446,7 @@ Papa.parse(urlFoglio, {
             let livLega = parseInt(s.livello_lega) || 0;
             let trofeiInt = parseInt(s.trofei_internazionali) || 0; // NUOVO
 
-            let badgesHTML = '<div class="badges-container">';
+            let attivi = [];
             let latS = parseFloat(s.latitudine);
             let lonS = parseFloat(s.longitudine);
             if (s.genere && s.genere.toLowerCase() === 'f') { badgesHTML += '<div class="badge-icon badge-tr badge-femminile" title="Femminile">♀</div>'; }
@@ -462,7 +462,21 @@ Papa.parse(urlFoglio, {
             if (latS === botLat) { badgesHTML += '<div class="badge-icon badge-sud" title="Punto più a Sud">🐧</div>'; }
             if (lonS === rightLon) { badgesHTML += '<div class="badge-icon badge-est" title="Orizzonte Est">🌅</div>'; }
             if (lonS === leftLon) { badgesHTML += '<div class="badge-icon badge-ovest" title="Orizzonte Ovest">🌇</div>'; }
-            badgesHTML += '</div>';
+            let badgesHTML = '';
+const totale = attivi.length;
+
+attivi.forEach((badge, i) => {
+    // Calcoliamo l'angolo (distribuito equamente in 360 gradi)
+    // Partiamo da -90 gradi (ore 12) per un look più ordinato
+    const angolo = (i * (360 / totale)) - 90; 
+    
+    badgesHTML += `
+        <div class="badge-icon ${badge.classe}" 
+             style="--angle: ${angolo}deg;" 
+             title="${badge.html}">
+             ${badge.html}
+        </div>`;
+});
 
             let highlightClass = (s.highlight && s.highlight.toUpperCase() === 'SI') ? 'highlight-active' : '';
 
