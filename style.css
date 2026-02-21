@@ -102,15 +102,15 @@ body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
 .badge-lc { top: 14px; left: -8px; }
 
 /* Tutti i Badge (Sullo stesso piano) */
-.badge-female { background: #ff69b4; }
-.badge-rarity { background: #5bc0de; }
-.badge-new { background: #f0ad4e; }
-.badge-defunct { background: #777; }
-.badge-pluri { background: #704214; }
-.badge-cattedrale { background: #800020; }
-.badge-elite { background: #ffd700; color: black; animation: shimmer 2s infinite; }
-.badge-tetto { background: #f0f8ff; color: black; border-color:#ccc; }
-.badge-intl { background: #0047AB; } /* Nuovo Badge Internazionale */
+.badge-femminile { background: #ff69b4 !important; }
+.badge-pioniere  { background: #5bc0de !important; }
+.badge-newentry  { background: #f0ad4e !important; }
+.badge-memoria   { background: #333333 !important; }
+.badge-gloria    { background: #0047AB !important; }
+.badge-secolare  { background: #704214 !important; }
+.badge-cattedrale { background: #800020 !important; }
+.badge-elite     { background: #ffd700 !important; color: #000 !important; }
+.badge-vetta     { background: #f0f8ff !important; color: #000 !important; border: 1px solid #ccc; }
 
 @keyframes shimmer {
     0% { box-shadow: 0 0 2px #ffd700; }
