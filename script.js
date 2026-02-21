@@ -463,27 +463,27 @@ data.forEach(s => {
             if (capStadio >= 50000) attivi.push({html: '🏟️', classe: 'badge-cattedrale', titolo: 'Cattedrale'});
             if (livLega === 1) attivi.push({html: '⭐', classe: 'badge-elite', titolo: 'Élite'});
             if (altitudine > 2000) attivi.push({html: '🏔️', classe: 'badge-vetta', titolo: 'Vetta'});
-            if (latS === topLat) attivi.push({html: '❄️', classe: 'badge-nord', titolo: 'Punto più a Nord'});
-            if (latS === botLat) attivi.push({html: '🐧', classe: 'badge-sud', titolo: 'Punto più a Sud'});
-            if (lonS === rightLon) attivi.push({html: '🌅', classe: 'badge-est', titolo: 'Orizzonte Est'});
-            if (lonS === leftLon) attivi.push({html: '🌇', classe: 'badge-ovest', titolo: 'Orizzonte Ovest'});
+            if (Math.abs(latS - topLat) < 0.000001) attivi.push({h: '❄️', c: 'badge-nord', t: 'Punto più a Nord'});
+            if (Math.abs(latS - botLat) < 0.000001) attivi.push({h: '🐧', c: 'badge-sud', t: 'Punto più a Sud'});
+            if (Math.abs(lonS - rightLon) < 0.000001) attivi.push({h: '🌅', c: 'badge-est', t: 'Orizzonte Est'});
+            if (Math.abs(lonS - leftLon) < 0.000001) attivi.push({h: '🌇', c: 'badge-ovest', t: 'Orizzonte Ovest'});
             
             let badgesHTML = '';
+            const raggio = 22;
             const totale = attivi.length;
 
-            if (totale > 0) {
-         attivi.forEach((badge, i) => {
-         
-         const angolo = (i * (360 / totale)) - 90; 
+            attivi.forEach((badge, i) => {
+            const angolo = (i * (2 * Math.PI) / totale) - (Math.PI / 2);
+            const x = Math.round(50 + (Math.cos(angolo) * raggio));
+            const y = Math.round(50 + (Math.sin(angolo) * raggio)); 
         
-         badgesHTML += `
-            <div class="badge-icon ${badge.classe}" 
-                 style="--angle: ${angolo}deg;" 
-                 title="${badge.titolo}">
-                 ${badge.html}
-            </div>`;
+            badgesHTML += `
+        <div class="badge-icon ${badge.c}" 
+             style="left: ${x}%; top: ${y}%; transform: translate(-50%, -50%);" 
+             title="${badge.t}">
+             ${badge.h}
+        </div>`;
           });
-       }
 
             let highlightClass = (s.highlight && s.highlight.toUpperCase() === 'SI') ? 'highlight-active' : '';
 
