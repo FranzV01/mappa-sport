@@ -450,20 +450,20 @@ Papa.parse(urlFoglio, {
             let latS = parseFloat(s.latitudine);
             let lonS = parseFloat(s.longitudine);
             
-            if (s.genere && s.genere.toLowerCase() === 'f') { badgesHTML += '<div class="badge-icon badge-tr badge-femminile" title="Femminile">♀</div>'; }
-            if (isOldest) { badgesHTML += '<div class="badge-icon badge-br badge-pioniere" title="Pioniere">💎</div>'; }
-            if (isSquadraNuova) { badgesHTML += '<div class="badge-icon badge-bl badge-newentry" title="New Entry">✨</div>'; }
-            if (isScomparso) { badgesHTML += '<div class="badge-icon badge-tl badge-memoria" title="Memoria">⚰️</div>'; }
-            if (trofeiInt > 0) { badgesHTML += '<div class="badge-icon badge-lc badge-gloria auto-badge" title="Gloria">🏆</div>'; }
-            if (annoFondazione <= (new Date().getFullYear() - 100)) { badgesHTML += '<div class="badge-icon badge-tc badge-secolare auto-badge" title="Secolare">📜</div>'; }
-            if (capStadio >= 50000) { badgesHTML += '<div class="badge-icon badge-bc badge-cattedrale auto-badge" title="Cattedrale">🏟️</div>'; }
-            if (livLega === 1) { badgesHTML += '<div class="badge-icon badge-rc badge-elite auto-badge" title="Élite">⭐</div>'; }
-            if (altitudine > 2000) { badgesHTML += '<div class="badge-icon badge-tc badge-vetta auto-badge" title="Vetta">🏔️</div>'; }
-            
-            if (latS === topLat) { badgesHTML += '<div class="badge-icon badge-nord" title="Punto più a Nord">❄️</div>'; }
-            if (latS === botLat) { badgesHTML += '<div class="badge-icon badge-sud" title="Punto più a Sud">🐧</div>'; }
-            if (lonS === rightLon) { badgesHTML += '<div class="badge-icon badge-est" title="Orizzonte Est">🌅</div>'; }
-            if (lonS === leftLon) { badgesHTML += '<div class="badge-icon badge-ovest" title="Orizzonte Ovest">🌇</div>'; }
+            if (s.genere && s.genere.toLowerCase() === 'f') attivi.push({html: '♀', classe: 'badge-femminile', titolo: 'Femminile'});
+            if (isOldest) attivi.push({html: '💎', classe: 'badge-pioniere', titolo: 'Pioniere'});
+            if (isSquadraNuova) attivi.push({html: '✨', classe: 'badge-newentry', titolo: 'New Entry'});
+            if (isScomparso) attivi.push({html: '⚰️', classe: 'badge-memoria', titolo: 'Memoria'});
+            if (trofeiInt > 0) attivi.push({html: '🏆', classe: 'badge-gloria', titolo: 'Gloria'});
+            const annoAttuale = new Date().getFullYear();
+            if (annoFondazione <= (annoAttuale - 100)) attivi.push({html: '📜', classe: 'badge-secolare', titolo: 'Secolare'});
+            if (capStadio >= 50000) attivi.push({html: '🏟️', classe: 'badge-cattedrale', titolo: 'Cattedrale'});
+            if (livLega === 1) attivi.push({html: '⭐', classe: 'badge-elite', titolo: 'Élite'});
+            if (altitudine > 2000) attivi.push({html: '🏔️', classe: 'badge-vetta', titolo: 'Vetta'});
+            if (latS === topLat) attivi.push({html: '❄️', classe: 'badge-nord', titolo: 'Punto più a Nord'});
+            if (latS === botLat) attivi.push({html: '🐧', classe: 'badge-sud', titolo: 'Punto più a Sud'});
+            if (lonS === rightLon) attivi.push({html: '🌅', classe: 'badge-est', titolo: 'Orizzonte Est'});
+            if (lonS === leftLon) attivi.push({html: '🌇', classe: 'badge-ovest', titolo: 'Orizzonte Ovest'});
             
             let badgesHTML = '';
             const totale = attivi.length;
