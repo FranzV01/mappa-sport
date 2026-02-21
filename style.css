@@ -111,6 +111,10 @@ body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
 .badge-cattedrale { background: #800020 !important; }
 .badge-elite     { background: #ffd700 !important; color: #000 !important; }
 .badge-vetta     { background: #f0f8ff !important; color: #000 !important; border: 1px solid #ccc; }
+.badge-nord { background: #E0F7FA !important; color: #006064 !important; border: 1px solid #006064; }
+.badge-sud { background: #1A237E !important; color: white !important; }
+.badge-est { background: #FFD54F !important; color: #827717 !important; }
+.badge-ovest { background: #BF360C !important; color: white !important; }
 
 @keyframes shimmer {
     0% { box-shadow: 0 0 2px #ffd700; }
