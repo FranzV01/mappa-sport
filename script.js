@@ -392,6 +392,17 @@ Papa.parse(urlFoglio, {
             }
         });
 
+        let topLat = -90, botLat = 90, leftLon = 180, rightLon = -180;
+
+        data.forEach(s => {
+           let lat = parseFloat(s.latitudine);
+           let lon = parseFloat(s.longitudine);
+           if (lat > topLat) topLat = lat;
+           if (lat < botLat) botLat = lat;
+           if (lon < leftLon) leftLon = lon;
+           if (lon > rightLon) rightLon = lon;
+       });
+
         const nazioni = [...new Set(data.map(s => s.nazione))].filter(n => n).sort();
         nazioni.forEach(n => {
             let opt = document.createElement('option'); opt.value = opt.innerText = n;
