@@ -85,21 +85,38 @@ body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
 .logo-container:active { transform: scale(0.9); }
 .logo-img-inner { width: 100%; height: 100%; border-radius: 50%; background: white; object-fit: contain; }
 
-.badge-icon {
-    position: absolute; width: 16px; height: 16px; 
-    color: white; border-radius: 50%; border: 2px solid white;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 9px; font-weight: bold; z-index: 100;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+.logo-img-wrapper {
+    position: relative;
+    width: 40px; 
+    height: 40px;
 }
-.badge-tr { top: -4px; right: -4px; }
-.badge-br { bottom: -4px; right: -4px; }
-.badge-bl { bottom: -4px; left: -4px; }
-.badge-tl { top: -4px; left: -4px; }
-.badge-tc { top: -8px; left: 14px; }
-.badge-bc { bottom: -8px; left: 14px; }
-.badge-rc { top: 14px; right: -8px; }
-.badge-lc { top: 14px; left: -8px; }
+
+.badges-container {
+    position: absolute;
+    top: -5px;      /* Li sposta leggermente sopra il logo */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-wrap: wrap; /* Se non ci stanno, vanno a capo */
+    justify-content: center;
+    gap: 2px;       /* Spazio tra un badge e l'altro */
+    width: 60px;    /* Leggermente più largo del logo per ospitare più badge */
+    pointer-events: none; /* Evita che i badge blocchino i click sul logo */
+    z-index: 20;
+}
+
+.badge-icon {
+    position: relative !important; /* Annulla il posizionamento absolute precedente */
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    flex-shrink: 0;
+}
 
 /* Tutti i Badge (Sullo stesso piano) */
 .badge-femminile { background: #ff69b4 !important; }
