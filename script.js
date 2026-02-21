@@ -550,7 +550,8 @@ for (let i = 1; i <= 10; i++) {
                 'filter-epoca': eVal, 'filter-genere': gVal, 'timeline-slider': tVal,
                 'cluster-enabled': isClusterEnabled, 'filter-capacita': cVal, 'filter-lega': lVal
             }));
-
+ 
+            document.querySelectorAll('.current-year-display').forEach(el => el.innerText = new Date().getFullYear());
             document.getElementById('year-display').innerText = tVal >= annoCorrente ? "Tutti i tempi" : "Fino al " + tVal;
 
             markers.clearLayers(); markersLayer.clearLayers();
