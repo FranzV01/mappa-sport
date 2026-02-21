@@ -436,6 +436,8 @@ Papa.parse(urlFoglio, {
             let trofeiInt = parseInt(s.trofei_internazionali) || 0; // NUOVO
 
             let badgesHTML = '';
+            let latS = parseFloat(s.latitudine);
+            let lonS = parseFloat(s.longitudine);
             if (s.genere && s.genere.toLowerCase() === 'f') { badgesHTML += '<div class="badge-icon badge-tr badge-femminile" title="Femminile">♀</div>'; }
             if (isOldest) { badgesHTML += '<div class="badge-icon badge-br badge-pioniere" title="Pioniere">💎</div>'; }
             if (isSquadraNuova) { badgesHTML += '<div class="badge-icon badge-bl badge-newentry" title="New Entry">✨</div>'; }
@@ -445,6 +447,10 @@ Papa.parse(urlFoglio, {
             if (capStadio >= 50000) { badgesHTML += '<div class="badge-icon badge-bc badge-cattedrale auto-badge" title="Cattedrale">🏟️</div>'; }
             if (livLega === 1) { badgesHTML += '<div class="badge-icon badge-rc badge-elite auto-badge" title="Élite">⭐</div>'; }
             if (altitudine > 2000) { badgesHTML += '<div class="badge-icon badge-tc badge-vetta auto-badge" title="Vetta">🏔️</div>'; }
+            if (latS === topLat) { badgesHTML += '<div class="badge-icon badge-nord" title="Punto più a Nord">❄️</div>'; }
+            if (latS === botLat) { badgesHTML += '<div class="badge-icon badge-sud" title="Punto più a Sud">🐧</div>'; }
+            if (lonS === rightLon) { badgesHTML += '<div class="badge-icon badge-est" title="Orizzonte Est">🌅</div>'; }
+            if (lonS === leftLon) { badgesHTML += '<div class="badge-icon badge-ovest" title="Orizzonte Ovest">🌇</div>'; }
 
             let highlightClass = (s.highlight && s.highlight.toUpperCase() === 'SI') ? 'highlight-active' : '';
 
