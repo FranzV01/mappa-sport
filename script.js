@@ -551,7 +551,6 @@ for (let i = 1; i <= 10; i++) {
                 'cluster-enabled': isClusterEnabled, 'filter-capacita': cVal, 'filter-lega': lVal
             }));
  
-            document.querySelectorAll('.current-year-display').forEach(el => el.innerText = new Date().getFullYear());
             document.getElementById('year-display').innerText = tVal >= annoCorrente ? "Tutti i tempi" : "Fino al " + tVal;
 
             markers.clearLayers(); markersLayer.clearLayers();
@@ -603,6 +602,14 @@ visibiliAttualmente.forEach(m => {
             }
         }
     }
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    const anno = new Date().getFullYear();
+    const yearElements = document.querySelectorAll('.current-year-display');
+    yearElements.forEach(el => {
+        el.innerText = anno;
+    });
 });
 
             heatLayer.setLatLngs(heatPoints);
