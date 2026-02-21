@@ -436,15 +436,15 @@ Papa.parse(urlFoglio, {
             let trofeiInt = parseInt(s.trofei_internazionali) || 0; // NUOVO
 
             let badgesHTML = '';
-            if (s.genere && s.genere.toLowerCase() === 'f') badgesHTML += '<div class="badge-icon badge-tr badge-female">♀</div>';
-            if (isOldest) badgesHTML += '<div class="badge-icon badge-br badge-rarity">💎</div>';
-            if (isSquadraNuova) badgesHTML += '<div class="badge-icon badge-bl badge-new">✨</div>';
-            if (isScomparso) badgesHTML += '<div class="badge-icon badge-tl badge-defunct">⚰️</div>';
-            if (trofeiInt > 0) badgesHTML += '<div class="badge-icon badge-lc badge-intl auto-badge" title="Campione Internazionale">🏆</div>';
-            if (annoFondazione < 1900) badgesHTML += '<div class="badge-icon badge-tc badge-pluri auto-badge" title="Pluricentenario">📜</div>';
-            if (capStadio > 50000) badgesHTML += '<div class="badge-icon badge-bc badge-cattedrale auto-badge" title="Cattedrale">🏟️</div>';
-            if (livLega === 1) badgesHTML += '<div class="badge-icon badge-rc badge-elite auto-badge" title="Élite">⭐</div>';
-            if (altitudine > 2000) badgesHTML += '<div class="badge-icon badge-tc badge-tetto auto-badge" title="Tetto del Mondo">🏔️</div>';
+            if (s.genere && s.genere.toLowerCase() === 'f') { badgesHTML += '<div class="badge-icon badge-tr badge-femminile" title="Femminile">♀</div>'; }
+            if (isOldest) { badgesHTML += '<div class="badge-icon badge-br badge-pioniere" title="Pioniere">💎</div>'; }
+            if (isSquadraNuova) { badgesHTML += '<div class="badge-icon badge-bl badge-newentry" title="New Entry">✨</div>'; }
+            if (isScomparso) { badgesHTML += '<div class="badge-icon badge-tl badge-memoria" title="Memoria">⚰️</div>'; }
+            if (trofeiInt > 0) { badgesHTML += '<div class="badge-icon badge-lc badge-gloria auto-badge" title="Gloria">🏆</div>'; }
+            if (annoFondazione <= (new Date().getFullYear() - 100)) { badgesHTML += '<div class="badge-icon badge-tc badge-secolare auto-badge" title="Secolare">📜</div>'; }
+            if (capStadio >= 50000) { badgesHTML += '<div class="badge-icon badge-bc badge-cattedrale auto-badge" title="Cattedrale">🏟️</div>'; }
+            if (livLega === 1) { badgesHTML += '<div class="badge-icon badge-rc badge-elite auto-badge" title="Élite">⭐</div>'; }
+            if (altitudine > 2000) { badgesHTML += '<div class="badge-icon badge-tc badge-vetta auto-badge" title="Vetta">🏔️</div>'; }
 
             let highlightClass = (s.highlight && s.highlight.toUpperCase() === 'SI') ? 'highlight-active' : '';
 
