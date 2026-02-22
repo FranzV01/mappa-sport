@@ -519,17 +519,30 @@ for (let i = 1; i <= 10; i++) {
             let emojiSport = sportIcons[s.sport] || "🏆"; 
 
             let precedentiHTML = '';
-            [s.club_precedente_1, s.club_precedente_2, s.club_precedente_3].forEach(cp => {
-                if(cp && cp.trim() !== "") {
-                    let clubTrovato = data.find(item => item.nome && item.nome.trim() === cp.trim());
-                    let nomeEscaped = cp.replace(/'/g, "\\'");
-                    if (clubTrovato && clubTrovato.logo_attuale) {
-                        precedentiHTML += `<div class="origin-wrapper" onclick="vaiAClub('${nomeEscaped}')" title="Vai a ${cp}">
-                            <img src="${clubTrovato.logo_attuale}" class="origin-logo" loading="lazy" onerror="this.src='${placeholderLogo}';">
-                            <span class="origin-name">${cp}</span></div>`;
-                    } else precedentiHTML += `<button class="btn-link-club" onclick="vaiAClub('${nomeEscaped}')">${cp}</button>`;
-                }
-            });
+
+if (s.club_precedente && s.club_precedente.trim() !== "") {
+    // Dividiamo la stringa in base alle virgole e puliamo gli spazi
+    const listaPrecedenti = s.club_precedente.split(',').map(item => item.trim());
+
+    listaPrecedenti.forEach(cp => {
+        if (cp !== "") {
+            // Cerchiamo se il club esiste nel database per prenderne il logo
+            let clubTrovato = data.find(item => item.nome && item.nome.trim() === cp);
+            let nomeEscaped = cp.replace(/'/g, "\\'");
+
+            if (clubTrovato && clubTrovato.logo_attuale) {
+                precedentiHTML += `
+                    <div class="origin-wrapper" onclick="vaiAClub('${nomeEscaped}')" title="Vai a ${cp}">
+                        <img src="${clubTrovato.logo_attuale}" class="origin-logo" loading="lazy" onerror="this.src='${placeholderLogo}';">
+                        <span class="origin-name">${cp}</span>
+                    </div>`;
+            } else {
+                // Se non c'è il logo, mostriamo il semplice pulsante link
+                precedentiHTML += `<button class="btn-link-club" onclick="vaiAClub('${nomeEscaped}')">${cp}</button>`;
+            }
+        }
+    });
+}
 
             let loghiItems = [];
             for(let i=1; i<=10; i++) {
