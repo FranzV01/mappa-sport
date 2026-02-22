@@ -550,6 +550,13 @@ for (let i = 1; i <= 10; i++) {
                 wikiBtn = `<a href="https://en.wikipedia.org/wiki/${wikiNome}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
             }
 
+            const partiStadio = (s.stadio_nome || '').split(',');
+            const nomeOriginale = partiStadio[0].trim();
+            const nomeSponsor = partiStadio[1] ? partiStadio[1].trim() : null;
+            const stadioDisplay = nomeSponsor 
+            ? `<b>${nomeOriginale}</b><br><small style="color:#666; margin-left:15px;">· <i>${nomeSponsor}</i></small>` 
+            : `<b>${nomeOriginale || 'N.D.'}</b>`;
+            
             marker.descrizione = `
                 <div class="popup-card">
                     <div class="popup-header">
