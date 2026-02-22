@@ -566,8 +566,8 @@ if (s.club_precedente && s.club_precedente.trim() !== "") {
             const partiStadio = (s.stadio_nome || '').split(',');
             const nomeOriginale = partiStadio[0].trim();
             const nomeSponsor = partiStadio[1] ? partiStadio[1].trim() : null;
-            const stadioDisplay = nomeSponsor 
-            ? `<b>${nomeOriginale}</b><br>· <i>${nomeSponsor}</i>` 
+            const stadioDisplay = nomeSponsor
+            ? `<b>${nomeOriginale}</b><br>· <i>${nomeSponsor}</i>`
             : `<b>${nomeOriginale || 'N.D.'}</b>`;
             
             marker.descrizione = `
