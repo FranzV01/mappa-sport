@@ -566,7 +566,7 @@ for (let i = 1; i <= 10; i++) {
                     <div class="popup-info">
                         ${flagHtml} <b>${s.nazione}</b><br>
                         Fondazione: <b>${s.fondazione}</b><br>
-                        Stadio: <b>${s.stadio_nome || 'N.D.'}</b><br>
+                        Stadio: <b>${stadioDisplay}</b><br>
                         ${s.capacita_stadio ? `Posti: <b>${new Intl.NumberFormat('it-IT').format(parseInt(s.capacita_stadio))}</b>` : ''}
                     </div>
                     ${wikiBtn} ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
