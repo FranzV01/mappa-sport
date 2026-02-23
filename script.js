@@ -559,15 +559,19 @@ if (s.club_precedente && s.club_precedente.trim() !== "") {
                 wikiBtn = `<a href="https://en.wikipedia.org/wiki/${wikiNome}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
             }
 
-            let coloriHTML = '';
-            if (s.colori_nomi) {
-            const listaColori = s.colori_nomi.split(',').map(c => c.trim().toLowerCase());
-            coloriHTML = '<div class="popup-colors">';
-            listaColori.forEach(colore => {
-            coloriHTML += `<span class="color-dot color-${colore}" title="${colore}"></span>`;
-            });
-            coloriHTML += '</div>';
-            }
+            // Generazione dei cerchietti
+let coloriHTML = '';
+if (s.colori_nomi) {
+    const listaColori = s.colori_nomi.split(',').map(c => c.trim().toLowerCase());
+    coloriHTML = '<div class="popup-colors">';
+    listaColori.forEach(coloreIta => {
+        // TRUCCO: sostituisce lo spazio con un trattino solo per la classe CSS
+        // Esempio: "verde scuro" diventa "color-verde-scuro"
+        const classeCSS = coloreIta.replace(/\s+/g, '-');
+        coloriHTML += `<span class="color-dot color-${classeCSS}" title="${coloreIta}"></span>`;
+    });
+    coloriHTML += '</div>';
+}
             
             const partiStadio = (s.stadio_nome || '').split(',');
             const nomeOriginale = partiStadio[0].trim();
