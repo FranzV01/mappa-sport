@@ -281,44 +281,44 @@ input:checked + .slider:before { transform: translateX(20px); }
 .btn-wiki:hover { background: #3366cc; color: #ffffff; }
 #map.hide-badges .badge-icon { display: none !important; }
 
-/* --- STILI PER I CERCHIETTI NEL POPUP --- */
+/* --- CSS SINCRONIZZATO CON I NOMI IN ITALIANO --- */
 .popup-colors {
     display: flex;
-    justify-content: center; /* Centra i cerchietti sotto il titolo */
+    justify-content: center;
     gap: 6px;
     margin: 8px 0;
 }
 
 .color-dot {
-    width: 14px; /* Leggermente più grandi per leggibilità */
+    width: 14px;
     height: 14px;
     border-radius: 50%;
-    border: 1px solid rgba(0,0,0,0.15); /* Bordino per separare colori chiari dal fondo */
+    border: 1px solid rgba(0,0,0,0.15);
     display: inline-block;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-/* Mapping colori coerente con il tuo HTML */
-.color-red        { background-color: #FF0000; }
-.color-amaranto   { background-color: #9F2B68; }
-.color-maroon     { background-color: #800000; } /* Granata */
-.color-bordeaux   { background-color: #6D1A22; }
-.color-orange     { background-color: #F75E25; }
-.color-gold       { background-color: #DAA520; }
-.color-amber      { background-color: #FFBF00; }
-.color-yellow     { background-color: #FFFF00; }
-.color-lime       { background-color: #00FF00; }
-.color-green      { background-color: #008000; }
-.color-darkgreen  { background-color: #004d00; }
-.color-skyblue    { background-color: #87CEEB; }
-.color-lightblue  { background-color: #007FFF; }
-.color-blue       { background-color: #0000FF; }
-.color-navy       { background-color: #000080; }
-.color-purple     { background-color: #8F00FF; }
-.color-fuchsia    { background-color: #D9027D; }
-.color-pink       { background-color: #FF69B4; }
-.color-lilac      { background-color: #C8A2C8; }
-.color-brown      { background-color: #654321; }
-.color-white      { background-color: #FFFFFF; }
-.color-grey       { background-color: #808080; }
-.color-black      { background-color: #000000; }
+/* Mapping diretto sui nomi che scrivi nel Foglio */
+.color-rosso        { background-color: #FF0000; }
+.color-amaranto     { background-color: #9F2B68; }
+.color-granata      { background-color: #800000; }
+.color-bordeaux     { background-color: #6D1A22; }
+.color-arancione    { background-color: #F75E25; }
+.color-oro          { background-color: #DAA520; }
+.color-ambra        { background-color: #FFBF00; }
+.color-giallo       { background-color: #FFFF00; }
+.color-verde-chiaro { background-color: #00FF00; }
+.color-verde        { background-color: #008000; }
+.color-verde-scuro  { background-color: #004d00; }
+.color-celeste      { background-color: #87CEEB; }
+.color-azzurro      { background-color: #007FFF; }
+.color-blu          { background-color: #0000FF; }
+.color-blu-navy     { background-color: #000080; }
+.color-viola        { background-color: #8F00FF; }
+.color-fucsia       { background-color: #D9027D; }
+.color-rosa         { background-color: #FF69B4; }
+.color-lilla        { background-color: #C8A2C8; }
+.color-marrone      { background-color: #654321; }
+.color-bianco       { background-color: #FFFFFF; }
+.color-grigio       { background-color: #808080; }
+.color-nero         { background-color: #000000; }
