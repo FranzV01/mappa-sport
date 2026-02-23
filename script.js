@@ -559,6 +559,16 @@ if (s.club_precedente && s.club_precedente.trim() !== "") {
                 wikiBtn = `<a href="https://en.wikipedia.org/wiki/${wikiNome}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
             }
 
+            let coloriHTML = '';
+            if (s.colori_nomi) {
+            const listaColori = s.colori_nomi.split(',').map(c => c.trim().toLowerCase());
+            coloriHTML = '<div class="popup-colors">';
+            listaColori.forEach(colore => {
+            coloriHTML += `<span class="color-dot color-${colore}" title="${colore}"></span>`;
+            });
+            coloriHTML += '</div>';
+            }
+            
             const partiStadio = (s.stadio_nome || '').split(',');
             const nomeOriginale = partiStadio[0].trim();
             const nomeSponsor = partiStadio[1] ? partiStadio[1].trim() : null;
@@ -571,7 +581,7 @@ if (s.club_precedente && s.club_precedente.trim() !== "") {
                     <div class="popup-header">
                         <h2 class="popup-title">${emojiSport} ${s.nome}</h2>
                         ${s.soprannome ? `<span class="popup-nickname">"${s.soprannome}"</span>` : ''}
-                    </div>
+                        ${coloriHTML}</div>
                     <div class="popup-info">
                         ${flagHtml} <b>${s.nazione}</b><br>
                         Fondazione: <b>${s.fondazione}</b><br>
