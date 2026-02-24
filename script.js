@@ -447,7 +447,7 @@ data.forEach(s => {
             let coloriArray = s.colori ? s.colori.split(',') : ['#333'];
             let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
 
-            const isRiserva = /\s(B|2|II|U23)$/i.test(s.nome);
+            let isRiserva = /\s(B|2|II|U23)$/i.test(s.nome);
             let isOldest = oldestByNation[s.nazione] && oldestByNation[s.nazione].nome === s.nome;
             let annoFondazione = parseInt(String(s.fondazione).replace(/\D/g, '')) || 9999;
             let isSquadraNuova = (annoFondazione === annoCorrente);
