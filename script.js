@@ -135,6 +135,17 @@ window.toggleAutoBadges = function() {
     localStorage.setItem('autoBadgeStatus', isChecked);
 };
 
+window.toggleRiserve = function(mostra) {
+    // Salviamo la preferenza
+    localStorage.setItem('mostraRiserveStatus', mostra);
+    // Riapplichiamo i filtri: la logica inserita sopra nasconderà i marker
+    applicaFiltri();
+    
+    if (typeof showNotification === "function") {
+        showNotification(mostra ? "Squadre riserva mostrate" : "Squadre riserva nascoste");
+    }
+};
+
 window.setFiltroColore = function(colore, el) {
     filtroColoreSociale = colore;
     
@@ -510,13 +521,6 @@ for (let i = 1; i <= 10; i++) {
         });
     }
 }
-            
-            // --- LOGICA BADGE RISERVA (Aggiungi qui) ---
-const isRiserva = /\s(B|2|II|U23|B\sTeam)$/i.test(s.nome);
-if (isRiserva) {
-    // Usiamo un angolo che non si sovrapponga ai badge esistenti (es. 135deg)
-    badgesHtml += `<div class="badge-icon badge-riserva" style="--angle: 135deg;" title="Squadra Riserve">B</div>`;
-}
 
             let flagHtml = s.codice_nazione ? `<img src="https://flagcdn.com/w40/${s.codice_nazione.toLowerCase()}.png" class="flag-icon">` : '';
             let emojiSport = sportIcons[s.sport] || "🏆"; 
@@ -620,6 +624,7 @@ if (s.colori_nomi) {
             const lVal = document.getElementById('filter-lega').value;
             const tVal = parseInt(document.getElementById('timeline-slider').value);
             const isClusterEnabled = document.getElementById('cluster-toggle').checked;
+            const showReserves = document.getElementById('toggle-reserves') ? document.getElementById('toggle-reserves').checked : true;
             
             localStorage.setItem('mapFilters', JSON.stringify({
                 'filter-nazione': nVal, 'filter-stato': stVal, 'filter-sport': spVal,
@@ -651,6 +656,8 @@ if (s.colori_nomi) {
                 if (cVal === "giant" && cap < 50000) ok = false;
                 if (lVal !== "Tutti" && parseInt(m.dati.livello_lega) !== parseInt(lVal)) ok = false;
                 if (!checkColorMatch(m.dati.colori_nomi, filtroColoreSociale)) ok = false;
+                const isRiserva = /\s(B|2|II|U23)$/i.test(m.dati.nome);
+                if (!showReserves && isRiserva) ok = false;
 
                 if(ok) {
                     heatPoints.push([m.getLatLng().lat, m.getLatLng().lng, 0.5]);
@@ -771,6 +778,13 @@ if (savedPanelStatus === 'true') {
     if (btn) btn.style.display = 'flex';
 }
 
+// Ripristino stato Switch Riserve
+const savedReservesStatus = localStorage.getItem('mostraRiserveStatus');
+const reservesToggle = document.getElementById('toggle-reserves');
+if (savedReservesStatus !== null && reservesToggle) {
+    reservesToggle.checked = (savedReservesStatus === 'true');
+}
+
 function getLogoPerAnno(marker, annoSelezionato) {
     // Se la timeline è su "Tutti i tempi" o l'anno è il futuro
     if (annoSelezionato >= annoCorrente) return marker.dati.logo_attuale;
@@ -782,27 +796,6 @@ function getLogoPerAnno(marker, annoSelezionato) {
 
     // Se lo trova restituisce quello, altrimenti il logo attuale
     return logoTrovato ? logoTrovato.url : marker.dati.logo_attuale;
-}
-
-function toggleRiserve(mostra) {
-    // Seleziona tutti i contenitori dei marker che hanno la classe 'marker-riserva'
-    const riserve = document.querySelectorAll('.marker-riserva');
-    
-    riserve.forEach(r => {
-        // Risaliamo al contenitore Leaflet (di solito 2 livelli sopra il wrapper)
-        const markerContainer = r.closest('.leaflet-marker-icon');
-        if (markerContainer) {
-            if (mostra) {
-                markerContainer.classList.remove('marker-hidden');
-            } else {
-                markerContainer.classList.add('marker-hidden');
-            }
-        }
-    });
-
-    if (typeof mostratosto === "function") {
-        mostratosto(mostra ? "Squadre riserva mostrate" : "Squadre riserva nascoste");
-    }
 }
 
 window.onload = () => { renderHistory(); };
