@@ -447,7 +447,6 @@ data.forEach(s => {
             let coloriArray = s.colori ? s.colori.split(',') : ['#333'];
             let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
 
-            let isRiserva = /\s(B|2|II|U23)$/i.test(s.nome);
             let isOldest = oldestByNation[s.nazione] && oldestByNation[s.nazione].nome === s.nome;
             let annoFondazione = parseInt(String(s.fondazione).replace(/\D/g, '')) || 9999;
             let isSquadraNuova = (annoFondazione === annoCorrente);
@@ -462,6 +461,7 @@ data.forEach(s => {
             let lonS = parseFloat(s.longitudine);
             
             if (s.genere && s.genere.toLowerCase() === 'f') attivi.push({html: '♀', classe: 'badge-femminile', titolo: 'Femminile'});
+            const isRiserva = /\s(B|2|II|U23)$/i.test(s.nome);
             if (isRiserva) { attivi.push({html: 'B', classe: 'badge-riserva', titolo: 'Squadra Riserva'});
             if (isOldest) attivi.push({html: '💎', classe: 'badge-pioniere', titolo: 'Pioniere'});
             if (isSquadraNuova) attivi.push({html: '✨', classe: 'badge-newentry', titolo: 'New Entry'});
