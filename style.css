@@ -121,6 +121,7 @@ body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
 
 /* Tutti i Badge (Sullo stesso piano) */
 .badge-femminile { background: #ff69b4 !important; }
+.badge-riserva   { background: #6c757d !important; }
 .badge-pioniere  { background: #5bc0de !important; }
 .badge-newentry  { background: #f0ad4e !important; }
 .badge-memoria   { background: #333333 !important; }
