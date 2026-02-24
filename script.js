@@ -510,6 +510,13 @@ for (let i = 1; i <= 10; i++) {
         });
     }
 }
+            
+            // --- LOGICA BADGE RISERVA (Aggiungi qui) ---
+const isRiserva = /\s(B|2|II|U23|B\sTeam)$/i.test(s.nome);
+if (isRiserva) {
+    // Usiamo un angolo che non si sovrapponga ai badge esistenti (es. 135deg)
+    badgesHtml += `<div class="badge-icon badge-riserva" style="--angle: 135deg;" title="Squadra Riserve">B</div>`;
+}
 
             let flagHtml = s.codice_nazione ? `<img src="https://flagcdn.com/w40/${s.codice_nazione.toLowerCase()}.png" class="flag-icon">` : '';
             let emojiSport = sportIcons[s.sport] || "🏆"; 
@@ -775,6 +782,27 @@ function getLogoPerAnno(marker, annoSelezionato) {
 
     // Se lo trova restituisce quello, altrimenti il logo attuale
     return logoTrovato ? logoTrovato.url : marker.dati.logo_attuale;
+}
+
+function toggleRiserve(mostra) {
+    // Seleziona tutti i contenitori dei marker che hanno la classe 'marker-riserva'
+    const riserve = document.querySelectorAll('.marker-riserva');
+    
+    riserve.forEach(r => {
+        // Risaliamo al contenitore Leaflet (di solito 2 livelli sopra il wrapper)
+        const markerContainer = r.closest('.leaflet-marker-icon');
+        if (markerContainer) {
+            if (mostra) {
+                markerContainer.classList.remove('marker-hidden');
+            } else {
+                markerContainer.classList.add('marker-hidden');
+            }
+        }
+    });
+
+    if (typeof mostratosto === "function") {
+        mostratosto(mostra ? "Squadre riserva mostrate" : "Squadre riserva nascoste");
+    }
 }
 
 window.onload = () => { renderHistory(); };
