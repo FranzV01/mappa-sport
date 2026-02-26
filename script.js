@@ -560,6 +560,7 @@ Papa.parse(urlFoglio, {
             });
             marker.dati = s;
             marker.nomeNormalizzato = normalizeText(s.nome);
+            marker.listaBadgeNomi = [];
 
             // --- LOGICA STORICO LOGHI PER TIMELINE ---
 marker.storicoLoghi = [];
