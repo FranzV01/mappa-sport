@@ -5,25 +5,30 @@ const apiKeyWeather = '866509f6df466a06900222f7a9562854';
 
 const sportIcons = { "Calcio": "⚽", "Pallacanestro": "🏀", "Pallavolo": "🏐", "Rugby": "🏉", "Pallamano": "🤾", "Pallanuoto": "🤽", "Hockey su ghiaccio": "🏒", "Football americano": "🏈", "Baseball": "⚾" };
 const placeholderLogo = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjY2MiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgMmwtMTAgOWgxNHoiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjEzIiByPSI5Ij48L2NpcmNsZT48L3N2Zz4=";
+const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
 const dizionarioBadge = {
-    "Pioniere": { html: "💎", classe: "badge-pioniere", priorita: 1 },
-    "Elite": { html: "⭐", classe: "badge-elite", priorita: 2 },
-    "Gloria": { html: "🏆", classe: "badge-gloria", priorita: 3 },
+    // ECCELLENZE (Priorità 1-10)
+    "Elite": { html: "⭐", classe: "badge-elite", priorita: 1 },
+    "Gloria": { html: "🏆", classe: "badge-gloria", priorita: 2 },
+    "Pioniere": { html: "💎", classe: "badge-pioniere", priorita: 3 },
     "Secolare": { html: "📜", classe: "badge-secolare", priorita: 4 },
+    / STRUTTURE E AMBIENTE (Priorità 10-20)
     "Cattedrale": { html: "🏟️", classe: "badge-cattedrale", priorita: 10 },
     "Vetta": { html: "🏔️", classe: "badge-vetta", priorita: 11 },
-    "New Entry": { html: "✨", classe: "badge-newentry", priorita: 20 },
-    "Isolano": { html: "🏝️", classe: "badge-isola", titolo: "Club Insulare", priorita: 30 },
-    "Portuale": { html: "⚓", classe: "badge-porto", titolo: "Città di Mare", priorita: 31 },
-    "Enclave": { html: "📍", classe: "badge-enclave", titolo: "Territorio Enclave", priorita: 32 },
-    "Globetrotter": { html: "🌍", classe: "badge-globetrotter", titolo: "Campionato Estero", priorita: 33 },
-    "Femminile": { html: "♀", classe: "badge-femminile", titolo: "Club Femminile", priorita: 40 },
-    "Riserva": { html: "B", classe: "badge-riserva", titolo: "Squadra Riserva", priorita: 50 },
-    "Memoria": { html: "⚰️", classe: "badge-memoria", priorita: 60 },
-    "Nord": { html: "❄️", classe: "badge-nord", titolo: "Punto più a Nord", priorita: 70 },
-    "Sud": { html: "🐧", classe: "badge-sud", titolo: "Punto più a Sud", priorita: 71 },
-    "Est": { html: "🌅", classe: "badge-est", titolo: "Orizzonte Est", priorita: 72 },
-    "Ovest": { html: "🌇", classe: "badge-ovest", titolo: "Orizzonte Ovest", priorita: 73 }
+    "Nord": { html: "❄️", classe: "badge-nord", priorita: 12 },
+    "Sud": { html: "🐧", classe: "badge-sud", priorita 13 },
+    "Est": { html: "🌅", classe: "badge-est", priorita 14 },
+    "Ovest": { html: "🌇", classe: "badge-ovest", priorita 15 },
+    // CARATTERISTICHE (Priorità 20-40)
+    "Isolano": { html: "🏝️", classe: "badge-isola", priorita: 20 },
+    "Globetrotter": { html: "🌍", classe: "badge-globetrotter", priorita: 21 },
+    "Portuale": { html: "⚓", classe: "badge-porto", priorita: 22 },
+    "Enclave": { html: "📍", classe: "badge-enclave", priorita: 23 },
+    // STATO E CATEGORIE (Priorità 40+)
+    "Femminile": { html: "♀", classe: "badge-femminile", priorita: 40 },
+    "New Entry": { html: "✨", classe: "badge-newentry", priorita: 41 },
+    "Riserva": { html: "B", classe: "badge-riserva", priorita: 50 },
+    "Memoria": { html: "⚰️", classe: "badge-memoria", priorita: 60 }
 };
 
 function getLogoPerAnno(marker, annoSelezionato) {
@@ -451,61 +456,12 @@ Papa.parse(urlFoglio, {
         
         const oldestByNation = {};
         data.forEach(s => {
-            // --- PASSAGGIO 1: IDENTIFICAZIONE PIONIERI ---
-let oldestByNation = {};
-data.forEach(s => {
-    if(!s.nazione || !s.fondazione) return;
-    const year = parseInt(String(s.fondazione).replace(/\D/g, '')) || 9999;
-    if (!oldestByNation[s.nazione] || year < oldestByNation[s.nazione].year) {
-        oldestByNation[s.nazione] = { year: year, nome: s.nome };
-    }
-});
-
-// --- PASSAGGIO 2: CREAZIONE MARKER E BADGE ---
-data.forEach(s => {
-    if(!s.lat || !s.lng) return; // Salta se mancano le coordinate
-
-    let badgeDaMostrare = [];
-    const annoFondazione = parseInt(String(s.fondazione).replace(/\D/g, '')) || 0;
-    const isOldest = oldestByNation[s.nazione] && s.nome === oldestByNation[s.nazione].nome;
-
-    // 1. Badge da Excel (es: isolano, portuale)
-    if (s.badge && s.badge.trim() !== "") {
-        const daExcel = s.badge.split(',').map(b => b.trim().toLowerCase());
-        daExcel.forEach(nomeMin => {
-            const chiave = Object.keys(dizionarioBadge).find(k => k.toLowerCase() === nomeMin);
-            if (chiave) badgeDaMostrare.push({ ...dizionarioBadge[chiave], nome: chiave });
+            if(!s.nazione || !s.fondazione) return;
+            const year = parseInt(String(s.fondazione).replace(/\D/g, '')) || 9999;
+            if (!oldestByNation[s.nazione] || year < oldestByNation[s.nazione].year) {
+                oldestByNation[s.nazione] = { year: year, nome: s.nome };
+            }
         });
-    }
-
-    // 2. Badge Automatici (Usa i nomi esatti del dizionarioBadge)
-    if (isOldest) {
-        if (!badgeDaMostrare.find(b => b.nome === "Pioniere"))
-            badgeDaMostrare.push({ ...dizionarioBadge["Pioniere"], nome: "Pioniere" });
-    }
-
-    if (new Date().getFullYear() - annoFondazione >= 100) {
-        if (!badgeDaMostrare.find(b => b.nome === "Secolare"))
-            badgeDaMostrare.push({ ...dizionarioBadge["Secolare"], nome: "Secolare" });
-    }
-
-    // Aggiungi qui gli altri IF (Femminile, Elite, Gloria, ecc.) usando la stessa logica...
-
-    // 3. ORDINAMENTO PER PRIORITÀ
-    badgeDaMostrare.sort((a, b) => (a.priorita || 99) - (b.priorita || 99));
-
-    // 4. GENERAZIONE HTML
-    let badgesHTML = '';
-    const totaleB = badgeDaMostrare.length;
-    badgeDaMostrare.forEach((badge, i) => {
-        const angolo = (i * (360 / totaleB)) - 90;
-        badgesHTML += `<div class="badge-icon ${badge.classe}" style="--angle: ${angolo}deg;" title="${badge.nome}">${badge.html}</div>`;
-    });
-
-    // 5. ORA CREA IL MARKER (come nel codice precedente)
-    // let highlightClass = ...
-    // var marker = L.marker(...
-});
 
         const nazioni = [...new Set(data.map(s => s.nazione))].filter(n => n).sort();
         nazioni.forEach(n => {
@@ -533,68 +489,98 @@ data.forEach(s => {
         renderHistory();
 
         data.forEach((s, index) => {
-            if(!s.lat || !s.lng) return;
-            
-            // --- OTTIMIZZAZIONE CARICAMENTO ---
-            if (index % 50 === 0) document.getElementById('loader-progress').style.width = (index / data.length * 100) + '%';
+    if(!s.lat || !s.lng) return;
+    
+    // --- OTTIMIZZAZIONE CARICAMENTO ---
+    if (index % 50 === 0) document.getElementById('loader-progress').style.width = (index / data.length * 100) + '%';
 
-            let coloriArray = s.colori ? s.colori.split(',') : ['#333'];
-            let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
+    let coloriArray = s.colori ? s.colori.split(',') : ['#333'];
+    let borderStyle = coloriArray.length > 1 ? `linear-gradient(45deg, ${coloriArray.join(',')})` : coloriArray[0];
 
-            let isOldest = oldestByNation[s.nazione] && oldestByNation[s.nazione].nome === s.nome;
-            let annoFondazione = parseInt(String(s.fondazione).replace(/\D/g, '')) || 9999;
-            let isSquadraNuova = (annoFondazione === annoCorrente);
-            let isScomparso = s.stato === "scomparso";
-            let capStadio = parseInt(s.capacita_stadio) || 0;
-            let altitudine = parseInt(s.altitudine) || 0;
-            let livLega = parseInt(s.livello_lega) || 0;
-            let trofeiInt = parseInt(s.trofei_internazionali) || 0;
+    const isOldest = oldestByNation[s.nazione] && oldestByNation[s.nazione].nome === s.nome;
+    const annoFondazione = parseInt(String(s.fondazione).replace(/\D/g, '')) || 9999;
+    const isSquadraNuova = (annoFondazione === annoCorrente);
+    const isScomparso = s.stato === "scomparso";
+    const capStadio = parseInt(s.capacita_stadio) || 0;
+    const altitudine = parseInt(s.altitudine) || 0;
+    const livLega = parseInt(s.livello_lega) || 0;
+    const trofeiInt = parseInt(s.trofei_internazionali) || 0;
 
-            let attivi = [];
-            let latS = parseFloat(s.latitudine);
-            let lonS = parseFloat(s.longitudine);
-            if (s.badge && s.badge.trim() !== "") {
-    const daExcel = s.badge.split(',').map(b => b.trim().toLowerCase());
-    daExcel.forEach(nomeMin => {
-        const chiave = Object.keys(dizionarioBadge).find(k => k.toLowerCase() === nomeMin);
-        if (chiave) badgeDaMostrare.push({ ...dizionarioBadge[chiave], titolo: chiave });
+    let badgeDaMostrare = [];
+
+    // --- 1. BADGE DA EXCEL ---
+    if (s.badge && s.badge.trim() !== "") {
+        const daExcel = s.badge.split(',').map(b => b.trim().toLowerCase());
+        daExcel.forEach(nomeMin => {
+            const chiave = Object.keys(dizionarioBadge).find(k => k.toLowerCase() === nomeMin);
+            if (chiave) badgeDaMostrare.push({ ...dizionarioBadge[chiave], titolo: chiave });
+        });
+    }
+                     
+    // --- 2. BADGE AUTOMATICI ---
+    if (s.genere && s.genere.toLowerCase() === 'f') 
+        badgeDaMostrare.push({ ...dizionarioBadge["Femminile"], titolo: "Femminile" });
+
+    const isRiserva = /\s(B|2|II|U23)$/i.test(s.nome);
+    if (isRiserva) 
+        badgeDaMostrare.push({ ...dizionarioBadge["Riserva"], titolo: "Squadra Riserva" });
+
+    if (isOldest) 
+        badgeDaMostrare.push({ ...dizionarioBadge["Pioniere"], titolo: "Pioniere" });
+
+    if (isSquadraNuova) 
+        badgeDaMostrare.push({ ...dizionarioBadge["New Entry"], titolo: "New Entry" });
+
+    if (isScomparso) 
+        badgeDaMostrare.push({ ...dizionarioBadge["Memoria"], titolo: "Memoria" });
+
+    if (trofeiInt > 0) 
+        badgeDaMostrare.push({ ...dizionarioBadge["Gloria"], titolo: "Gloria" });
+
+    if (annoFondazione <= (new Date().getFullYear() - 100)) {
+        if (!badgeDaMostrare.find(b => b.titolo === "Secolare")) {
+            badgeDaMostrare.push({ ...dizionarioBadge["Secolare"], titolo: "Secolare" });
+        }
+    }
+
+    if (capStadio >= 50000) 
+        badgeDaMostrare.push({ ...dizionarioBadge["Cattedrale"], titolo: "Cattedrale" });
+
+    if (livLega === 1) 
+        badgeDaMostrare.push({ ...dizionarioBadge["Elite"], titolo: "Elite" });
+
+    if (altitudine > 2000) 
+        badgeDaMostrare.push({ ...dizionarioBadge["Vetta"], titolo: "Vetta" });
+
+    // --- 3. ORDINAMENTO E GENERAZIONE HTML ---
+    badgeDaMostrare.sort((a, b) => (a.priorita || 99) - (b.priorita || 99));
+    
+    let badgesHTML = '';
+    const totaleB = badgeDaMostrare.length;
+    badgeDaMostrare.forEach((badge, i) => {
+        const angolo = (i * (360 / totaleB)) - 90;
+        badgesHTML += `<div class="badge-icon ${badge.classe}" style="--angle: ${angolo}deg;" title="${badge.titolo}">${badge.html}</div>`;
     });
-}
-            
-            if (s.genere && s.genere.toLowerCase() === 'f') badgeDaMostrare.push({ ...dizionarioBadge["Femminile"], titolo: "Femminile" });
-            const isRiserva = /\s(B|2|II|U23)$/i.test(s.nome);
-            if (isRiserva) badgeDaMostrare.push({ ...dizionarioBadge["Riserva"], titolo: "Riserva" });
-            if (isOldest) badgeDaMostrare.push({ ...dizionarioBadge["Pioniere"], titolo: "Pioniere" });
-            if (isSquadraNuova) badgeDaMostrare.push({ ...dizionarioBadge["New Entry"], titolo: "New Entry" });
-            if (isScomparso) badgeDaMostrare.push({ ...dizionarioBadge["Memoria"], titolo: "Memoria" });
-            if (trofeiInt > 0) badgeDaMostrare.push({ ...dizionarioBadge["Gloria"], titolo: "Gloria" });
-            const annoAttuale = new Date().getFullYear();
-            if (annoFondazione <= (annoAttuale - 100)) badgeDaMostrare.push({ ...dizionarioBadge["Secolare"], titolo: "Secolare" });
-            if (capStadio >= 50000) badgeDaMostrare.push({ ...dizionarioBadge["Cattedrale"], titolo: "Cattedrale" });
-            if (livLega === 1) badgeDaMostrare.push({ ...dizionarioBadge["Elite"], titolo: "Elite" });
-            if (altitudine > 2000) badgeDaMostrare.push({ ...dizionarioBadge["Vetta"], titolo: "Vetta" });
-            
-            let badgesHTML = '';
-badgeDaMostrare.forEach((badge, i) => {
-    const angolo = (i * (360 / badgeDaMostrare.length)) - 90;
-    badgesHTML += `<div class="badge-icon ${badge.classe}" style="--angle: ${angolo}deg;" title="${badge.titolo}">${badge.html}</div>`;
-});
 
-            let highlightClass = (s.highlight && s.highlight.toUpperCase() === 'SI') ? 'highlight-active' : '';
+    // --- 4. CREAZIONE MARKER ---
+    let highlightClass = (s.highlight && s.highlight.toUpperCase() === 'SI') ? 'highlight-active' : '';
 
-            var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
-                icon: L.divIcon({
-                    className: 'custom-div-icon',
-                    html: `<div class="logo-container ${highlightClass}" style="background: ${borderStyle};">
-                             ${badgesHTML}
-                             <img src="${s.logo_attuale}" class="logo-img-inner" loading="lazy" onerror="this.src='${placeholderLogo}';">
-                           </div>`,
-                    iconSize: [44, 44], iconAnchor: [22, 22]
-                })
-            });
-            marker.dati = s;
-            marker.nomeNormalizzato = normalizeText(s.nome);
-            marker.listaBadgeNomi = badgeDaMostrare.map(b => b.nome);
+    var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
+        icon: L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div class="logo-container ${highlightClass}" style="background: ${borderStyle};">
+                     ${badgesHTML}
+                     <img src="${s.logo_attuale}" class="logo-img-inner" loading="lazy" onerror="this.src='${placeholderLogo}';">
+                   </div>`,
+            iconSize: [44, 44], iconAnchor: [22, 22]
+        })
+    });
+
+    marker.dati = s;
+    marker.nomeNormalizzato = normalizeText(s.nome);
+    marker.listaBadgeNomi = badgeDaMostrare.map(b => b.titolo);
+    
+    // Prosegui qui con marker.storicoLoghi e il resto del tuo codice...
 
             // --- LOGICA STORICO LOGHI PER TIMELINE ---
 marker.storicoLoghi = [];
