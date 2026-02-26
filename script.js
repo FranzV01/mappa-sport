@@ -16,6 +16,87 @@ const dizionarioBadge = {
     "Ovest": { html: "🌇", classe: "badge-ovest", titolo: "Orizzonte Ovest" }
 };
 
+function getLogoPerAnno(marker, annoSelezionato) {
+    // Se la timeline è su "Tutti i tempi" o l'anno è il futuro
+    if (annoSelezionato >= annoCorrente) return marker.dati.logo_attuale;
+
+    // Cerca se esiste un logo storico per quell'anno specifico
+    const logoTrovato = marker.storicoLoghi.find(l => 
+        annoSelezionato >= l.inizio && annoSelezionato <= l.fine
+    );
+
+    // Se lo trova restituisce quello, altrimenti il logo attuale
+    return logoTrovato ? logoTrovato.url : marker.dati.logo_attuale;
+}
+
+function checkColorMatch(cellaColoriNomi, targetColor) {
+    if (targetColor === "Tutti") return true;
+    
+    if (!cellaColoriNomi || cellaColoriNomi === 'N.D.' || cellaColoriNomi === '') return false;
+
+    const listaColoriPuri = cellaColoriNomi.toLowerCase().split(',').map(c => c.trim());
+    const coloreCercato = targetColor.toLowerCase();
+
+   const mapping = {
+    'red': 'rosso',
+    'amaranto': 'amaranto',
+    'maroon': 'granata',
+    'bordeaux': 'bordeaux',
+    'orange': 'arancione',
+    'gold': 'oro',
+    'amber': 'ambra',
+    'yellow': 'giallo',
+    'lime': 'verde chiaro',
+    'green': 'verde',
+    'darkgreen': 'verde scuro',
+    'skyblue': 'celeste',
+    'lightblue': 'azzurro',
+    'blue': 'blu',
+    'navy': 'blu navy',
+    'purple': 'viola',
+    'fuchsia': 'fucsia',
+    'pink': 'rosa',
+    'lilac': 'lilla',
+    'brown': 'marrone',
+    'white': 'bianco',
+    'grey': 'grigio',
+    'black': 'nero'
+};
+
+    const nomeTradotto = mapping[coloreCercato] || coloreCercato;
+
+    // Verifica se il colore cercato (o la sua traduzione) è nella lista
+    return listaColoriPuri.includes(nomeTradotto) || listaColoriPuri.includes(coloreCercato);
+
+    const matchColore = checkColorMatch(m.dati.colori_nomi, filtroColoreAttivo);
+}
+
+function generaLegendaBadge() {
+    // Cerchiamo il pezzetto di HTML che abbiamo appena creato
+    const container = document.getElementById('legenda-badge-dinamici'); 
+    
+    // Se non lo trova, usciamo per non mandare in crash il sito
+    if (!container) {
+        console.log("Errore: Non trovo il contenitore della legenda!");
+        return;
+    }
+
+    let htmlLegenda = ''; 
+
+    // Usiamo il dizionario che hai creato prima
+    Object.keys(dizionarioBadge).forEach(key => {
+        const b = dizionarioBadge[key];
+        htmlLegenda += `
+            <div class="legend-item">
+                <div class="legend-icon ${b.classe}">${b.html}</div>
+                <span><b>${key}</b></span>
+            </div>`;
+    });
+
+    // Scriviamo i badge dentro il contenitore
+    container.innerHTML = htmlLegenda;
+}
+
 var osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
 var dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' });
 var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' });
@@ -174,48 +255,6 @@ window.setFiltroColore = function(colore, el) {
     
     applicaFiltri();
 };
-
-function checkColorMatch(cellaColoriNomi, targetColor) {
-    if (targetColor === "Tutti") return true;
-    
-    if (!cellaColoriNomi || cellaColoriNomi === 'N.D.' || cellaColoriNomi === '') return false;
-
-    const listaColoriPuri = cellaColoriNomi.toLowerCase().split(',').map(c => c.trim());
-    const coloreCercato = targetColor.toLowerCase();
-
-   const mapping = {
-    'red': 'rosso',
-    'amaranto': 'amaranto',
-    'maroon': 'granata',
-    'bordeaux': 'bordeaux',
-    'orange': 'arancione',
-    'gold': 'oro',
-    'amber': 'ambra',
-    'yellow': 'giallo',
-    'lime': 'verde chiaro',
-    'green': 'verde',
-    'darkgreen': 'verde scuro',
-    'skyblue': 'celeste',
-    'lightblue': 'azzurro',
-    'blue': 'blu',
-    'navy': 'blu navy',
-    'purple': 'viola',
-    'fuchsia': 'fucsia',
-    'pink': 'rosa',
-    'lilac': 'lilla',
-    'brown': 'marrone',
-    'white': 'bianco',
-    'grey': 'grigio',
-    'black': 'nero'
-};
-
-    const nomeTradotto = mapping[coloreCercato] || coloreCercato;
-
-    // Verifica se il colore cercato (o la sua traduzione) è nella lista
-    return listaColoriPuri.includes(nomeTradotto) || listaColoriPuri.includes(coloreCercato);
-
-    const matchColore = checkColorMatch(m.dati.colori_nomi, filtroColoreAttivo);
-}
 
 window.toggleRanking = function(tipo) {
     const sidebar = document.getElementById('ranking-sidebar');
@@ -690,14 +729,6 @@ visibiliAttualmente.forEach(m => {
     }
 });
 
-document.addEventListener("DOMContentLoaded", function() {
-    const anno = new Date().getFullYear();
-    const yearElements = document.querySelectorAll('.current-year-display');
-    yearElements.forEach(el => {
-        el.innerText = anno;
-    });
-});
-
             heatLayer.setLatLngs(heatPoints);
             document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibiliAttualmente.length}</b>`;
             document.getElementById('stats-breakdown').innerHTML = Object.entries(sportCounts).sort((a,b) => b[1] - a[1]).map(([n, c]) => `${sportIcons[n] || ''} ${c}`).join(' • ');
@@ -788,46 +819,15 @@ if (savedReservesStatus !== null && reservesToggle) {
     reservesToggle.checked = (savedReservesStatus === 'true');
 }
 
-function getLogoPerAnno(marker, annoSelezionato) {
-    // Se la timeline è su "Tutti i tempi" o l'anno è il futuro
-    if (annoSelezionato >= annoCorrente) return marker.dati.logo_attuale;
-
-    // Cerca se esiste un logo storico per quell'anno specifico
-    const logoTrovato = marker.storicoLoghi.find(l => 
-        annoSelezionato >= l.inizio && annoSelezionato <= l.fine
-    );
-
-    // Se lo trova restituisce quello, altrimenti il logo attuale
-    return logoTrovato ? logoTrovato.url : marker.dati.logo_attuale;
-}
-
 window.onload = () => { renderHistory(); };
-
-function generaLegendaBadge() {
-    // Cerchiamo il pezzetto di HTML che abbiamo appena creato
-    const container = document.getElementById('legenda-badge-dinamici'); 
-    
-    // Se non lo trova, usciamo per non mandare in crash il sito
-    if (!container) {
-        console.log("Errore: Non trovo il contenitore della legenda!");
-        return;
-    }
-
-    let htmlLegenda = ''; 
-
-    // Usiamo il dizionario che hai creato prima
-    Object.keys(dizionarioBadge).forEach(key => {
-        const b = dizionarioBadge[key];
-        htmlLegenda += `
-            <div class="legend-item">
-                <div class="legend-icon ${b.classe}">${b.html}</div>
-                <span><b>${key}</b></span>
-            </div>`;
-    });
-
-    // Scriviamo i badge dentro il contenitore
-    container.innerHTML = htmlLegenda;
-}
 
 // IMPORTANTE: Chiama la funzione alla fine del file script.js
 generaLegendaBadge();
+
+document.addEventListener("DOMContentLoaded", function() {
+    const anno = new Date().getFullYear();
+    const yearElements = document.querySelectorAll('.current-year-display');
+    yearElements.forEach(el => {
+        el.innerText = anno;
+    });
+});
