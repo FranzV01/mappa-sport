@@ -329,3 +329,34 @@ input:checked + .slider:before { transform: translateX(20px); }
 .marker-hidden {
     display: none !important;
 }
+
+/* Colori Badge Speciali */
+.badge-isola { background: #00bcd4 !important; }
+.badge-globetrotter { background: #4caf50 !important; }
+.badge-enclave { background: #e91e63 !important; }
+.badge-porto { background: #0277bd !important; }
+
+/* Uniformità Totale: Tutti i badge con lo stesso bordo e ombra */
+.badge-icon, .legend-icon {
+    width: 18px !important;
+    height: 18px !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px !important;
+    border-radius: 50%;
+    box-sizing: border-box !important;
+    color: white !important;
+}
+
+/* Stile per la lista nel pannello laterale */
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: #333;
+}
