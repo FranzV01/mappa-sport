@@ -494,27 +494,15 @@ Papa.parse(urlFoglio, {
             let attivi = [];
             let latS = parseFloat(s.latitudine);
             let lonS = parseFloat(s.longitudine);
-    // --- LOGICA BADGE EXTRA (INSENSIBILE A MAIUSCOLE/MINUSCOLE) ---
-    if (s.badge && s.badge.trim() !== "") {
-    // Dividiamo i badge scritti su Excel (es: "isolano, portuale")
-    const listaBadgeExcel = s.badge.split(',').map(b => b.trim().toLowerCase());
-
-    listaBadgeExcel.forEach(nomeBadgeExcel => {
-        // Cerchiamo nel dizionario ignorando le maiuscole
-        const chiaveTrovata = Object.keys(dizionarioBadge).find(
-            key => key.toLowerCase() === nomeBadgeExcel
-        );
-
-        if (chiaveTrovata) {
-            const configurazione = dizionarioBadge[chiaveTrovata];
-            attivi.push(configurazione);
-            
-            // Salviamo il nome "Bello" (con la maiuscola) per il filtro
-            if (!marker.listaBadgeNomi) marker.listaBadgeNomi = [];
-            marker.listaBadgeNomi.push(chiaveTrovata); 
-        }
-    });
-}
+            if (s.badge && s.badge.trim() !== "") {
+                const listaBadgeExtra = s.badge.split(',').map(b => b.trim());
+                listaBadgeExtra.forEach(nomeBadge => {
+                    const configurazione = dizionarioBadge[nomeBadge];
+                    if (configurazione) {
+                        attivi.push(configurazione);
+                    }
+                });
+            }
             
             if (s.genere && s.genere.toLowerCase() === 'f') attivi.push({html: '♀', classe: 'badge-femminile', titolo: 'Femminile'});
             const isRiserva = /\s(B|2|II|U23)$/i.test(s.nome);
@@ -560,7 +548,6 @@ Papa.parse(urlFoglio, {
             });
             marker.dati = s;
             marker.nomeNormalizzato = normalizeText(s.nome);
-            marker.listaBadgeNomi = [];
 
             // --- LOGICA STORICO LOGHI PER TIMELINE ---
 marker.storicoLoghi = [];
