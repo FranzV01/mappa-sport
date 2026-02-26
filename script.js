@@ -12,13 +12,13 @@ const dizionarioBadge = {
     "Gloria": { html: "🏆", classe: "badge-gloria", priorita: 2 },
     "Pioniere": { html: "💎", classe: "badge-pioniere", priorita: 3 },
     "Secolare": { html: "📜", classe: "badge-secolare", priorita: 4 },
-    / STRUTTURE E AMBIENTE (Priorità 10-20)
+    // STRUTTURE E AMBIENTE (Priorità 10-20)
     "Cattedrale": { html: "🏟️", classe: "badge-cattedrale", priorita: 10 },
     "Vetta": { html: "🏔️", classe: "badge-vetta", priorita: 11 },
     "Nord": { html: "❄️", classe: "badge-nord", priorita: 12 },
-    "Sud": { html: "🐧", classe: "badge-sud", priorita 13 },
-    "Est": { html: "🌅", classe: "badge-est", priorita 14 },
-    "Ovest": { html: "🌇", classe: "badge-ovest", priorita 15 },
+    "Sud": { html: "🐧", classe: "badge-sud", priorita: 13 },
+    "Est": { html: "🌅", classe: "badge-est", priorita: 14 },
+    "Ovest": { html: "🌇", classe: "badge-ovest", priorita: 15 },
     // CARATTERISTICHE (Priorità 20-40)
     "Isolano": { html: "🏝️", classe: "badge-isola", priorita: 20 },
     "Globetrotter": { html: "🌍", classe: "badge-globetrotter", priorita: 21 },
@@ -176,9 +176,7 @@ var visibiliAttualmente = [];
 var popup = L.popup({ className: 'custom-popup' });
 var precisionCircle = null;
 var tourInterval = null;
-var filtroColoreSociale = "Tutti";
-
-const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
+let filtroColoreSociale = "Tutti";
 
 function togglePanel() {
     const panel = document.getElementById('ui-panel');
