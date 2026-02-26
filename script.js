@@ -16,16 +16,16 @@ const dizionarioBadge = {
     // STRUTTURE
     "Cattedrale": { html: "🏟️", classe: "badge-cattedrale", priorita: 10, desc: "Stadio con capienza oltre 50.000 posti" },
     "Vetta": { html: "🏔️", classe: "badge-vetta", priorita: 11, desc: "Sede situata oltre i 2.000 metri d'altitudine" },
-    "Nord": { html: "❄️", classe: "badge-nord", priorita: 12, desc: "Club più a nord del mondo" },
-    "Sud": { html: "🐧", classe: "badge-sud", priorita: 13, desc: "Club più a sud del mondo" },
-    "Est": { html: "🌅", classe: "badge-est", priorita: 14, desc: "Club più a est del mondo" },
-    "Ovest": { html: "🌇", classe: "badge-ovest", priorita: 15, desc: "Club più a ovest del mondo" },
+    "Nord": { html: "❄️", classe: "badge-nord", priorita: 12, desc: "Confine Artico: Club situato a latitudini estreme settentrionali" },
+    "Sud": { html: "🐧", classe: "badge-sud", priorita: 13, desc: "Terre Australi: Club situato a latitudini estreme meridionali" },
+    "Est": { html: "🌅", classe: "badge-est", priorita: 14, desc: "Oriente: Club situato all'estremo levante geografico" },
+    "Ovest": { html: "🌇", classe: "badge-ovest", priorita: 15, desc: "Occidente: Club situato all'estremo ponente geografico" },
     
     // CARATTERISTICHE
-    "Isolano": { html: "🏝️", classe: "badge-isola", priorita: 20, desc: "Club con sede su un'isola" },
+    "Oltremare": { html: "🏝️", classe: "badge-isola", priorita: 20, desc: "Club con sede in territori distaccati o isole minori" },
     "Portuale": { html: "⚓", classe: "badge-porto", priorita: 22, desc: "Club situato in una città di mare/porto" },
     "Enclave": { html: "📍", classe: "badge-enclave", priorita: 23, desc: "Club situato in un'enclave o territorio speciale" },
-    "Globetrotter": { html: "🌍", classe: "badge-globetrotter", priorita: 21, desc: "Club partecipante ad un campionato estero" },
+    "Sconfinato": { html: "🌍", classe: "badge-globetrotter", priorita: 21, desc: "Club che gioca in un campionato estero rispetto alla propria nazione" },
 
     // STATO
     "Femminile": { html: "♀", classe: "badge-femminile", priorita: 40, desc: "Sezione di calcio femminile" },
