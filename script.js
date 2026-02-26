@@ -87,34 +87,25 @@ function checkColorMatch(cellaColoriNomi, targetColor) {
 }
 
 function generaLegendaBadge() {
-    // Cerchiamo il contenitore
-    const container = document.getElementById('legenda-badge-dinamici'); 
-    
-    // Se non lo trova, usciamo per non mandare in crash il sito
-    if (!container) {
-        console.log("Errore: Non trovo il contenitore della legenda!");
-        return;
-    }
+    const container = document.getElementById('legenda-badge-dinamici');
+    if (!container) return;
 
-    // --- AGGIUNTA FONDAMENTALE: Svuota il contenitore prima di iniziare ---
-    container.innerHTML = ''; 
+    container.innerHTML = ''; // Pulizia
 
-    let htmlLegenda = ''; 
+    // Trasformiamo il dizionario in un array e lo ordiniamo per priorità
+    const badges = Object.entries(dizionarioBadge).sort((a, b) => a[1].priorita - b[1].priorita);
 
-    // Usiamo il dizionario che hai creato prima
-    Object.keys(dizionarioBadge).forEach(key => {
-        const b = dizionarioBadge[key];
-        
-        // Costruiamo la stringa aggiungendo ogni singolo badge
-        htmlLegenda += `
-            <div class="legend-item" style="display: flex; align-items: center; margin-bottom: 5px; gap: 8px;">
-                <div class="legend-icon ${b.classe}" style="width: 24px; text-align: center;">${b.html}</div>
-                <span><b>${key}</b></span>
-            </div>`;
+    badges.forEach(([nome, info]) => {
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.title = nome; // Appare al passaggio del mouse
+
+        item.innerHTML = `
+            <div class="legend-icon ${info.classe}">${info.html}</div>
+            <span><b>${nome}</b></span>
+        `;
+        container.appendChild(item);
     });
-
-    // Scriviamo i badge finali dentro il contenitore (sovrascrivendo tutto il contenuto precedente)
-    container.innerHTML = htmlLegenda;
 }
 
 var osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
