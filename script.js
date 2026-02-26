@@ -92,20 +92,21 @@ function checkColorMatch(cellaColoriNomi, targetColor) {
 function generaLegendaBadge() {
     const container = document.getElementById('legenda-badge-dinamici');
     if (!container) return;
+    container.innerHTML = ''; 
 
-    container.innerHTML = ''; // Pulizia
+    // Ordina i badge per priorità
+    const badgeOrdinati = Object.entries(dizionarioBadge).sort((a, b) => a[1].priorita - b[1].priorita);
 
-    // Trasformiamo il dizionario in un array e lo ordiniamo per priorità
-    const badges = Object.entries(dizionarioBadge).sort((a, b) => a[1].priorita - b[1].priorita);
-
-    badges.forEach(([nome, info]) => {
+    badgeOrdinati.forEach(([nome, info]) => {
         const item = document.createElement('div');
-        item.className = 'legend-item';
-        item.title = nome; // Appare al passaggio del mouse
-
+        item.className = 'legend-item-modern';
+        
         item.innerHTML = `
-            <div class="legend-icon ${info.classe}">${info.html}</div>
-            <span><b>${nome}</b></span>
+            <div class="legend-badge-large ${info.classe}">${info.html}</div>
+            <div class="legend-info">
+                <span class="legend-label">${nome}</span>
+                <span class="legend-desc">${info.desc || ''}</span>
+            </div>
         `;
         container.appendChild(item);
     });
@@ -113,10 +114,13 @@ function generaLegendaBadge() {
 
 function toggleLegenda() {
     const content = document.getElementById('legenda-box-content');
+    const wrapper = document.querySelector('.legend-container-wrapper');
     const chevron = document.getElementById('legend-chevron');
     
     content.classList.toggle('open');
+    wrapper.classList.toggle('open'); // Questo serve per far ruotare la freccia nel CSS
     
+    // Cambiamo il carattere per i browser che non supportano bene le rotazioni
     if (content.classList.contains('open')) {
         chevron.innerText = '▲';
     } else {
