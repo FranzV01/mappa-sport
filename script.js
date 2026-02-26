@@ -495,212 +495,245 @@ Papa.parse(urlFoglio, {
           });
        }
 
-            let highlightClass = (s.highlight && s.highlight.toUpperCase() === 'SI') ? 'highlight-active' : '';
+            /* --- INIZIO PARTE CORRETTA --- */
 
-            var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
-                icon: L.divIcon({
-                    className: 'custom-div-icon',
-                    html: `<div class="logo-container ${highlightClass}" style="background: ${borderStyle};">
-                               ${badgesHTML}
-                               <img src="${s.logo_attuale}" class="logo-img-inner" loading="lazy" onerror="this.src='${placeholderLogo}';">
-                             </div>`,
-                    iconSize: [44, 44], iconAnchor: [22, 22]
-                })
-            });
-            marker.dati = s;
-            marker.nomeNormalizzato = normalizeText(s.nome);
-
-            // --- LOGICA STORICO LOGHI ---
-            marker.storicoLoghi = [];
-            for (let i = 1; i <= 10; i++) {
-                let url = s[`logo_storia_${i}_url`];
-                let dateRange = s[`logo_storia_${i}_date`]; 
-                if (url && dateRange && dateRange.includes('-')) {
-                    let parti = dateRange.split('-');
-                    marker.storicoLoghi.push({
-                        url: url,
-                        inizio: parseInt(parti[0].trim()) || 0,
-                        fine: parseInt(parti[1].trim()) || annoCorrente
-                    });
-                }
-            }
-
-            let flagHtml = s.codice_nazione ? `<img src="https://flagcdn.com/w40/${s.codice_nazione.toLowerCase()}.png" class="flag-icon">` : '';
-            let emojiSport = sportIcons[s.sport] || "🏆"; 
-
-            let precedentiHTML = '';
-            if (s.club_precedente && s.club_precedente.trim() !== "") {
-                const listaPrecedenti = s.club_precedente.split(',').map(item => item.trim());
-                listaPrecedenti.forEach(cp => {
-                    if (cp !== "") {
-                        let clubTrovato = data.find(item => item.nome && item.nome.trim() === cp);
-                        let nomeEscaped = cp.replace(/'/g, "\\'");
-                        if (clubTrovato && clubTrovato.logo_attuale) {
-                            precedentiHTML += `
-                                <div class="origin-wrapper" onclick="vaiAClub('${nomeEscaped}')" title="Vai a ${cp}">
-                                    <img src="${clubTrovato.logo_attuale}" class="origin-logo" loading="lazy" onerror="this.src='${placeholderLogo}';">
-                                    <span class="origin-name">${cp}</span>
-                                </div>`;
-                        } else {
-                            precedentiHTML += `<button class="btn-link-club" onclick="vaiAClub('${nomeEscaped}')">${cp}</button>`;
-                        }
-                    }
-                });
-            }
-
-            let loghiItems = [];
-            for(let i=1; i<=10; i++) {
-                let url = s[`logo_storia_${i}_url`];
-                if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img" loading="lazy" onerror="this.src='${placeholderLogo}';"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
-            }
-
-            let annivItems = [];
-            for(let i=1; i<=5; i++) {
-                let url = s[`logo_anniversario_${i}_url`];
-                let dataA = s[`logo_anniversario_${i}_data`];
-                if(url) annivItems.push(`<div class="anniversario-item"><img src="${url}" class="anniversario-img" loading="lazy" onerror="this.src='${placeholderLogo}';"><b>${dataA || ''}</b></div>`);
-            }
-
-            let wikiBtn = (s.wiki && s.wiki.toLowerCase() === "si") ? 
-                `<a href="https://en.wikipedia.org/wiki/${s.nome.replace(/\s+/g, '_')}" target="_blank" class="btn-wiki">Wikipedia 📖</a>` : "";
-
-            let coloriHTML = '';
-            if (s.colori_nomi) {
-                const listaColori = s.colori_nomi.split(',').map(c => c.trim().toLowerCase());
-                coloriHTML = '<div class="popup-colors">' + 
-                    listaColori.map(c => `<span class="color-dot color-${c.replace(/\s+/g, '-')}" title="${c}"></span>`).join('') + 
-                    '</div>';
-            }
-            
-            const partiStadio = (s.stadio_nome || '').split(',');
-            const nomeOriginale = partiStadio[0].trim();
-            const nomeSponsor = partiStadio[1] ? partiStadio[1].trim() : null;
-            const stadioDisplay = nomeSponsor ? `<b>${nomeOriginale}</b><br>· <i>${nomeSponsor}</i>` : `<b>${nomeOriginale || 'N.D.'}</b>`;
-            
-            marker.descrizione = `
-                <div class="popup-card">
-                    <div class="popup-header">
-                        <h2 class="popup-title">${emojiSport} ${s.nome}</h2>
-                        ${s.soprannome ? `<span class="popup-nickname">"${s.soprannome}"</span>` : ''}
-                        ${coloriHTML}</div>
-                    <div class="popup-info">
-                        ${flagHtml} <b>${s.nazione}</b><br>
-                        Fondazione: <b>${s.fondazione}</b><br>
-                        Stadio: ${stadioDisplay}<br>
-                        ${s.capacita_stadio ? `Posti: <b>${new Intl.NumberFormat('it-IT').format(parseInt(s.capacita_stadio))}</b>` : ''}
-                    </div>
-                    ${wikiBtn} ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
-                    ${annivItems.length > 0 ? `<div class="anniversario-box"><span class="box-label">Loghi Anniversario</span><div class="anniversario-grid">${annivItems.slice(0,3).join('')}</div>${annivItems.length > 3 ? `<div class="anniversario-grid hidden-logos">${annivItems.slice(3).join('')}</div><button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
-                    ${loghiItems.length > 0 ? `<div class="storici-container"><span class="box-label">Loghi Storici</span><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>${loghiItems.length > 3 ? `<div class="storico-grid hidden-logos">${loghiItems.slice(3).join('')}</div><button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
-                    <a href="${linkCrowdsourcingBase}${encodeURIComponent(s.nome)}" target="_blank" class="btn-update">Segnala aggiornamento ✏️</a>
-                </div>`;
-
-            oms.addMarker(marker);
-            allMarkers.push(marker);
-        });
-
-        // --- FUNZIONE FILTRI (Spostata fuori dal loop) ---
-        window.applicaFiltri = function() {
-            const sVal = normalizeText(document.getElementById('search-input').value);
-            const nVal = document.getElementById('filter-nazione').value;
-            const stVal = document.getElementById('filter-stato').value;
-            const spVal = document.getElementById('filter-sport').value;
-            const eVal = document.getElementById('filter-epoca').value;
-            const gVal = document.getElementById('filter-genere').value;
-            const cVal = document.getElementById('filter-capacita').value;
-            const lVal = document.getElementById('filter-lega').value;
-            const tVal = parseInt(document.getElementById('timeline-slider').value);
-            const isClusterEnabled = document.getElementById('cluster-toggle').checked;
-            const showReserves = document.getElementById('toggle-reserves')?.checked ?? true;
-            
-            localStorage.setItem('mapFilters', JSON.stringify({
-                'filter-nazione': nVal, 'filter-stato': stVal, 'filter-sport': spVal,
-                'filter-epoca': eVal, 'filter-genere': gVal, 'timeline-slider': tVal,
-                'cluster-enabled': isClusterEnabled, 'filter-capacita': cVal, 'filter-lega': lVal
-            }));
-
-            document.getElementById('year-display').innerText = tVal >= annoCorrente ? "Tutti i tempi" : "Fino al " + tVal;
-
-            markers.clearLayers(); 
-            markersLayer.clearLayers();
-            let heatPoints = [];
-            let sportCounts = {};
-            
-            visibiliAttualmente = allMarkers.filter(m => {
-                let ok = true;
-                const anno = parseInt(String(m.dati.fondazione).replace(/\D/g, '')) || 0;
-                const cap = parseInt(m.dati.capacita_stadio) || 0;
-
-                if (sVal && !m.nomeNormalizzato.includes(sVal) && !normalizeText(m.dati.stadio_nome).includes(sVal)) ok = false;
-                if (nVal !== "Tutti" && m.dati.nazione !== nVal) ok = false;
-                if (stVal !== "Tutti" && m.dati.stato !== stVal) ok = false;
-                if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
-                if (gVal === "f" && (!m.dati.genere || m.dati.genere.toLowerCase() !== 'f')) ok = false;
-                if (gVal === "m" && m.dati.genere && m.dati.genere.toLowerCase() === 'f') ok = false;
-                if (tVal < annoCorrente && anno > tVal) ok = false;
-                if (cVal === "small" && cap >= 15000) ok = false;
-                if (cVal === "medium" && (cap < 15000 || cap >= 30000)) ok = false;
-                if (cVal === "large" && (cap < 30000 || cap >= 50000)) ok = false;
-                if (cVal === "giant" && cap < 50000) ok = false;
-                if (lVal !== "Tutti" && parseInt(m.dati.livello_lega) !== parseInt(lVal)) ok = false;
-                if (!checkColorMatch(m.dati.colori_nomi, filtroColoreSociale)) ok = false;
-                if (!showReserves && /\s(B|2|II|U23)$/i.test(m.dati.nome)) ok = false;
-
-                if(ok) {
-                    heatPoints.push([m.getLatLng().lat, m.getLatLng().lng, 0.5]);
-                    sportCounts[m.dati.sport] = (sportCounts[m.dati.sport] || 0) + 1;
-                }
-                return ok;
-            });
-
-            if (isClusterEnabled) {
-                map.removeLayer(markersLayer); visibiliAttualmente.forEach(m => markers.addLayer(m)); map.addLayer(markers);
-            } else {
-                map.removeLayer(markers); visibiliAttualmente.forEach(m => markersLayer.addLayer(m)); map.addLayer(markersLayer);
-            }
-
-            // --- AGGIORNAMENTO DINAMICO LOGHI ---
-            visibiliAttualmente.forEach(m => {
-                const iconEl = m.getElement();
-                if (iconEl) {
-                    const img = iconEl.querySelector('.logo-img-inner');
-                    if (img) {
-                        const newSrc = getLogoPerAnno(m, tVal);
-                        if (img.getAttribute('src') !== newSrc) img.src = newSrc;
-                    }
-                }
-            });
-
-            heatLayer.setLatLngs(heatPoints);
-            document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibiliAttualmente.length}</b>`;
-            document.getElementById('stats-breakdown').innerHTML = Object.entries(sportCounts).sort((a,b) => b[1] - a[1]).map(([n, c]) => `${sportIcons[n] || ''} ${c}`).join(' • ');
-        };
-
-        // Eventi UI
-        let searchTimeout;
-        document.getElementById('search-input').oninput = () => { clearTimeout(searchTimeout); searchTimeout = setTimeout(applicaFiltri, 300); };
-        document.getElementById('timeline-slider').oninput = () => { applicaFiltri(); };
-        document.querySelectorAll('select').forEach(sel => sel.onchange = applicaFiltri);
-        
-        generaLegendaBadge();
-        applicaFiltri();
-    }
-});
-
-// --- FUNZIONI DI SUPPORTO (A fondo file o in cima, ma fuori dal caricamento) ---
+// 1. UTILITY FUNCTIONS (Spostate qui per sicurezza di caricamento)
 function getLogoPerAnno(marker, annoSelezionato) {
     if (annoSelezionato >= annoCorrente) return marker.dati.logo_attuale;
-    const logoTrovato = marker.storicoLoghi.find(l => annoSelezionato >= l.inizio && annoSelezionato <= l.fine);
+    const logoTrovato = marker.storicoLoghi.find(l => 
+        annoSelezionato >= l.inizio && annoSelezionato <= l.fine
+    );
     return logoTrovato ? logoTrovato.url : marker.dati.logo_attuale;
 }
 
+function checkColorMatch(cellaColoriNomi, targetColor) {
+    if (targetColor === "Tutti") return true;
+    if (!cellaColoriNomi || cellaColoriNomi === '' || cellaColoriNomi === 'N.D.') return false;
+    const listaColoriPuri = cellaColoriNomi.toLowerCase().split(',').map(c => c.trim());
+    const mapping = {
+        'red': 'rosso', 'orange': 'arancione', 'yellow': 'giallo', 'green': 'verde',
+        'blue': 'blu', 'purple': 'viola', 'black': 'nero', 'white': 'bianco', 'brown': 'marrone'
+    };
+    const coloreCercato = targetColor.toLowerCase();
+    const nomeTradotto = mapping[coloreCercato] || coloreCercato;
+    return listaColoriPuri.includes(nomeTradotto) || listaColoriPuri.includes(coloreCercato);
+}
+
+// 2. CREAZIONE MARKER E POPUP (Dentro il forEach dei dati)
+let highlightClass = (s.highlight && s.highlight.toUpperCase() === 'SI') ? 'highlight-active' : '';
+
+var marker = L.marker([parseFloat(s.lat), parseFloat(s.lng)], {
+    icon: L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div class="logo-container ${highlightClass}" style="background: ${borderStyle};">
+                 ${badgesHTML}
+                 <img src="${s.logo_attuale}" class="logo-img-inner" loading="lazy" onerror="this.src='${placeholderLogo}';">
+               </div>`,
+        iconSize: [44, 44], iconAnchor: [22, 22]
+    })
+});
+marker.dati = s;
+marker.nomeNormalizzato = normalizeText(s.nome);
+
+// Logica Storico Loghi
+marker.storicoLoghi = [];
+for (let i = 1; i <= 10; i++) {
+    let url = s[`logo_storia_${i}_url`];
+    let dateRange = s[`logo_storia_${i}_date`]; 
+    if (url && dateRange && dateRange.includes('-')) {
+        let parti = dateRange.split('-');
+        marker.storicoLoghi.push({
+            url: url,
+            inizio: parseInt(parti[0].trim()) || 0,
+            fine: parseInt(parti[1].trim()) || annoCorrente
+        });
+    }
+}
+
+let flagHtml = s.codice_nazione ? `<img src="https://flagcdn.com/w40/${s.codice_nazione.toLowerCase()}.png" class="flag-icon">` : '';
+let emojiSport = sportIcons[s.sport] || "🏆"; 
+
+let precedentiHTML = '';
+if (s.club_precedente && s.club_precedente.trim() !== "") {
+    const listaPrecedenti = s.club_precedente.split(',').map(item => item.trim());
+    listaPrecedenti.forEach(cp => {
+        if (cp !== "") {
+            let clubTrovato = data.find(item => item.nome && item.nome.trim() === cp);
+            let nomeEscaped = cp.replace(/'/g, "\\'");
+            if (clubTrovato && clubTrovato.logo_attuale) {
+                precedentiHTML += `
+                    <div class="origin-wrapper" onclick="vaiAClub('${nomeEscaped}')" title="Vai a ${cp}">
+                        <img src="${clubTrovato.logo_attuale}" class="origin-logo" loading="lazy" onerror="this.src='${placeholderLogo}';">
+                        <span class="origin-name">${cp}</span>
+                    </div>`;
+            } else {
+                precedentiHTML += `<button class="btn-link-club" onclick="vaiAClub('${nomeEscaped}')">${cp}</button>`;
+            }
+        }
+    });
+}
+
+let loghiItems = [];
+for(let i=1; i<=10; i++) {
+    let url = s[`logo_storia_${i}_url`];
+    if(url) loghiItems.push(`<div class="storico-item"><img src="${url}" class="storico-img" loading="lazy" onerror="this.src='${placeholderLogo}';"><b>${s[`logo_storia_${i}_date`] || ''}</b></div>`);
+}
+
+let annivItems = [];
+for(let i=1; i<=5; i++) {
+    let url = s[`logo_anniversario_${i}_url`];
+    let dataA = s[`logo_anniversario_${i}_data`];
+    if(url) annivItems.push(`<div class="anniversario-item"><img src="${url}" class="anniversario-img" loading="lazy" onerror="this.src='${placeholderLogo}';"><b>${dataA || ''}</b></div>`);
+}
+
+let wikiBtn = "";
+if (s.wiki && s.wiki.toLowerCase() === "si") {
+    const wikiNome = s.nome.replace(/\s+/g, '_');
+    wikiBtn = `<a href="https://en.wikipedia.org/wiki/${wikiNome}" target="_blank" class="btn-wiki">Wikipedia 📖</a>`;
+}
+
+let coloriHTML = '';
+if (s.colori_nomi) {
+    const listaColori = s.colori_nomi.split(',').map(c => c.trim().toLowerCase());
+    coloriHTML = '<div class="popup-colors">';
+    listaColori.forEach(coloreIta => {
+        const classeCSS = coloreIta.replace(/\s+/g, '-');
+        coloriHTML += `<span class="color-dot color-${classeCSS}" title="${coloreIta}"></span>`;
+    });
+    coloriHTML += '</div>';
+}
+
+const partiStadio = (s.stadio_nome || '').split(',');
+const nomeOriginale = partiStadio[0].trim();
+const nomeSponsor = partiStadio[1] ? partiStadio[1].trim() : null;
+const stadioDisplay = nomeSponsor ? `<b>${nomeOriginale}</b><br>· <i>${nomeSponsor}</i>` : `<b>${nomeOriginale || 'N.D.'}</b>`;
+
+marker.descrizione = `
+    <div class="popup-card">
+        <div class="popup-header">
+            <h2 class="popup-title">${emojiSport} ${s.nome}</h2>
+            ${s.soprannome ? `<span class="popup-nickname">"${s.soprannome}"</span>` : ''}
+            ${coloriHTML}</div>
+        <div class="popup-info">
+            ${flagHtml} <b>${s.nazione}</b><br>
+            Fondazione: <b>${s.fondazione}</b><br>
+            Stadio: ${stadioDisplay}<br>
+            ${s.capacita_stadio ? `Posti: <b>${new Intl.NumberFormat('it-IT').format(parseInt(s.capacita_stadio))}</b>` : ''}
+        </div>
+        ${wikiBtn} ${precedentiHTML !== '' ? `<div class="precedenti-box"><span class="box-label">Club d'Origine</span><div class="precedenti-grid">${precedentiHTML}</div></div>` : ''}
+        ${annivItems.length > 0 ? `<div class="anniversario-box"><span class="box-label">Loghi Anniversario</span><div class="anniversario-grid">${annivItems.slice(0,3).join('')}</div>${annivItems.length > 3 ? `<div class="anniversario-grid hidden-logos">${annivItems.slice(3).join('')}</div><button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
+        ${loghiItems.length > 0 ? `<div class="storici-container"><span class="box-label">Loghi Storici</span><div class="storico-grid">${loghiItems.slice(0,3).join('')}</div>${loghiItems.length > 3 ? `<div class="storico-grid hidden-logos">${loghiItems.slice(3).join('')}</div><button class="btn-espandi" onclick="toggleLoghi(this)">mostra altri ▼</button>` : ''}</div>` : ''}
+        <a href="${linkCrowdsourcingBase}${encodeURIComponent(s.nome)}" target="_blank" class="btn-update">Segnala aggiornamento/errore ✏️</a>
+    </div>`;
+
+oms.addMarker(marker);
+allMarkers.push(marker);
+// --- Fine ciclo marker ---
+
+// 3. FUNZIONE FILTRI (Senza listener annidati)
+window.applicaFiltri = function() {
+    const sVal = normalizeText(document.getElementById('search-input').value);
+    const nVal = document.getElementById('filter-nazione').value;
+    const stVal = document.getElementById('filter-stato').value;
+    const spVal = document.getElementById('filter-sport').value;
+    const gVal = document.getElementById('filter-genere').value;
+    const cVal = document.getElementById('filter-capacita').value;
+    const lVal = document.getElementById('filter-lega').value;
+    const tVal = parseInt(document.getElementById('timeline-slider').value);
+    const isClusterEnabled = document.getElementById('cluster-toggle').checked;
+    const showReserves = document.getElementById('toggle-reserves') ? document.getElementById('toggle-reserves').checked : true;
+    
+    localStorage.setItem('mapFilters', JSON.stringify({
+        'filter-nazione': nVal, 'filter-stato': stVal, 'filter-sport': spVal,
+        'filter-genere': gVal, 'timeline-slider': tVal,
+        'cluster-enabled': isClusterEnabled, 'filter-capacita': cVal, 'filter-lega': lVal
+    }));
+
+    document.getElementById('year-display').innerText = tVal >= annoCorrente ? "Tutti i tempi" : "Fino al " + tVal;
+
+    markers.clearLayers(); markersLayer.clearLayers();
+    let heatPoints = [];
+    let sportCounts = {};
+    
+    visibiliAttualmente = allMarkers.filter(m => {
+        let ok = true;
+        const anno = parseInt(String(m.dati.fondazione).replace(/\D/g, '')) || 0;
+        const cap = parseInt(m.dati.capacita_stadio) || 0;
+
+        if (sVal && !m.nomeNormalizzato.includes(sVal) && !normalizeText(m.dati.stadio_nome).includes(sVal)) ok = false;
+        if (nVal !== "Tutti" && m.dati.nazione !== nVal) ok = false;
+        if (stVal !== "Tutti" && m.dati.stato !== stVal) ok = false;
+        if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
+        if (gVal === "f" && (!m.dati.genere || m.dati.genere.toLowerCase() !== 'f')) ok = false;
+        if (gVal === "m" && m.dati.genere && m.dati.genere.toLowerCase() === 'f') ok = false;
+        if (tVal < annoCorrente && anno > tVal) ok = false;
+        if (cVal === "small" && cap >= 15000) ok = false;
+        if (cVal === "medium" && (cap < 15000 || cap >= 30000)) ok = false;
+        if (cVal === "large" && (cap < 30000 || cap >= 50000)) ok = false;
+        if (cVal === "giant" && cap < 50000) ok = false;
+        if (lVal !== "Tutti" && parseInt(m.dati.livello_lega) !== parseInt(lVal)) ok = false;
+        if (!checkColorMatch(m.dati.colori_nomi, filtroColoreSociale)) ok = false;
+        const isRiserva = /\s(B|2|II|U23)$/i.test(m.dati.nome);
+        if (!showReserves && isRiserva) ok = false;
+
+        if(ok) {
+            heatPoints.push([m.getLatLng().lat, m.getLatLng().lng, 0.5]);
+            sportCounts[m.dati.sport] = (sportCounts[m.dati.sport] || 0) + 1;
+        }
+        return ok;
+    });
+
+    if (isClusterEnabled) {
+        map.removeLayer(markersLayer); visibiliAttualmente.forEach(m => markers.addLayer(m)); map.addLayer(markers);
+    } else {
+        map.removeLayer(markers); visibiliAttualmente.forEach(m => markersLayer.addLayer(m)); map.addLayer(markersLayer);
+    }
+
+    // Aggiornamento Loghi Dinamici
+    visibiliAttualmente.forEach(m => {
+        const iconEl = m.getElement();
+        if (iconEl) {
+            const img = iconEl.querySelector('.logo-img-inner');
+            if (img) {
+                const logoDaMostrare = getLogoPerAnno(m, tVal);
+                if (img.getAttribute('src') !== logoDaMostrare) img.src = logoDaMostrare;
+            }
+        }
+    });
+
+    heatLayer.setLatLngs(heatPoints);
+    document.getElementById('count-box').innerHTML = `Squadre filtrate: <b>${visibiliAttualmente.length}</b>`;
+    document.getElementById('stats-breakdown').innerHTML = Object.entries(sportCounts).sort((a,b) => b[1] - a[1]).map(([n, c]) => `${sportIcons[n] || ''} ${c}`).join(' • ');
+    
+    if (sVal.length > 2 && visibiliAttualmente.length === 1) {
+        const target = visibiliAttualmente[0];
+        map.flyTo(target.getLatLng(), 16);
+        map.once('moveend', () => { popup.setContent(target.descrizione).setLatLng(target.getLatLng()).openOn(map); });
+    }
+};
+
+// 4. GESTIONE LEGENDA BADGE
 function generaLegendaBadge() {
     const container = document.getElementById('legenda-badge-dinamici'); 
     if (!container) return;
-    let html = '';
+    let htmlLegenda = ''; 
     Object.keys(dizionarioBadge).forEach(key => {
         const b = dizionarioBadge[key];
-        html += `<div class="legend-item"><div class="legend-icon ${b.classe}">${b.html}</div><span><b>${key}</b></span></div>`;
+        htmlLegenda += `
+            <div class="legend-item">
+                <div class="legend-icon ${b.classe}">${b.html}</div>
+                <span><b>${key}</b></span>
+            </div>`;
     });
-    container.innerHTML = html;
+    container.innerHTML = htmlLegenda;
 }
+
+// 5. INIZIALIZZAZIONE FINALE (Fuori dai cicli)
+document.addEventListener("DOMContentLoaded", function() {
+    const anno = new Date().getFullYear();
+    document.querySelectorAll('.current-year-display').forEach(el => el.innerText = anno);
+    generaLegendaBadge();
+    renderHistory();
+});
+
+/* --- FINE PARTE CORRETTA --- */
