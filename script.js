@@ -5,6 +5,16 @@ const apiKeyWeather = '866509f6df466a06900222f7a9562854';
 
 const sportIcons = { "Calcio": "⚽", "Pallacanestro": "🏀", "Pallavolo": "🏐", "Rugby": "🏉", "Pallamano": "🤾", "Pallanuoto": "🤽", "Hockey su ghiaccio": "🏒", "Football americano": "🏈", "Baseball": "⚾" };
 const placeholderLogo = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjY2MiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgMmwtMTAgOWgxNHoiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjEzIiByPSI5Ij48L2NpcmNsZT48L3N2Zz4=";
+const dizionarioBadge = {
+    "Isolano": { html: "🏝️", classe: "badge-isola", titolo: "Club Insulare" },
+    "Globetrotter": { html: "🌍", classe: "badge-globetrotter", titolo: "Campionato Estero" },
+    "Enclave": { html: "📍", classe: "badge-enclave", titolo: "Territorio Enclave" },
+    "Portuale": { html: "⚓", classe: "badge-porto", titolo: "Città di Mare" },
+    "Nord": { html: "❄️", classe: "badge-nord", titolo: "Punto più a Nord" },
+    "Sud": { html: "🐧", classe: "badge-sud", titolo: "Punto più a Sud" },
+    "Est": { html: "🌅", classe: "badge-est", titolo: "Orizzonte Est" },
+    "Ovest": { html: "🌇", classe: "badge-ovest", titolo: "Orizzonte Ovest" }
+};
 
 var osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
 var dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '© CartoDB' });
@@ -390,19 +400,16 @@ Papa.parse(urlFoglio, {
         document.getElementById('loader').style.display = 'none';
         const data = results.data;
 
-let topLat = -90, botLat = 90, leftLon = 180, rightLon = -180;
-
-data.forEach(s => {
-    let lat = parseFloat(s.latitudine);
-    let lon = parseFloat(s.longitudine);
-    
-    if (!isNaN(lat) && !isNaN(lon)) {
-        if (lat > topLat) topLat = lat;
-        if (lat < botLat) botLat = lat;
-        if (lon < leftLon) leftLon = lon;
-        if (lon > rightLon) rightLon = lon;
-    }
-});
+        // Questo pezzetto legge la tua colonna "badge" e crea le icone sulla mappa
+if (s.badge && s.badge.trim() !== "") {
+    const listaBadgeExtra = s.badge.split(',').map(b => b.trim());
+    listaBadgeExtra.forEach(nomeBadge => {
+        const configurazione = dizionarioBadge[nomeBadge];
+        if (configurazione) {
+            attivi.push(configurazione);
+        }
+    });
+}
         
         const oldestByNation = {};
         data.forEach(s => {
@@ -472,10 +479,6 @@ data.forEach(s => {
             if (capStadio >= 50000) attivi.push({html: '🏟️', classe: 'badge-cattedrale', titolo: 'Cattedrale'});
             if (livLega === 1) attivi.push({html: '⭐', classe: 'badge-elite', titolo: 'Élite'});
             if (altitudine > 2000) attivi.push({html: '🏔️', classe: 'badge-vetta', titolo: 'Vetta'});
-            if (latS === topLat) attivi.push({html: '❄️', classe: 'badge-nord', titolo: 'Punto più a Nord'});
-            if (latS === botLat) attivi.push({html: '🐧', classe: 'badge-sud', titolo: 'Punto più a Sud'});
-            if (lonS === rightLon) attivi.push({html: '🌅', classe: 'badge-est', titolo: 'Orizzonte Est'});
-            if (lonS === leftLon) attivi.push({html: '🌇', classe: 'badge-ovest', titolo: 'Orizzonte Ovest'});
             
             let badgesHTML = '';
             const totale = attivi.length;
@@ -801,3 +804,16 @@ function getLogoPerAnno(marker, annoSelezionato) {
 }
 
 window.onload = () => { renderHistory(); };
+
+function generaLegendaBadge() {
+    const container = document.querySelector('.legend-box'); 
+    if (!container) return;
+    let htmlLegenda = '<h4>Special Badges</h4>';
+    Object.keys(dizionarioBadge).forEach(key => {
+        const b = dizionarioBadge[key];
+        htmlLegenda += `<div class="legend-item"><span class="legend-icon ${b.classe}">${b.html}</span><span>${b.titolo}</span></div>`;
+    });
+    container.innerHTML = htmlLegenda;
+}
+// Avviala subito
+generaLegendaBadge();
