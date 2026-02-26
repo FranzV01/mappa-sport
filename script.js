@@ -6,14 +6,14 @@ const apiKeyWeather = '866509f6df466a06900222f7a9562854';
 const sportIcons = { "Calcio": "⚽", "Pallacanestro": "🏀", "Pallavolo": "🏐", "Rugby": "🏉", "Pallamano": "🤾", "Pallanuoto": "🤽", "Hockey su ghiaccio": "🏒", "Football americano": "🏈", "Baseball": "⚾" };
 const placeholderLogo = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjY2MiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgMmwtMTAgOWgxNHoiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjEzIiByPSI5Ij48L2NpcmNsZT48L3N2Zz4=";
 const dizionarioBadge = {
-    "Isolano": { html: "🏝️", classe: "badge-isola", titolo: "Club Insulare" },
-    "Globetrotter": { html: "🌍", classe: "badge-globetrotter", titolo: "Campionato Estero" },
-    "Enclave": { html: "📍", classe: "badge-enclave", titolo: "Territorio Enclave" },
-    "Portuale": { html: "⚓", classe: "badge-porto", titolo: "Città di Mare" },
-    "Nord": { html: "❄️", classe: "badge-nord", titolo: "Punto più a Nord" },
-    "Sud": { html: "🐧", classe: "badge-sud", titolo: "Punto più a Sud" },
-    "Est": { html: "🌅", classe: "badge-est", titolo: "Orizzonte Est" },
-    "Ovest": { html: "🌇", classe: "badge-ovest", titolo: "Orizzonte Ovest" }
+    "isolano": { html: "🏝️", classe: "badge-isola", titolo: "Club Insulare" },
+    "globetrotter": { html: "🌍", classe: "badge-globetrotter", titolo: "Campionato Estero" },
+    "enclave": { html: "📍", classe: "badge-enclave", titolo: "Territorio Enclave" },
+    "portuale": { html: "⚓", classe: "badge-porto", titolo: "Città di Mare" },
+    "nord": { html: "❄️", classe: "badge-nord", titolo: "Punto più a Nord" },
+    "sud": { html: "🐧", classe: "badge-sud", titolo: "Punto più a Sud" },
+    "est": { html: "🌅", classe: "badge-est", titolo: "Orizzonte Est" },
+    "ovest": { html: "🌇", classe: "badge-ovest", titolo: "Orizzonte Ovest" }
 };
 
 function getLogoPerAnno(marker, annoSelezionato) {
