@@ -129,6 +129,10 @@ body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
 .badge-secolare  { background: #704214 !important; }
 .badge-cattedrale { background: #800020 !important; }
 .badge-elite     { background: #ffd700 !important; color: #000 !important; }
+.badge-isola { background-color: #00bcd4 !important; }
+.badge-porto { background-color: #0277bd !important; }
+.badge-enclave { background-color: #e91e63 !important; }
+.badge-globetrotter { background-color: #4caf50 !important; }
 .badge-vetta     { background: #f0f8ff !important; color: #000 !important; border: 1px solid #ccc; }
 .badge-nord { background: #E0F7FA !important; color: #006064 !important; border: 1px solid #006064; }
 .badge-sud { background: #1A237E !important; color: white !important; }
