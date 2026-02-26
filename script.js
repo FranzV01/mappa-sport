@@ -87,7 +87,7 @@ function checkColorMatch(cellaColoriNomi, targetColor) {
 }
 
 function generaLegendaBadge() {
-    // Cerchiamo il pezzetto di HTML che abbiamo appena creato
+    // Cerchiamo il contenitore
     const container = document.getElementById('legenda-badge-dinamici'); 
     
     // Se non lo trova, usciamo per non mandare in crash il sito
@@ -96,19 +96,24 @@ function generaLegendaBadge() {
         return;
     }
 
+    // --- AGGIUNTA FONDAMENTALE: Svuota il contenitore prima di iniziare ---
+    container.innerHTML = ''; 
+
     let htmlLegenda = ''; 
 
     // Usiamo il dizionario che hai creato prima
     Object.keys(dizionarioBadge).forEach(key => {
         const b = dizionarioBadge[key];
+        
+        // Costruiamo la stringa aggiungendo ogni singolo badge
         htmlLegenda += `
-            <div class="legend-item">
-                <div class="legend-icon ${b.classe}">${b.html}</div>
+            <div class="legend-item" style="display: flex; align-items: center; margin-bottom: 5px; gap: 8px;">
+                <div class="legend-icon ${b.classe}" style="width: 24px; text-align: center;">${b.html}</div>
                 <span><b>${key}</b></span>
             </div>`;
     });
 
-    // Scriviamo i badge dentro il contenitore
+    // Scriviamo i badge finali dentro il contenitore (sovrascrivendo tutto il contenuto precedente)
     container.innerHTML = htmlLegenda;
 }
 
