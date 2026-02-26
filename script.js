@@ -7,28 +7,31 @@ const sportIcons = { "Calcio": "⚽", "Pallacanestro": "🏀", "Pallavolo": "�
 const placeholderLogo = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNjY2MiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTIgMmwtMTAgOWgxNHoiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjEzIiByPSI5Ij48L2NpcmNsZT48L3N2Zz4=";
 const normalizeText = (str) => str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
 const dizionarioBadge = {
-    // ECCELLENZE (Priorità 1-10)
-    "Elite": { html: "⭐", classe: "badge-elite", priorita: 1 },
-    "Gloria": { html: "🏆", classe: "badge-gloria", priorita: 2 },
-    "Pioniere": { html: "💎", classe: "badge-pioniere", priorita: 3 },
-    "Secolare": { html: "📜", classe: "badge-secolare", priorita: 4 },
-    // STRUTTURE E AMBIENTE (Priorità 10-20)
-    "Cattedrale": { html: "🏟️", classe: "badge-cattedrale", priorita: 10 },
-    "Vetta": { html: "🏔️", classe: "badge-vetta", priorita: 11 },
-    "Nord": { html: "❄️", classe: "badge-nord", priorita: 12 },
-    "Sud": { html: "🐧", classe: "badge-sud", priorita: 13 },
-    "Est": { html: "🌅", classe: "badge-est", priorita: 14 },
-    "Ovest": { html: "🌇", classe: "badge-ovest", priorita: 15 },
-    // CARATTERISTICHE (Priorità 20-40)
-    "Isolano": { html: "🏝️", classe: "badge-isola", priorita: 20 },
-    "Globetrotter": { html: "🌍", classe: "badge-globetrotter", priorita: 21 },
-    "Portuale": { html: "⚓", classe: "badge-porto", priorita: 22 },
-    "Enclave": { html: "📍", classe: "badge-enclave", priorita: 23 },
-    // STATO E CATEGORIE (Priorità 40+)
-    "Femminile": { html: "♀", classe: "badge-femminile", priorita: 40 },
-    "New Entry": { html: "✨", classe: "badge-newentry", priorita: 41 },
-    "Riserva": { html: "B", classe: "badge-riserva", priorita: 50 },
-    "Memoria": { html: "⚰️", classe: "badge-memoria", priorita: 60 }
+    // ECCELLENZE
+    "Elite": { html: "⭐", classe: "badge-elite", priorita: 1, desc: "Club nella massima serie nazionale" },
+    "Gloria": { html: "🏆", classe: "badge-gloria", priorita: 2, desc: "Vincitore di trofei internazionali" },
+    "Pioniere": { html: "💎", classe: "badge-pioniere", priorita: 3, desc: "Il club più antico della nazione" },
+    "Secolare": { html: "📜", classe: "badge-secolare", priorita: 4, desc: "Club con oltre 100 anni di storia" },
+    
+    // STRUTTURE
+    "Cattedrale": { html: "🏟️", classe: "badge-cattedrale", priorita: 10, desc: "Stadio con capienza oltre 50.000 posti" },
+    "Vetta": { html: "🏔️", classe: "badge-vetta", priorita: 11, desc: "Sede situata oltre i 2.000 metri d'altitudine" },
+    "Nord": { html: "❄️", classe: "badge-nord", priorita: 12, desc: "Club più a nord del mondo" },
+    "Sud": { html: "🐧", classe: "badge-sud", priorita: 13, desc: "Club più a sud del mondo" },
+    "Est": { html: "🌅", classe: "badge-est", priorita: 14, desc: "Club più a est del mondo" },
+    "Ovest": { html: "🌇", classe: "badge-ovest", priorita: 15, desc: "Club più a ovest del mondo" },
+    
+    // CARATTERISTICHE
+    "Isolano": { html: "🏝️", classe: "badge-isola", priorita: 20, desc: "Club con sede su un'isola" },
+    "Portuale": { html: "⚓", classe: "badge-porto", priorita: 22, desc: "Club situato in una città di mare/porto" },
+    "Enclave": { html: "📍", classe: "badge-enclave", priorita: 23, desc: "Club situato in un'enclave o territorio speciale" },
+    "Globetrotter": { html: "🌍", classe: "badge-globetrotter", priorita: 21, desc: "Club partecipante ad un campionato estero" },
+
+    // STATO
+    "Femminile": { html: "♀", classe: "badge-femminile", priorita: 40, desc: "Sezione di calcio femminile" },
+    "New Entry": { html: "✨", classe: "badge-newentry", priorita: 41, desc: "Club fondato nell'anno corrente" },
+    "Riserva": { html: "B", classe: "badge-riserva", priorita: 50, desc: "Squadre riserve o seconde squadre (B, U23)" },
+    "Memoria": { html: "⚰️", classe: "badge-memoria", priorita: 60, desc: "Club non più attivo o scomparso" }
 };
 
 function getLogoPerAnno(marker, annoSelezionato) {
@@ -106,6 +109,19 @@ function generaLegendaBadge() {
         `;
         container.appendChild(item);
     });
+}
+
+function toggleLegenda() {
+    const content = document.getElementById('legenda-box-content');
+    const chevron = document.getElementById('legend-chevron');
+    
+    content.classList.toggle('open');
+    
+    if (content.classList.contains('open')) {
+        chevron.innerText = '▲';
+    } else {
+        chevron.innerText = '▼';
+    }
 }
 
 var osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
