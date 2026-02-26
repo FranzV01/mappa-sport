@@ -806,14 +806,22 @@ function getLogoPerAnno(marker, annoSelezionato) {
 window.onload = () => { renderHistory(); };
 
 function generaLegendaBadge() {
-    const container = document.querySelector('.legend-box'); 
+    // Cerchiamo il contenitore vuoto che abbiamo creato nell'HTML
+    const container = document.getElementById('legenda-badge-dinamici'); 
     if (!container) return;
-    let htmlLegenda = '<h4>Special Badges</h4>';
+
+    let htmlLegenda = ''; // Iniziamo dal vuoto
+
+    // Cicliamo il dizionario e creiamo una riga per ogni badge
     Object.keys(dizionarioBadge).forEach(key => {
         const b = dizionarioBadge[key];
-        htmlLegenda += `<div class="legend-item"><span class="legend-icon ${b.classe}">${b.html}</span><span>${b.titolo}</span></div>`;
+        htmlLegenda += `
+            <div class="legend-item" title="${b.titolo}">
+                <div class="legend-icon ${b.classe}">${b.html}</div>
+                <span><b>${key}:</b> ${b.titolo}</span>
+            </div>`;
     });
+
+    // Inseriamo tutto il malloppo nell'HTML
     container.innerHTML = htmlLegenda;
 }
-// Avviala subito
-generaLegendaBadge();
