@@ -170,10 +170,15 @@
         <option value="Duemila">Dal 2000 in poi</option>
     </select>
 
-    <div class="legend-box">
-    <h4 style="margin: 0 0 10px 0; font-size: 12px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Legenda Badge</h4>
-    <div id="legenda-badge-dinamici" class="legenda-grid">
-        </div>
+    <div class="legend-container-wrapper">
+    <button class="legend-toggle-btn" onclick="toggleLegenda()">
+        <span>📚 Legenda Badge</span>
+        <span id="legend-chevron">▼</span>
+    </button>
+    
+    <div id="legenda-box-content" class="legend-content collapsed">
+        <div id="legenda-badge-dinamici">
+            </div>
     </div>
 </div></div>
 
@@ -195,6 +200,7 @@
     
 </body>
 </html>
+
 
 
 
