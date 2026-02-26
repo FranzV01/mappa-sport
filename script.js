@@ -806,22 +806,30 @@ function getLogoPerAnno(marker, annoSelezionato) {
 window.onload = () => { renderHistory(); };
 
 function generaLegendaBadge() {
-    // Cerchiamo il contenitore vuoto che abbiamo creato nell'HTML
+    // Cerchiamo il pezzetto di HTML che abbiamo appena creato
     const container = document.getElementById('legenda-badge-dinamici'); 
-    if (!container) return;
+    
+    // Se non lo trova, usciamo per non mandare in crash il sito
+    if (!container) {
+        console.log("Errore: Non trovo il contenitore della legenda!");
+        return;
+    }
 
-    let htmlLegenda = ''; // Iniziamo dal vuoto
+    let htmlLegenda = ''; 
 
-    // Cicliamo il dizionario e creiamo una riga per ogni badge
+    // Usiamo il dizionario che hai creato prima
     Object.keys(dizionarioBadge).forEach(key => {
         const b = dizionarioBadge[key];
         htmlLegenda += `
-            <div class="legend-item" title="${b.titolo}">
+            <div class="legend-item">
                 <div class="legend-icon ${b.classe}">${b.html}</div>
-                <span><b>${key}:</b> ${b.titolo}</span>
+                <span><b>${key}</b></span>
             </div>`;
     });
 
-    // Inseriamo tutto il malloppo nell'HTML
+    // Scriviamo i badge dentro il contenitore
     container.innerHTML = htmlLegenda;
 }
+
+// IMPORTANTE: Chiama la funzione alla fine del file script.js
+generaLegendaBadge();
