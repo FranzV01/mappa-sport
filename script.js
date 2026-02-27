@@ -142,7 +142,8 @@ function checkNightShift() {
     return osm;
 }
 
-var map = L.map('map', { 
+var map = L.map('map', {
+    preferCanvas: true,
     layers: [checkNightShift()], 
     zoomControl: false, 
     dragging: !L.Browser.mobile, 
@@ -153,14 +154,6 @@ var map = L.map('map', {
     maxBounds: [[-85, -500], [85, 500]], // Blocca solo Nord/Sud, ma lascia spazio infinito a Est/Ovest
     maxBoundsViscosity: 0.8
 }).setView(startCenter, startZoom);
-
-// Esempio di come deve apparire la tua inizializzazione
-const map = L.map('map', {
-    preferCanvas: true, // Questo dice al browser di disegnare tutto su un unico "foglio" tecnico
-    center: [42, 12],
-    zoom: 6,
-    // ... le tue altre opzioni
-});
 
 // --- FIX RIPRISTINO STATO BADGE AL CARICAMENTO ---
 const savedBadgeStatus = localStorage.getItem('autoBadgeStatus');
