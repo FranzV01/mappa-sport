@@ -180,10 +180,16 @@ L.control.zoom({ position: 'bottomright' }).addTo(map);
 
 var markersLayer = L.featureGroup();
 var markers = L.markerClusterGroup({ 
-    disableClusteringAtZoom: 17, 
+    disableClusteringAtZoom: 13, // Diminuito: i loghi si separano prima, così li vedi meglio
     showCoverageOnHover: false,
+    chunkedLoading: true,        // <--- FONDAMENTALE per la fluidità su mobile
+    maxClusterRadius: 50,        // Cluster un po' più grandi per raggruppare meglio quando sei lontano
     iconCreateFunction: function(cluster) {
-        return L.divIcon({ html: `<div class="cluster-modern">${cluster.getChildCount()}</div>`, className: 'custom-cluster-icon', iconSize: L.point(40, 40) });
+        return L.divIcon({ 
+            html: `<div class="cluster-modern">${cluster.getChildCount()}</div>`, 
+            className: 'custom-cluster-icon', 
+            iconSize: L.point(40, 40) 
+        });
     }
 });
 
