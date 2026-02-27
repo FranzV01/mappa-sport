@@ -95,24 +95,23 @@ body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
     justify-content: center;
 }
 
-/* Di base nascondiamo i badge */
-.badge-icon {
-    display: none !important;
+/* 1. Stato di base: sempre nascosti sotto lo zoom 8 */
+.badge-icon { 
+    display: none !important; 
 }
 
-/* Li mostriamo solo quando l'utente entra nel dettaglio (Zoom 8 o superiore) */
-/* Leaflet aggiunge automaticamente queste classi al div #map */
-.leaflet-zoom-8 .badge-icon,
-.leaflet-zoom-9 .badge-icon,
-.leaflet-zoom-10 .badge-icon,
-.leaflet-zoom-11 .badge-icon,
-.leaflet-zoom-12 .badge-icon,
-.leaflet-zoom-13 .badge-icon,
-.leaflet-zoom-14 .badge-icon,
-.leaflet-zoom-15 .badge-icon,
-.leaflet-zoom-16 .badge-icon,
-.leaflet-zoom-17 .badge-icon,
-.leaflet-zoom-18 .badge-icon {
+/* 2. Se lo zoom è alto (>=8) E l'interruttore NON è su "nascondi", allora mostrali */
+:not(.hide-badges).leaflet-zoom-8 .badge-icon,
+:not(.hide-badges).leaflet-zoom-9 .badge-icon,
+:not(.hide-badges).leaflet-zoom-10 .badge-icon,
+:not(.hide-badges).leaflet-zoom-11 .badge-icon,
+:not(.hide-badges).leaflet-zoom-12 .badge-icon,
+:not(.hide-badges).leaflet-zoom-13 .badge-icon,
+:not(.hide-badges).leaflet-zoom-14 .badge-icon,
+:not(.hide-badges).leaflet-zoom-15 .badge-icon,
+:not(.hide-badges).leaflet-zoom-16 .badge-icon,
+:not(.hide-badges).leaflet-zoom-17 .badge-icon,
+:not(.hide-badges).leaflet-zoom-18 .badge-icon {
     display: flex !important;
 }
 
@@ -121,6 +120,24 @@ body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
 .leaflet-drag-target .logo-container {
     box-shadow: none !important;
     transition: none !important;
+}
+
+.logo-container {
+    /* Forza l'uso della GPU (scheda video) del telefono */
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+/* Elimina le ombre pesanti su mobile (sono quelle che rallentano tutto) */
+@media (max-width: 768px) {
+    .logo-container {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+        transition: none !important; /* Le transizioni fluide uccidono il mobile */
+    }
+    .badge-icon {
+        box-shadow: none !important;
+    }
 }
 
 /* Stile base del badge (il tuo stile originale) */
