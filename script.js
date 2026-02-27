@@ -597,14 +597,10 @@ Papa.parse(urlFoglio, {
         })
     });
 
-            // Recupera il livello e calcola la priorità (1 è il massimo)
-var livello = parseInt(s.livello_lega) || 99; 
-marker.setZIndexOffset(1000 - (livello * 10)); 
-// --------------------------------------
-
-// Poi continua con il resto del tuo codice (es. popup e aggiunta al layer)
-marker.bindPopup(popupContent); // Se hai questa riga
-markers.addLayer(marker);       // Aggiunge al cluster
+    // --- NUOVA LOGICA PRIORITÀ LIVELLO LEGA ---
+    // Più il livello è basso (es. 1), più alto deve essere lo Z-Index per stare sopra
+    const prioritaLega = parseInt(s.livello_lega) || 99; 
+    marker.setZIndexOffset(1000 - (prioritaLega * 10));        
 
     marker.dati = s;
     marker.nomeNormalizzato = normalizeText(s.nome);
