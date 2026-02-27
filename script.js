@@ -154,6 +154,14 @@ var map = L.map('map', {
     maxBoundsViscosity: 0.8
 }).setView(startCenter, startZoom);
 
+// Esempio di come deve apparire la tua inizializzazione
+const map = L.map('map', {
+    preferCanvas: true, // Questo dice al browser di disegnare tutto su un unico "foglio" tecnico
+    center: [42, 12],
+    zoom: 6,
+    // ... le tue altre opzioni
+});
+
 // --- FIX RIPRISTINO STATO BADGE AL CARICAMENTO ---
 const savedBadgeStatus = localStorage.getItem('autoBadgeStatus');
 const mapEl = document.getElementById('map');
