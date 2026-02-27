@@ -597,6 +597,15 @@ Papa.parse(urlFoglio, {
         })
     });
 
+            // Recupera il livello e calcola la priorità (1 è il massimo)
+var livello = parseInt(s.livello_lega) || 99; 
+marker.setZIndexOffset(1000 - (livello * 10)); 
+// --------------------------------------
+
+// Poi continua con il resto del tuo codice (es. popup e aggiunta al layer)
+marker.bindPopup(popupContent); // Se hai questa riga
+markers.addLayer(marker);       // Aggiunge al cluster
+
     marker.dati = s;
     marker.nomeNormalizzato = normalizeText(s.nome);
     marker.listaBadgeNomi = badgeDaMostrare.map(b => b.titolo);
