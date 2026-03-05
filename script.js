@@ -57,13 +57,14 @@ function checkColorMatch(cellaColoriNomi, targetColor) {
 
    const mapping = {
     'red': 'rosso',
-    'amaranto': 'amaranto',
+    'amaranth': 'amaranto',
     'maroon': 'granata',
     'bordeaux': 'bordeaux',
     'orange': 'arancione',
     'gold': 'oro',
     'amber': 'ambra',
     'yellow': 'giallo',
+    'cream': 'crema',
     'lime': 'verde chiaro',
     'green': 'verde',
     'darkgreen': 'verde scuro',
