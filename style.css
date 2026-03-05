@@ -338,6 +338,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 .color-oro          { background-color: #DAA520; }
 .color-ambra        { background-color: #FFBF00; }
 .color-giallo       { background-color: #FFFF00; }
+.color-crema        { background-color: #FFFDD0; }
 .color-verde-chiaro { background-color: #00FF00; }
 .color-verde        { background-color: #008000; }
 .color-verde-scuro  { background-color: #004d00; }
