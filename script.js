@@ -751,6 +751,12 @@ if (s.colori_nomi) {
                 if (spVal !== "Tutti" && m.dati.sport !== spVal) ok = false;
                 if (gVal === "f" && (!m.dati.genere || m.dati.genere.toLowerCase() !== 'f')) ok = false;
                 if (gVal === "m" && m.dati.genere && m.dati.genere.toLowerCase() === 'f') ok = false;
+                if (eVal !== "Tutte") {
+                    if (eVal === "Prima del 1900" && anno >= 1900) ok = false;
+                    if (eVal === "1900 - 1949" && (anno < 1900 || anno > 1949)) ok = false;
+                    if (eVal === "1950 - 1999" && (anno < 1950 || anno > 1999)) ok = false;
+                    if (eVal === "Dal 2000 in poi" && anno < 2000) ok = false;
+                }
                 if (tVal < annoCorrente && anno > tVal) ok = false;
                 if (cVal === "small" && cap >= 15000) ok = false;
                 if (cVal === "medium" && (cap < 15000 || cap >= 30000)) ok = false;
