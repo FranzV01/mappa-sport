@@ -334,7 +334,7 @@ window.toggleRanking = function(tipo) {
     };
     renderList(10);
     btnMore.style.display = dati.length > 10 ? 'block' : 'none';
-    btnMore.onclick = () => { renderList(25); btnMore.style.display = 'none'; };
+    btnMore.onclick = () => { renderList(100); btnMore.style.display = 'none'; };
 };
 
 document.addEventListener('keydown', function(e) {
